@@ -1,0 +1,69 @@
+import { ThumbsUp, MessageCircle, Send } from "lucide-react";
+import Image from 'next/image';
+
+
+export default function Post({ post, isLoading }) {
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+          <div className="flex-1">
+            <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-48"></div>
+          </div>
+        </div>
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+        <div className="h-64 bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="flex items-start gap-3 mb-4">
+        <Image
+          src={post.avatar}
+          width={50} height={50}
+          alt={post.author}
+          className="w-12 h-12 rounded-full"
+        />
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900">{post.author}</h3>
+          <p className="text-sm text-gray-500">{post.education}</p>
+        </div>
+      </div>
+
+      {post.title && (
+        <h4 className="font-medium text-gray-900 mb-3">{post.title}</h4>
+      )}
+
+      {post.image && (
+        <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden">
+          <Image
+            src={post.image}
+            width={100} height={100}
+            alt={post.title}
+            className="w-full h-64 object-cover"
+          />
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
+          <ThumbsUp className="w-5 h-5" />
+          <span>Like</span>
+        </button>
+        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
+          <MessageCircle className="w-5 h-5" />
+          <span>Comment</span>
+        </button>
+        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
+          <Send className="w-5 h-5" />
+          <span>Sent</span>
+        </button>
+        <span className="text-sm text-gray-400">Posted {post.timestamp}</span>
+      </div>
+    </div>
+  );
+}
