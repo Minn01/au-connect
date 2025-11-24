@@ -1,5 +1,15 @@
 export const BASE_API_PATH = '/api/connect/v1';
 
+export const MAIN_PAGE_PATH = '/';
+export const LOGIN_PAGE_PATH = '/auth/login'
+export const SIGNUP_PAGE_PATH = '/auth/signup'
+export const ONBOARD_PAGE_PATH = '/auth/onboarding'
+
+// api routes for auth
+export const LOGIN_PATH = BASE_API_PATH + '/auth/login';
+export const SIGNUP_PATH = BASE_API_PATH + '/auth/signup';
+export const LOGOUT_PATH = BASE_API_PATH + '/auth/logout';
+
 // paths to to push to for OAuth sign-in
 export const GOOGLE_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/google';
 export const LINKEDIN_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/linkedin';

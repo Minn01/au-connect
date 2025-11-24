@@ -1,29 +1,106 @@
 "use client";
 
 import Image from "next/image";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
+
+import Provider from "@/enums/Provider";
+import {
+  GOOGLE_AUTH_DIRECT_PATH,
+  LINKEDIN_AUTH_DIRECT_PATH,
+  LOGIN_PAGE_PATH,
+  ONBOARD_PAGE_PATH,
+  SIGNUP_PATH,
+} from "@/lib/constants";
+
+/*
+ * TODO:
+ * - add button for linkedin sign in
+ * - add loading effects and error messages (use the states defined)
+ */
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Signup:", form);
-    alert("Account created!");
+  function handleSignin(provider: Provider) {
+    switch (provider) {
+      case Provider.GOOGLE:
+        router.push(GOOGLE_AUTH_DIRECT_PATH);
+        break;
+      case Provider.LINKEDIN:
+        router.push(LINKEDIN_AUTH_DIRECT_PATH);
+        break;
+    }
+  }
+  // In your SignUpPage component
+
+  const handleSignup = async () => {
+    // Validation
+    if (!form.email) {
+      setErrorMsg("Please enter your email.");
+      return;
+    }
+
+    if (!form.password) {
+      setErrorMsg("Please enter your password.");
+      return;
+    }
+
+    if (!form.confirmPassword) {
+      setErrorMsg("Please confirm your password.");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setErrorMsg("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch(SIGNUP_PATH, {
+        // You'll need to add this to your constants
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      if (res.ok) {
+        router.push(ONBOARD_PAGE_PATH);
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.message || "Signup failed. Please try again.");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMsg(error.message);
+      } else {
+        setErrorMsg("An error occurred during signup. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="relative min-h-screen flex">
-
       {/* MOBILE BACKGROUND IMAGE (same as onboarding) */}
       <div
         className="absolute inset-0 md:hidden bg-cover bg-center"
@@ -79,7 +156,6 @@ export default function SignUpPage() {
             space-y-5
           "
         >
-
           {/* HEADER */}
           <div className="text-center md:text-left">
             <p className="text-xs uppercase tracking-wide text-red-500 font-semibold">
@@ -96,8 +172,13 @@ export default function SignUpPage() {
           </div>
 
           {/* FORM */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
-
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSignup();
+            }}
+          >
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">
@@ -158,20 +239,24 @@ export default function SignUpPage() {
               />
             </div>
 
+            {errorMsg && <p className="mt-5 text-red-400">{errorMsg}</p>}
+
             {/* Create Account */}
             <button
               type="submit"
+              disabled={loading}
               className="
                 w-full mt-5 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 
           {/* Google Sign Up */}
           <button
-            onClick={() => signIn("google")}
+            onClick={() => handleSignin(Provider.GOOGLE)}
             className="
               w-full mt-3 bg-black text-white py-2 rounded-md flex items-center justify-center gap-2
               hover:bg-gray-800 transition
@@ -184,14 +269,13 @@ export default function SignUpPage() {
           {/* Login Link */}
           <p className="text-xs text-zinc-400 text-center pt-2">
             Already have an account?{" "}
-            <a
-              href="/login"
-              className="text-red-600 font-medium hover:underline ml-1"
+            <Link
+              href={LOGIN_PAGE_PATH}
+              className="text-blue-600 font-medium hover:underline ml-1"
             >
               Sign in
-            </a>
+            </Link>
           </p>
-
         </div>
       </div>
     </div>

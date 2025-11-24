@@ -4,25 +4,38 @@ import bcrypt from "bcrypt";
 
 import prisma from "../lib/prisma";
 import SessionMethod from "../enums/SessionMethod";
-import { JWT_COOKIE, COOKIE_EXPIRATION_TIME, GOOGLE_ACCESS_TOKEN_URL, GOOGLE_USERINFO_URL, LINKEDIN_ACCESS_TOKEN_URL, LINKEDIN_USERINFO_URL } from "./constants";
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_SECRET, LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, LINKEDIN_REDIRECT_URI, NEXT_PUBLIC_BASE_URL, NODE_ENV } from "./env";
+import {
+  JWT_COOKIE,
+  COOKIE_EXPIRATION_TIME,
+  GOOGLE_ACCESS_TOKEN_URL,
+  GOOGLE_USERINFO_URL,
+  LINKEDIN_ACCESS_TOKEN_URL,
+  LINKEDIN_USERINFO_URL,
+} from "./constants";
+import {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI,
+  JWT_SECRET,
+  LINKEDIN_CLIENT_ID,
+  LINKEDIN_CLIENT_SECRET,
+  LINKEDIN_REDIRECT_URI,
+  NEXT_PUBLIC_BASE_URL,
+  NODE_ENV,
+} from "./env";
 
 export async function tradSignup(req: NextRequest) {
   // get inputs from request body
   const { email, password } = await req.json();
 
   // validate input
-  if (!email) 
-    return new NextResponse("Email is required", { status: 400 });
-  if (!password)
-    return new NextResponse("Password is required", { status: 400 });
+  if (!email) return responseJSON("Email is required", 400);
+  if (!password) return responseJSON("Password is required", 400);
 
   // check if user already exists
   const existingUser = await checkExistUser(email);
   if (existingUser) {
-    return new NextResponse("User already exists, please login instead", {
-      status: 409,
-    });
+    return responseJSON("User already exists, please login instead", 409);
   }
 
   // hash password
@@ -55,7 +68,7 @@ export async function googleAuthSignIn(req: NextRequest) {
   // gets the code containing the authorization data
   const code = url.searchParams.get("code");
 
-  if (!code) return NextResponse.json({ error: "No code" }, { status: 400 });
+  if (!code) return responseJSON("No code", 400);
 
   // Exchange code for access token
   const tokenRes = await fetch(GOOGLE_ACCESS_TOKEN_URL, {
@@ -109,7 +122,7 @@ export async function linkedinAuthSignIn(req: NextRequest) {
   const code = url.searchParams.get("code");
   // const state = url.searchParams.get("state");
 
-  if (!code) return NextResponse.json({ error: "Missing code" }, { status: 400 });
+  if (!code) return responseJSON("Missing code", 400);
 
   // Exchange code for access token
   const tokenRes = await fetch(LINKEDIN_ACCESS_TOKEN_URL, {
@@ -120,19 +133,18 @@ export async function linkedinAuthSignIn(req: NextRequest) {
       code,
       redirect_uri: LINKEDIN_REDIRECT_URI,
       client_id: LINKEDIN_CLIENT_ID,
-      client_secret: LINKEDIN_CLIENT_SECRET
-    })
+      client_secret: LINKEDIN_CLIENT_SECRET,
+    }),
   });
 
   const tokenData = await tokenRes.json();
   const accessToken = tokenData.access_token;
 
-  if (!accessToken)
-    return NextResponse.json({ error: "Token exchange failed" }, { status: 400 });
+  if (!accessToken) return responseJSON("Token exchange failed", 400);
 
   // fetch user info via OIDC
   const infoRes = await fetch(LINKEDIN_USERINFO_URL, {
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   const userInfo = await infoRes.json();
@@ -164,34 +176,39 @@ export async function linkedinAuthSignIn(req: NextRequest) {
     SessionMethod.SIGN_IN_LINKEDIN
   );
 
-  return NextResponse.redirect(NEXT_PUBLIC_BASE_URL + `/?success=true&provider=linkedin`);
+  return NextResponse.redirect(
+    NEXT_PUBLIC_BASE_URL + `/?success=true&provider=linkedin`
+  );
 }
 
 export async function tradLogin(req: NextRequest) {
-    const { email, password } = await req.json();
+  const { email, password } = await req.json();
 
-    if (!email) return new NextResponse("Email is required", { status: 400 });
-    if (!password) return new NextResponse("Password is required", { status: 400 });
+  if (!email) return responseJSON("Email is required", 400);
+  if (!password) return responseJSON("Password is required", 400);
 
-    const user = await checkExistUser(email);
-    if (!user) {
-        return new NextResponse("You might not have an account, please sign up first", { status: 404 });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password!);
-    if (!passwordMatch) {
-        return new NextResponse("Incorrect password", { status: 401 });
-    }
-
-    return createUserSession(
-        { id: user.id, email: user.email },
-        SessionMethod.LOGIN
+  const user = await checkExistUser(email);
+  if (!user) {
+    return responseJSON(
+      "You might not have an account, please sign up first",
+      404
     );
+  }
+
+  const passwordMatch = await bcrypt.compare(password, user.password!);
+  if (!passwordMatch) {
+    return responseJSON("Incorrect password", 401);
+  }
+
+  return createUserSession(
+    { id: user.id, email: user.email },
+    SessionMethod.LOGIN
+  );
 }
 
 export async function logout(req: NextRequest) {
-    req.cookies.delete(JWT_COOKIE);
-    return getResponse({id: "", email: ""}, SessionMethod.LOGOUT);
+  req.cookies.delete(JWT_COOKIE);
+  return getResponse({ id: "", email: "" }, SessionMethod.LOGOUT);
 }
 
 // checks email only
@@ -204,14 +221,11 @@ export async function checkExistUser(email: string) {
 export function createUserSession(
   user: { id: string; email: string },
   method: SessionMethod
-  //   req?: NextRequest | null = null
 ) {
   // create JWT token
-  const token = jwt.sign(
-    { userId: user.id, email: user.email },
-    JWT_SECRET,
-    { expiresIn: COOKIE_EXPIRATION_TIME }
-  );
+  const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: COOKIE_EXPIRATION_TIME,
+  });
 
   const response = getResponse(user, method);
 
@@ -231,7 +245,7 @@ export function createUserSession(
 
 function getResponse(
   user: { id: string; email: string },
-  method: SessionMethod,
+  method: SessionMethod
 ) {
   switch (method) {
     case SessionMethod.LOGIN:
@@ -245,13 +259,13 @@ function getResponse(
         { status: 200 }
       );
     case SessionMethod.SIGN_IN_GOOGLE:
-      // this case represents OAuth sign in with google
-      // TODO: this is temporary redirect to home page, can be changed later
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=google`);
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=google`
+      );
     case SessionMethod.SIGN_IN_LINKEDIN:
-      // this case represents OAuth sign in with linkedin
-      // TODO: this is temporary redirect to home page, can be changed later
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=linkedin`);
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=linkedin`
+      );
     case SessionMethod.SIGN_UP:
       return NextResponse.json(
         { message: "Signed up successfully", user },
@@ -260,4 +274,8 @@ function getResponse(
     default:
     // TODO: add default response ?
   }
+}
+
+function responseJSON(message: string, statusCode: number) {
+  return NextResponse.json({ message: message }, { status: statusCode });
 }

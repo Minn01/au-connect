@@ -2,8 +2,6 @@
  * file to put all environment variable related code
 **/
 
-import 'dotenv/config';
-
 function required(name: string): string {
   const value = process.env[name];
   console.log('condition check: ' + !value)
