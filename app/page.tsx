@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import Post from "./components/Post";
 import EventCard from "./components/EventCard";
 
-// Mock Data
 const mockUser = {
   name: "Zai Swan",
   title: "Game Developer",
@@ -50,33 +49,17 @@ const mockEvents = [
 ];
 
 export default function Home() {
-  const searchParams = useSearchParams();
-  const success = searchParams.get("success");
-  const provider = searchParams.get("provider");
-
-  // return (
-  //   <div className="flex justify-center items-center h-screen flex-col gap-5">
-  //     {success === 'true' ? (
-  //       <div className='mb-4 p-4 bg-green-200 text-green-800 rounded'>
-  //         {provider === 'google' ? 'Signed in with Google' : provider === 'linkedin' ? 'Signed in with LinkedIn' : 'OAuth'}
-  //       </div>
-  //     ) : null}
-
-  //     <h1>Auth Successful! This is the home page</h1>
-  //   </div>
-  // );
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading
     setTimeout(() => setLoading(false), 1500);
   }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="grid grid-cols-12 gap-6">
-        {/* Left Sidebar - Profile */}
+        
+        {/* LEFT PROFILE */}
         <div className="col-span-3">
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden sticky top-20">
             <div className="h-24 bg-gray-200"></div>
@@ -99,9 +82,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Main Feed */}
+        {/* MAIN FEED */}
         <div className="col-span-6 space-y-4">
-          {/* Create Post */}
+          
+          {/* CREATE POST */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center gap-3 mb-3">
               <div className="relative w-10 h-10">
@@ -130,18 +114,18 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Posts */}
+          {/* POSTS */}
           {loading ? (
             <>
               <Post isLoading={true} />
               <Post isLoading={true} />
             </>
           ) : (
-            mockPosts.map((post) => <Post key={post.id} post={post} />)
+            mockPosts.map((post) => <Post key={post.id} post={post} isLoading={false} />)
           )}
         </div>
 
-        {/* Right Sidebar - Events */}
+        {/* RIGHT EVENT SIDEBAR */}
         <div className="col-span-3 space-y-4">
           {loading ? (
             <>
@@ -150,7 +134,7 @@ export default function Home() {
             </>
           ) : (
             mockEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventCard key={event.id} event={event} isLoading={false} />
             ))
           )}
         </div>
