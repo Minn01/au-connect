@@ -1,8 +1,23 @@
 import { ThumbsUp, MessageCircle, Send } from "lucide-react";
-import Image from 'next/image';
+import Image from "next/image";
 
+type PostType = {
+  avatar: string;
+  author: string;
+  education: string;
+  title?: string;
+  image?: string;
+  timestamp: string;
+};
 
-export default function Post({ post, isLoading }) {
+export default function Post({
+  post,
+  isLoading,
+}: {
+  post?: PostType;      // optional for loading state
+  isLoading: boolean;
+}) {
+  // Skeleton UI
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
@@ -19,12 +34,16 @@ export default function Post({ post, isLoading }) {
     );
   }
 
+  // If post is missing (should not happen), avoid crash
+  if (!post) return null;
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-start gap-3 mb-4">
         <Image
           src={post.avatar}
-          width={50} height={50}
+          width={50}
+          height={50}
           alt={post.author}
           className="w-12 h-12 rounded-full"
         />
@@ -42,8 +61,9 @@ export default function Post({ post, isLoading }) {
         <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden">
           <Image
             src={post.image}
-            width={100} height={100}
-            alt={post.title}
+            width={100}
+            height={100}
+            alt={post.title || "Post image"}
             className="w-full h-64 object-cover"
           />
         </div>
@@ -60,7 +80,7 @@ export default function Post({ post, isLoading }) {
         </button>
         <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
           <Send className="w-5 h-5" />
-          <span>Sent</span>
+          <span>Send</span>
         </button>
         <span className="text-sm text-gray-400">Posted {post.timestamp}</span>
       </div>
