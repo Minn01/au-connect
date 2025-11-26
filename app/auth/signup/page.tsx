@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { Sparkle, ArrowRight } from "lucide-react";
 
 import Provider from "@/enums/Provider";
 import {
@@ -16,7 +17,7 @@ import {
 
 /*
  * TODO:
- * - add button for linkedin sign in
+ * - add button for linkedin sign in (Done)
  * - add loading effects and error messages (use the states defined)
  */
 
@@ -101,181 +102,124 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex">
-      {/* MOBILE BACKGROUND IMAGE (same as onboarding) */}
-      <div
-        className="absolute inset-0 md:hidden bg-cover bg-center"
-        style={{ backgroundImage: "url('/signUp.png')" }}
-      >
-        <div className="absolute inset-0 bg-black/55" />
-      </div>
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Left side - Hero section with image */}
+      <div className="relative w-1/2 hidden lg:flex items-end overflow-hidden">
+        {/* Background Image */}
+        <Image
+          src="/signUp.png"
+          alt="AU signup background"
+          fill
+          className="object-cover"
+        />
 
-      {/* DESKTOP LEFT IMAGE */}
-      <div
-        className="hidden md:flex w-1/2 bg-cover bg-center relative"
-        style={{ backgroundImage: "url('/signUp.png')" }}
-      >
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 flex items-end p-10">
-          <h1 className="text-4xl md:text-5xl font-semibold text-white leading-tight">
-            Join <span className="block mt-2">AU Connect</span>
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20"></div>
+
+        {/* Text Content at Bottom */}
+        <div className="relative z-10 text-white p-12 pb-16 w-full">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-semibold tracking-wider uppercase opacity-90">
+              AU Connect
+            </span>
+          </div>
+
+          <h1 className="text-5xl font-bold mb-4 leading-tight">
+            Join Our Community
           </h1>
+
+          <p className="text-lg text-gray-200 leading-relaxed mb-6 max-w-md">
+            Connect with fellow AU students, collaborate on projects, and grow together.
+            Your journey starts here.
+          </p>
         </div>
       </div>
 
-      {/* RIGHT SIDE (Mobile Centered Card like onboarding) */}
-      <div
-        className="
-          relative z-10
-          flex items-center justify-center
-          w-full md:flex-1
-          px-4 py-10 md:p-0
-          bg-white/0 md:bg-zinc-50
-          backdrop-blur-sm md:backdrop-blur-none
-        "
-      >
-        <div
-          className="
-            w-full
-
-            /* MOBILE  */
-            max-w-xs
-            bg-white/90 backdrop-blur-xl
-            border border-white/40
-            rounded-3xl
-            p-4
-
-            /* DESKTOP  */
-            md:max-w-md
-            md:bg-white md:backdrop-blur-none
-            md:border-zinc-200
-            md:rounded-2xl
-            md:p-10
-            md:shadow-xl
-
-            mx-auto my-10 md:my-0
-            space-y-5
-          "
-        >
-          {/* HEADER */}
-          <div className="text-center md:text-left">
-            <p className="text-xs uppercase tracking-wide text-red-500 font-semibold">
-              AU Connect
-            </p>
-
-            <h2 className="mt-1 text-2xl font-semibold text-zinc-900">
-              Create your account
-            </h2>
-
-            <p className="mt-1 text-sm text-zinc-500">
-              Sign up with your Gmail or password.
-            </p>
+      {/* Right side - Signup form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {/* Logo section */}
+          <div className="text-center mb-8">
+            <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg overflow-hidden">
+              <Image
+                src="/au-connect-logo.png"
+                alt="AU Connect logo"
+                width={64}
+                height={64}
+                className="object-contain"
+              />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign Up</h2>
+            <p className="text-gray-600">Choose your preferred sign-up method</p>
           </div>
 
-          {/* FORM */}
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSignup();
-            }}
-          >
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                required
-                className="
-                  w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-800
-                  focus:outline-none focus:ring-2 focus:ring-red-500
-                  placeholder:text-zinc-400
-                "
-              />
+          {/* Error message */}
+          {errorMsg && (
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm animate-in fade-in slide-in-from-top-2 duration-300">
+              {errorMsg}
             </div>
+          )}
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Create password"
-                required
-                className="
-                  w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-800
-                  focus:outline-none focus:ring-2 focus:ring-red-500
-                  placeholder:text-zinc-400
-                "
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter password"
-                required
-                className="
-                  w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-800
-                  focus:outline-none focus:ring-2 focus:ring-red-500
-                  placeholder:text-zinc-400
-                "
-              />
-            </div>
-
-            {errorMsg && <p className="mt-5 text-red-400">{errorMsg}</p>}
-
-            {/* Create Account */}
+          {/* Social signup buttons */}
+          <div className="space-y-3 mb-8">
+            {/* Google */}
             <button
-              type="submit"
+              onClick={() => handleSignin(Provider.GOOGLE)}
               disabled={loading}
-              className="
-                w-full mt-5 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
+              className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:border-gray-300 hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              <Image src="/google-icon.png" width={20} height={20} alt="Google" />
+              <span>Continue with Google</span>
+              <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
-          </form>
 
-          {/* Google Sign Up */}
-          <button
-            onClick={() => handleSignin(Provider.GOOGLE)}
-            className="
-              w-full mt-3 bg-black text-white py-2 rounded-md flex items-center justify-center gap-2
-              hover:bg-gray-800 transition
-            "
-          >
-            <Image src="/google-icon.png" width={20} height={20} alt="Google" />
-            Sign up with Google
-          </button>
-
-          {/* Login Link */}
-          <p className="text-xs text-zinc-400 text-center pt-2">
-            Already have an account?{" "}
-            <Link
-              href={LOGIN_PAGE_PATH}
-              className="text-blue-600 font-medium hover:underline ml-1"
+            {/* LinkedIn */}
+            <button
+              onClick={() => handleSignin(Provider.LINKEDIN)}
+              disabled={loading}
+              className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-xl bg-[#0A66C2] text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-[#004182] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
-            </Link>
+              <Image src="/linkedin-icon.png" width={20} height={20} alt="LinkedIn" />
+              <span>Continue with LinkedIn</span>
+              <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+
+            {/* Microsoft */}
+            <button
+              onClick={() => handleSignin(Provider.MICROSOFT)}
+              disabled={loading}
+              className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:from-gray-900 hover:to-black hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Image src="/microsoft-icon.png" width={20} height={20} alt="Microsoft" />
+              <span>Continue with Microsoft</span>
+              <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-gray-500">
+                Already have an account?
+              </span>
+            </div>
+          </div>
+
+          {/* Login link */}
+          <Link
+            href={LOGIN_PAGE_PATH}
+            className="flex items-center justify-center w-full py-3.5 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 group"
+          >
+            Sign in to your account
+            <ArrowRight className="inline-block ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          {/* Footer */}
+          <p className="text-center text-xs text-gray-500 mt-8">
+            © 2025 AU Connect Team. All rights reserved.
           </p>
         </div>
       </div>
