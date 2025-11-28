@@ -16,11 +16,14 @@ datasource db {
 
 model User {
   id        String   @id @map("_id") @default(auto()) @db.ObjectId
+  username String 
   email     String   @unique
   password  String?  
   googleId  String?  @unique
   linkedinId String? @unique
+  microsoftId String? @unique
   profilePic String?
+  phoneNo String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

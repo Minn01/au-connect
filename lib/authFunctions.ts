@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 
 import prisma from "../lib/prisma";
 import SessionMethod from "../enums/SessionMethod";
 import {
   JWT_COOKIE,
-  COOKIE_EXPIRATION_TIME,
+  JWT_COOKIE_EXPIRATION_TIME,
   GOOGLE_ACCESS_TOKEN_URL,
   GOOGLE_USERINFO_URL,
   LINKEDIN_ACCESS_TOKEN_URL,
   LINKEDIN_USERINFO_URL,
+  OAUTH_STATE_COOKIE_EXPIRATION_TIME,
+  OAUTH_STATE_COOKIE,
+  SIGNIN_PAGE_PATH,
+  MICROSOFT_ACCESS_TOKEN_URL,
+  MICROSOFT_USERINFO_URL,
 } from "./constants";
 import {
   GOOGLE_CLIENT_ID,
@@ -20,53 +24,22 @@ import {
   LINKEDIN_CLIENT_ID,
   LINKEDIN_CLIENT_SECRET,
   LINKEDIN_REDIRECT_URI,
+  MICROSOFT_CLIENT_ID,
+  MICROSOFT_CLIENT_SECRET,
+  MICROSOFT_REDIRECT_URI,
   NEXT_PUBLIC_BASE_URL,
   NODE_ENV,
 } from "./env";
 
-export async function tradSignup(req: NextRequest) {
-  // get inputs from request body
-  const { email, password } = await req.json();
-
-  // validate input
-  if (!email) return responseJSON("Email is required", 400);
-  if (!password) return responseJSON("Password is required", 400);
-
-  // check if user already exists
-  const existingUser = await checkExistUser(email);
-  if (existingUser) {
-    return responseJSON("User already exists, please login instead", 409);
-  }
-
-  // hash password
-  const hashedPsw = await bcrypt.hash(password, 10);
-
-  // create new user
-  try {
-    const user = await prisma.user.create({
-      data: {
-        email: email,
-        password: hashedPsw,
-      },
-    });
-
-    return createUserSession(
-      { id: user.id, email: user.email },
-      SessionMethod.SIGN_UP
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { message: `Error signing up user in file:${__filename}`, error },
-      { status: 500 }
-    );
-  }
-}
-
+// TODO: check for errors from providers in each function
 export async function googleAuthSignIn(req: NextRequest) {
   // the url from google
   const url = new URL(req.url);
   // gets the code containing the authorization data
   const code = url.searchParams.get("code");
+
+  // verify state to prevent CSRF
+  verifyOauthState(url, req);
 
   if (!code) return responseJSON("No code", 400);
 
@@ -99,8 +72,10 @@ export async function googleAuthSignIn(req: NextRequest) {
   if (!user) {
     user = await prisma.user.create({
       data: {
+        username: profile.name,
         email: profile.email,
         googleId: profile.sub,
+        profilePic: profile.picture,
       },
     });
   } else {
@@ -121,6 +96,9 @@ export async function linkedinAuthSignIn(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
   // const state = url.searchParams.get("state");
+
+  // verify state to prevent CSRF
+  verifyOauthState(url, req);
 
   if (!code) return responseJSON("Missing code", 400);
 
@@ -149,7 +127,8 @@ export async function linkedinAuthSignIn(req: NextRequest) {
 
   const userInfo = await infoRes.json();
 
-  // console.log('LinkedIn User Info:', userInfo);
+  // TODO: remove log
+  console.log('LinkedIn User Info:', userInfo);
 
   // check if user exists
   let user = await checkExistUser(userInfo.email);
@@ -158,8 +137,10 @@ export async function linkedinAuthSignIn(req: NextRequest) {
   if (!user) {
     user = await prisma.user.create({
       data: {
+        username: userInfo.name,
         email: userInfo.email,
         linkedinId: userInfo.sub,
+        profilePic: userInfo.picture.original.url,
       },
     });
   } else {
@@ -171,39 +152,129 @@ export async function linkedinAuthSignIn(req: NextRequest) {
   }
 
   // Create a login session
-  createUserSession(
+  return createUserSession(
     { id: user.id, email: user.email },
     SessionMethod.SIGN_IN_LINKEDIN
   );
-
-  return NextResponse.redirect(
-    NEXT_PUBLIC_BASE_URL + `/?success=true&provider=linkedin`
-  );
 }
 
-export async function tradLogin(req: NextRequest) {
-  const { email, password } = await req.json();
+export async function azurezAdAuthSignIn(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
 
-  if (!email) return responseJSON("Email is required", 400);
-  if (!password) return responseJSON("Password is required", 400);
-
-  const user = await checkExistUser(email);
-  if (!user) {
-    return responseJSON(
-      "You might not have an account, please sign up first",
-      404
+  // verify state to prevent CSRF
+  const storedState = req.cookies.get(OAUTH_STATE_COOKIE)?.value;
+  if (!state || state !== storedState) {
+    return NextResponse.redirect(
+      `${SIGNIN_PAGE_PATH}?error=Invalid state parameter`
     );
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.password!);
-  if (!passwordMatch) {
-    return responseJSON("Incorrect password", 401);
+  if (!code) {
+    return NextResponse.redirect(
+      `${SIGNIN_PAGE_PATH}?error=No authorization code received`
+    );
   }
 
-  return createUserSession(
-    { id: user.id, email: user.email },
-    SessionMethod.LOGIN
-  );
+  try {
+    // exchange authorization code for access token
+    const tokenResponse = await fetch(MICROSOFT_ACCESS_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: MICROSOFT_CLIENT_ID,
+        client_secret: MICROSOFT_CLIENT_SECRET,
+        code: code,
+        redirect_uri: MICROSOFT_REDIRECT_URI,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json();
+      throw new Error(
+        `Token exchange failed: ${
+          errorData.error_description || errorData.error
+        }`
+      );
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    // get user info from Microsoft Graph API
+    const userResponse = await fetch(MICROSOFT_USERINFO_URL, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!userResponse.ok) {
+      throw new Error("Failed to fetch user info from Microsoft Graph");
+    }
+
+    const userData = await userResponse.json();
+
+    // check if user exists
+    let user = await checkExistUser(userData.mail);
+
+    // if user does not exist create new user record
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: userData.mail,
+          username: userData.displayName,
+          microsoftId: userData.id,
+          phoneNo: userData.mobilePhone,
+        },
+      });
+    } else {
+      // update if doesn't exist
+      user = await prisma.user.update({
+        where: { email: userData.mail },
+        data: {
+          microsoftId: userData.id,
+          phoneNo: userData.mobilePhone,
+        },
+      });
+    }
+
+    return createUserSession(
+      { id: user.id, email: user.email },
+      SessionMethod.SIGN_IN_MICROSOFT
+    );
+  } catch (error) {
+    console.error("Microsoft OAuth callback error:", error);
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/login?error=${encodeURIComponent(
+        error instanceof Error ? error.message : "Authentication failed"
+      )}`
+    );
+  }
+}
+
+export function createOauthStateCookie(res: NextResponse, state: string) {
+  return res.cookies.set(OAUTH_STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: OAUTH_STATE_COOKIE_EXPIRATION_TIME, // 10 minutes
+  });
+}
+
+function verifyOauthState(url: URL, req: NextRequest) {
+  const state = url.searchParams.get("state");
+  const storedState = req.cookies.get(OAUTH_STATE_COOKIE)?.value;
+  
+  // TODO: remove log
+  console.log("equal check: " + state == storedState + "state:", state, " storedState:", storedState);
+  
+  if (!state || state !== storedState) {
+    throw new Error("Invalid state parameter");
+  }
 }
 
 export async function logout(req: NextRequest) {
@@ -224,35 +295,30 @@ export function createUserSession(
 ) {
   // create JWT token
   const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: COOKIE_EXPIRATION_TIME,
+    expiresIn: JWT_COOKIE_EXPIRATION_TIME,
   });
 
-  const response = getResponse(user, method);
+  const response = getResponse(method);
 
-  // set the JWT in the cookie
   if (response) {
+    // delete oauth state cookie
+    response.cookies.delete(OAUTH_STATE_COOKIE);
+
+    // set the JWT in the cookie
     response.cookies.set({
       name: JWT_COOKIE,
       value: token,
       httpOnly: true,
       secure: NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: JWT_COOKIE_EXPIRATION_TIME, // 7 days
     });
   }
 
   return response;
 }
 
-function getResponse(
-  user: { id: string; email: string },
-  method: SessionMethod
-) {
+function getResponse(method: SessionMethod) {
   switch (method) {
-    case SessionMethod.LOGIN:
-      return NextResponse.json(
-        { message: "Logged in successfully", user },
-        { status: 200 }
-      );
     case SessionMethod.LOGOUT:
       return NextResponse.json(
         { message: "Logged out successfully" },
@@ -266,10 +332,9 @@ function getResponse(
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=linkedin`
       );
-    case SessionMethod.SIGN_UP:
-      return NextResponse.json(
-        { message: "Signed up successfully", user },
-        { status: 201 }
+    case SessionMethod.SIGN_IN_MICROSOFT:
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=microsoft`
       );
     default:
     // TODO: add default response ?

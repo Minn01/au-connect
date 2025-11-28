@@ -8,6 +8,7 @@ import Provider from "@/enums/Provider";
 import {
   GOOGLE_AUTH_DIRECT_PATH,
   LINKEDIN_AUTH_DIRECT_PATH,
+  MICROSOFT_AUTH_DIRECT_PATH,
 } from "@/lib/constants";
 
 export default function SignUpPage() {
@@ -25,6 +26,10 @@ export default function SignUpPage() {
         case Provider.LINKEDIN:
           setLoading(true);
           router.push(LINKEDIN_AUTH_DIRECT_PATH);
+          break;
+        case Provider.MICROSOFT:
+          setLoading(true);
+          router.push(MICROSOFT_AUTH_DIRECT_PATH);
           break;
       }
     } catch (error) {

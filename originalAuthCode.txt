@@ -1,0 +1,62 @@
+// export async function tradLogin(req: NextRequest) {
+//   const { email, password } = await req.json();
+
+//   if (!email) return responseJSON("Email is required", 400);
+//   if (!password) return responseJSON("Password is required", 400);
+
+//   const user = await checkExistUser(email);
+//   if (!user) {
+//     return responseJSON(
+//       "You might not have an account, please sign up first",
+//       404
+//     );
+//   }
+
+//   const passwordMatch = await bcrypt.compare(password, user.password!);
+//   if (!passwordMatch) {
+//     return responseJSON("Incorrect password", 401);
+//   }
+
+//   return createUserSession(
+//     { id: user.id, email: user.email },
+//     SessionMethod.LOGIN
+//   );
+// }
+
+export async function tradSignup(req: NextRequest) {
+  // get inputs from request body
+  const { email, password } = await req.json();
+
+  // validate input
+  if (!email) return responseJSON("Email is required", 400);
+  if (!password) return responseJSON("Password is required", 400);
+
+  // check if user already exists
+  const existingUser = await checkExistUser(email);
+  if (existingUser) {
+    return responseJSON("User already exists, please login instead", 409);
+  }
+
+  // hash password
+  const hashedPsw = await bcrypt.hash(password, 10);
+
+  // create new user
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email: email,
+        password: hashedPsw,
+      },
+    });
+
+    return createUserSession(
+      { id: user.id, email: user.email },
+      SessionMethod.SIGN_UP
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: `Error signing up user in file:${__filename}`, error },
+      { status: 500 }
+    );
+  }
+}

@@ -96,6 +96,7 @@ export default function Header() {
           </Link>
           <Link
             href={PROFILE_PAGE_PATH}
+            onClick={() => setCurrentPage(PROFILE_PAGE_PATH)}
             className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-red-400"
           >
             <Image

@@ -1,3 +1,8 @@
+/* 
+* GLOBAL VARIABLES USED ACROSS THE APP
+* contains routes, paths and other constants 
+*/
+
 export const BASE_API_PATH = '/api/connect/v1';
 
 export const MAIN_PAGE_PATH = '/';
@@ -17,6 +22,7 @@ export const LOGOUT_PATH = BASE_API_PATH + '/auth/logout';
 // paths to to push to for OAuth sign-in
 export const GOOGLE_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/google';
 export const LINKEDIN_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/linkedin';
+export const MICROSOFT_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/azure-ad';
 
 // OAuth URLs
 
@@ -28,8 +34,16 @@ export const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinf
 export const LINKEDIN_AUTH_URL = 'https://www.linkedin.com/oauth/v2/authorization'; 
 export const LINKEDIN_ACCESS_TOKEN_URL = 'https://www.linkedin.com/oauth/v2/accessToken';
 export const LINKEDIN_USERINFO_URL = 'https://api.linkedin.com/v2/userinfo'
+// Microsoft/Azure AD
+export const MICROSOFT_TENANT_ID = 'common';
+export const MICROSOFT_AUTH_URL = `https://login.microsoftonline.com/${MICROSOFT_TENANT_ID}/oauth2/v2.0/authorize`;
+export const MICROSOFT_ACCESS_TOKEN_URL = `https://login.microsoftonline.com/${MICROSOFT_TENANT_ID}/oauth2/v2.0/token`;
+export const MICROSOFT_USERINFO_URL = 'https://graph.microsoft.com/v1.0/me';
 
-// Cookie name
+// Cookies
 export const JWT_COOKIE = 'ac_auth_token';
-// Number of days until the cookie expires (in days)
-export const COOKIE_EXPIRATION_TIME = '7d';
+export const OAUTH_STATE_COOKIE = 'oauth_state_token';
+// in seconds 
+export const JWT_COOKIE_EXPIRATION_TIME = 7 * 24 * 60 * 60; // 7 days
+export const OAUTH_STATE_COOKIE_EXPIRATION_TIME = 600; // 10 minutes
+export const OAUTH_STATE_RANDOM_BYTES_LENGTH = 32
