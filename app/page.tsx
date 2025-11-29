@@ -73,7 +73,7 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-12 gap-6">
+      <div className="md:grid md:grid-cols-12 md:gap-6">
         {/* LEFT PROFILE */}
         <LeftProfile user={mockUser} loading={loading} />
 

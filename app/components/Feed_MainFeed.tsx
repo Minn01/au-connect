@@ -7,9 +7,9 @@ import Image from "next/image";
 
 export default function MainFeed({ user, posts, loading }: MainFeedPropTypes) {
   return (
-    <div className="col-span-6 space-y-4">
+    <div className="lg:col-span-6 md:col-span-7 space-y-4">
       {/* CREATE POST */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white md:rounded-lg border border-gray-200 p-4 pt-7">
         <div className="flex items-center gap-3 mb-3">
           <div className="relative w-10 h-10">
             <Image
