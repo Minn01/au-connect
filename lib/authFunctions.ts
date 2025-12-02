@@ -31,6 +31,8 @@ import {
 } from "./env";
 
 // TODO: check for errors from providers in each function
+// TODO: google and linkedin are missing error handline for fetching token
+// TODO: error handling missing for all auth callback function for user info fetching
 export async function googleAuthSignIn(req: NextRequest) {
   // the url from google
   const url = new URL(req.url);
@@ -78,10 +80,24 @@ export async function googleAuthSignIn(req: NextRequest) {
       },
     });
   } else {
+    let profilePic: string | null = user.profilePic;
+
+    // if the user had a default picture, update it 
+    if (isDefaultPicture(user.profilePic)) {
+      // but only if the picture from google is not default, use it
+      if (!isDefaultPicture(profile.picture)) {
+        profilePic = profile.picture;
+      }     
+      // else keep existing picture
+    }
+
     // update existing user with Google ID
     user = await prisma.user.update({
       where: { email: profile.email },
-      data: { googleId: profile.sub },
+      data: { 
+        googleId: profile.sub,
+        profilePic: profilePic
+      },
     });
   }
 
@@ -126,9 +142,6 @@ export async function linkedinAuthSignIn(req: NextRequest) {
 
   const userInfo = await infoRes.json();
 
-  // TODO: remove log
-  console.log('LinkedIn User Info:', userInfo);
-
   // check if user exists
   let user = await checkExistUser(userInfo.email);
 
@@ -144,9 +157,24 @@ export async function linkedinAuthSignIn(req: NextRequest) {
     });
   } else {
     // update existing user with LinkedIn ID
+    let profilePic: string | null = user.profilePic;
+
+    // if the user had a default picture, update it
+    if (isDefaultPicture(user.profilePic)) {
+      // but only if the picture from linkedin is not default, use it
+      if (!isDefaultPicture(userInfo.picture.original.url)) {
+        profilePic = userInfo.picture.original.url;
+      }     
+      // else keep existing picture
+    }
+
     user = await prisma.user.update({
       where: { email: userInfo.email },
-      data: { linkedinId: userInfo.sub },
+      data: {
+        linkedinId: userInfo.sub,
+        // only update profile picture if it's not a default avatar
+        profilePic: profilePic,
+      },
     });
   }
 
@@ -261,12 +289,21 @@ export function createOauthStateCookie(res: NextResponse, state: string) {
 function verifyOauthState(url: URL, req: NextRequest) {
   const state = url.searchParams.get("state");
   const storedState = req.cookies.get(OAUTH_STATE_COOKIE)?.value;
-  
-  // TODO: remove log
-  console.log("equal check: " + state == storedState + "state:", state, " storedState:", storedState);
-  
+
   if (!state || state !== storedState) {
     throw new Error("Invalid state parameter");
+  }
+}
+
+export function verifyJwtToken(token: string) {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      email: string;
+    };
+    return decoded;
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Invalid token");
   }
 }
 
@@ -336,4 +373,13 @@ function getResponse(method: SessionMethod) {
 
 function responseJSON(message: string, statusCode: number) {
   return NextResponse.json({ message: message }, { status: statusCode });
+}
+
+function isDefaultPicture(imageString: string | null) {
+  if (!imageString) return false;
+
+  return (
+    imageString.startsWith("https://lh3.googleusercontent.com/") ||
+    imageString.startsWith("https://media.licdn.com/dms/image/")
+  );
 }

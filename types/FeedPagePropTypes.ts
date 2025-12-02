@@ -3,12 +3,12 @@ import PostType from "@/types/Post";
 import AC_Event from '@/types/AC_Event'
 
 export type LeftProfilePropTypes = {
-  user: User
+  user: User | null
   loading: boolean
 };
 
 export type MainFeedPropTypes = {
-  user: User
+  user: User 
   posts: Array<PostType>
   loading: boolean
 };
