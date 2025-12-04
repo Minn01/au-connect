@@ -1,3 +1,4 @@
+"use client";
 import EventCard from "./EventCard";
 import { RightEventsProfileTypes } from "@/types/FeedPagePropTypes";
 

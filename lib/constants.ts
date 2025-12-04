@@ -2,7 +2,7 @@
 * GLOBAL VARIABLES USED ACROSS THE APP
 * contains routes, paths and other constants 
 */
-
+import { buildSlug } from "@/app/profile/utils/buildSlug";
 export const BASE_API_PATH = '/api/connect/v1';
 
 export const MAIN_PAGE_PATH = '/';
@@ -10,7 +10,10 @@ export const SIGNIN_PAGE_PATH = '/auth/register'
 export const ONBOARD_PAGE_PATH = '/auth/onboarding'
 export const CONNECT_PAGE_PATH = '/connect'
 export const MESSAGES_PAGE_PATH = '/messages'
-export const PROFILE_PAGE_PATH = '/profile'
+
+export const PROFILE_PAGE_PATH = "/profile";
+
+
 export const NOTIFICATION_PAGE_PATH = '/notifications'
 
 export const HEADER_HIDDEN_PAGES = [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH]

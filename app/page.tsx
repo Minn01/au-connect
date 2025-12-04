@@ -1,8 +1,12 @@
-"use client";
-import { useState, useEffect } from "react";
+// "use client";
+//import { useState, useEffect } from "react";
 import LeftProfile from "./components/Feed_LeftProfile";
 import MainFeed from "./components/Feed_MainFeed";
 import RightEvents from "./components/Feed_RightEvents";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/getCurrentUser";
+import { buildSlug } from "@/app/profile/utils/buildSlug";
+
 
 const mockUser = {
   name: "Zai Swan",
@@ -64,24 +68,46 @@ const mockEvents = [
   },
 ];
 
-export default function Home() {
-  const [loading, setLoading] = useState(true);
+export default async function Home() {
+  const session = await getCurrentUser();
 
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1500);
-  }, []);
+  let currentUser = null;
+
+  if (session?.userId) {
+    currentUser = await prisma.user.findUnique({
+      where: { id: session.userId },
+    });
+  }
+
+  // const [loading, setLoading] = useState(true);
+
+  // useEffect(() => {
+  //   setTimeout(() => setLoading(false), 1500);
+  // }, []);
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="md:grid md:grid-cols-12 md:gap-6">
         {/* LEFT PROFILE */}
-        <LeftProfile user={mockUser} loading={loading} />
+        <LeftProfile
+          user={{
+            name: currentUser?.username || "Guest User",
+            title: currentUser?.title || "No title yet",
+            education: currentUser?.education || "",
+            location: currentUser?.location || "",
+            avatar: currentUser?.profilePic || "/default-avatar.png",
+            slug: currentUser ? buildSlug(currentUser.username, currentUser.id) : "",
+
+          }}
+          loading={!currentUser}
+        />
 
         {/* MAIN FEED */}
-        <MainFeed user={mockUser} posts={mockPosts} loading={loading}/>
+        <MainFeed user={mockUser} posts={mockPosts} loading={!currentUser}/>
 
         {/* RIGHT EVENT SIDEBAR */}
-        <RightEvents events={mockEvents} loading={loading}/>
+        <RightEvents events={mockEvents} loading={!currentUser}/>
       </div>
     </div>
   );

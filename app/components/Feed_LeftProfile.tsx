@@ -30,7 +30,9 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
         <div className="hidden md:block h-24 bg-gray-200"></div>
         <div className="flex flex-row gap-6 md:gap-0 md:flex-col p-4 md:-mt-12">
           <div
-            onClick={() => router.push(PROFILE_PAGE_PATH)}
+            onClick={() => router.push(`/profile/${user.slug}`)}
+
+
             className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 active:scale-95 hover:scale-105"
           >
             <Image
@@ -41,7 +43,8 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
             />
           </div>
           <div
-            onClick={() => router.push(PROFILE_PAGE_PATH)}
+            onClick={() => router.push(`/profile/${user.slug}`)}
+
             className="cursor-pointer transition-all duration-200"
           >
             <h2 className="font-bold text-gray-900 text-lg hover:text-red-500 transition-colors">

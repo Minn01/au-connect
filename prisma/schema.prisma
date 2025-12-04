@@ -15,15 +15,53 @@ datasource db {
 }
 
 model User {
+  id            String   @id @map("_id") @default(auto()) @db.ObjectId
+  username      String
+  email         String   @unique
+  password      String?
+  googleId      String?  @unique
+  linkedinId    String?  @unique
+  microsoftId   String?  @unique
+
+  profilePic    String?
+  coverPhoto    String?
+  title         String?
+  location      String?
+  about         String?
+  connections   Int       @default(0)
+
+  experience    Experience[]
+  education     Education[]
+  posts         Post[]
+
+  phoneNo       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Experience {
   id        String   @id @map("_id") @default(auto()) @db.ObjectId
-  username String 
-  email     String   @unique
-  password  String?  
-  googleId  String?  @unique
-  linkedinId String? @unique
-  microsoftId String? @unique
-  profilePic String?
-  phoneNo String?
+  role      String
+  company   String
+  period    String
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Education {
+  id        String   @id @map("_id") @default(auto()) @db.ObjectId
+  school    String
+  degree    String
+  period    String
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id        String   @id @map("_id") @default(auto()) @db.ObjectId
+  content   String?
+  image     String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
 }
