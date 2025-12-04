@@ -28,10 +28,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen bg-gray-50 min-w-lg">
+        <div className="h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            {children} {/* MessagePages goes here */}
+          </main>
+        </div>
+        {/* <div className="min-h-screen bg-gray-50 min-w-lg">
           <Header />
           {children}
-        </div>
+        </div> */}
       </body>
     </html>
   );

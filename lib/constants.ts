@@ -18,14 +18,15 @@ export const NOTIFICATION_PAGE_PATH = '/notifications'
 
 export const HEADER_HIDDEN_PAGES = [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH]
 
-// api routes for auth
-export const SIGNUP_PATH = BASE_API_PATH + '/auth/signup';
-export const LOGOUT_PATH = BASE_API_PATH + '/auth/logout';
-
 // paths to to push to for OAuth sign-in
 export const GOOGLE_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/google';
 export const LINKEDIN_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/linkedin';
 export const MICROSOFT_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/azure-ad';
+
+// api routes 
+export const LOGOUT_API_PATH = BASE_API_PATH + '/auth/logout';
+export const ME_API_PATH = BASE_API_PATH + '/me';
+
 
 // OAuth URLs
 
@@ -50,3 +51,4 @@ export const OAUTH_STATE_COOKIE = 'oauth_state_token';
 export const JWT_COOKIE_EXPIRATION_TIME = 7 * 24 * 60 * 60; // 7 days
 export const OAUTH_STATE_COOKIE_EXPIRATION_TIME = 600; // 10 minutes
 export const OAUTH_STATE_RANDOM_BYTES_LENGTH = 32
+

@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
       {
@@ -15,6 +14,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "graph.microsoft.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatar.microsoft.com",
       }
     ],
   },

@@ -1,7 +1,17 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Home, UserPlus, PlusCircle, Bell, Search, Menu, X, MessageCircleMore } from "lucide-react";
+import {
+  Home,
+  UserPlus,
+  PlusCircle,
+  Bell,
+  Search,
+  Menu,
+  X,
+  MessageCircleMore,
+  UserRound,
+} from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -11,28 +21,25 @@ import {
   SIGNIN_PAGE_PATH,
   ONBOARD_PAGE_PATH,
   MESSAGES_PAGE_PATH,
+  PROFILE_PAGE_PATH,
   // PROFILE_PAGE_PATH,
 } from "@/lib/constants";
 
-// const mockUser = {
-//   name: "Zai Swan",
-//   title: "Game Developer",
-//   education: "Class 2015, School of Science & Technology",
-//   location: "Bangkok, Thailand",
-//   avatar: "/au-bg.png",
-// };
-
 export default function Header() {
-  const [currentPage, setCurrentPage] = useState(MAIN_PAGE_PATH);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathName = usePathname();
-  
-  const hidden = [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH].includes(pathName);
+  const navBarIndicatedPages = [
+    MAIN_PAGE_PATH,
+    CONNECT_PAGE_PATH,
+    MESSAGES_PAGE_PATH,
+    NOTIFICATION_PAGE_PATH,
+    PROFILE_PAGE_PATH
+  ];
 
-  const handleNavClick = (path: string) => {
-    setCurrentPage(path);
-    setMobileMenuOpen(false);
-  };
+  const currentPage = navBarIndicatedPages.includes(pathName)
+    ? pathName
+    : "not-valid-path";
+  const hidden = [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH].includes(pathName);
 
   return hidden ? null : (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -41,7 +48,12 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <Image src={'/au-connect-logo.png'} width={50} height={50} alt="au-connect-logo"/>
+            <Image
+              src={"/au-connect-logo.png"}
+              width={50}
+              height={50}
+              alt="au-connect-logo"
+            />
             <h1 className="text-xl font-bold text-gray-900">AU Connect</h1>
           </div>
 
@@ -61,7 +73,6 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href={MAIN_PAGE_PATH}
-              onClick={() => setCurrentPage(MAIN_PAGE_PATH)}
               className={`flex flex-col items-center gap-1 ${
                 currentPage == MAIN_PAGE_PATH ? "text-red-400" : "text-gray-600"
               } hover:text-red-600`}
@@ -71,9 +82,10 @@ export default function Header() {
             </Link>
             <Link
               href={CONNECT_PAGE_PATH}
-              onClick={() => setCurrentPage(CONNECT_PAGE_PATH)}
               className={`flex flex-col items-center gap-1 ${
-                currentPage == CONNECT_PAGE_PATH ? "text-red-400" : "text-gray-600"
+                currentPage == CONNECT_PAGE_PATH
+                  ? "text-red-400"
+                  : "text-gray-600"
               } hover:text-red-600`}
             >
               <UserPlus className="w-5 h-5" />
@@ -81,36 +93,37 @@ export default function Header() {
             </Link>
             <Link
               href={MESSAGES_PAGE_PATH}
-              onClick={() => setCurrentPage(MESSAGES_PAGE_PATH)}
               className={`flex flex-col items-center gap-1 ${
-                currentPage == MESSAGES_PAGE_PATH ? "text-red-400" : "text-gray-600"
+                currentPage == MESSAGES_PAGE_PATH
+                  ? "text-red-400"
+                  : "text-gray-600"
               } hover:text-red-600`}
             >
               <MessageCircleMore className="w-5 h-5" />
-              <span className="text-xs">Messages</span>
+              <span className="text-xs">Messaging</span>
             </Link>
             <Link
               href={NOTIFICATION_PAGE_PATH}
-              onClick={() => setCurrentPage(NOTIFICATION_PAGE_PATH)}
               className={`flex flex-col items-center gap-1 ${
-                currentPage == NOTIFICATION_PAGE_PATH ? "text-red-400" : "text-gray-600"
+                currentPage == NOTIFICATION_PAGE_PATH
+                  ? "text-red-400"
+                  : "text-gray-600"
               } hover:text-red-600`}
             >
               <Bell className="w-5 h-5" />
               <span className="text-xs">Notification</span>
             </Link>
-            {/* <Link
+            <Link
               href={PROFILE_PAGE_PATH}
-              onClick={() => setCurrentPage(PROFILE_PAGE_PATH)}
-              className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-red-400"
+              className={`flex flex-col items-center gap-1 ${
+                currentPage == PROFILE_PAGE_PATH
+                  ? "text-red-400"
+                  : "text-gray-600"
+              } hover:text-red-600`}
             >
-              <Image
-                src={mockUser.avatar}
-                alt="Profile Avatar"
-                fill={true}
-                className="object-cover"
-              />
-            </Link> */}
+              <UserRound className="w-5 h-5"/>
+              <span className="text-xs">Profile</span>
+            </Link>
           </nav>
 
           {/* Mobile Hamburger Button */}
@@ -118,7 +131,11 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden text-gray-600 hover:text-red-600"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -140,9 +157,10 @@ export default function Header() {
             <div className="flex flex-col gap-4">
               <Link
                 href={MAIN_PAGE_PATH}
-                onClick={() => handleNavClick(MAIN_PAGE_PATH)}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                  currentPage == MAIN_PAGE_PATH ? "bg-red-50 text-red-400" : "text-gray-600"
+                  currentPage == MAIN_PAGE_PATH
+                    ? "bg-red-50 text-red-400"
+                    : "text-gray-600"
                 } hover:bg-red-50 hover:text-red-600`}
               >
                 <Home className="w-5 h-5" />
@@ -150,9 +168,10 @@ export default function Header() {
               </Link>
               <Link
                 href={CONNECT_PAGE_PATH}
-                onClick={() => handleNavClick(CONNECT_PAGE_PATH)}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                  currentPage == CONNECT_PAGE_PATH ? "bg-red-50 text-red-400" : "text-gray-600"
+                  currentPage == CONNECT_PAGE_PATH
+                    ? "bg-red-50 text-red-400"
+                    : "text-gray-600"
                 } hover:bg-red-50 hover:text-red-600`}
               >
                 <UserPlus className="w-5 h-5" />
@@ -160,9 +179,10 @@ export default function Header() {
               </Link>
               <Link
                 href={MESSAGES_PAGE_PATH}
-                onClick={() => handleNavClick(MESSAGES_PAGE_PATH)}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                  currentPage == MESSAGES_PAGE_PATH ? "bg-red-50 text-red-400" : "text-gray-600"
+                  currentPage == MESSAGES_PAGE_PATH
+                    ? "bg-red-50 text-red-400"
+                    : "text-gray-600"
                 } hover:bg-red-50 hover:text-red-600`}
               >
                 <PlusCircle className="w-5 h-5" />
@@ -170,13 +190,25 @@ export default function Header() {
               </Link>
               <Link
                 href={NOTIFICATION_PAGE_PATH}
-                onClick={() => handleNavClick(NOTIFICATION_PAGE_PATH)}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                  currentPage == NOTIFICATION_PAGE_PATH ? "bg-red-50 text-red-400" : "text-gray-600"
+                  currentPage == NOTIFICATION_PAGE_PATH
+                    ? "bg-red-50 text-red-400"
+                    : "text-gray-600"
                 } hover:bg-red-50 hover:text-red-600`}
               >
                 <Bell className="w-5 h-5" />
                 <span className="font-medium">Notification</span>
+              </Link>
+              <Link
+                href={PROFILE_PAGE_PATH}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
+                  currentPage == PROFILE_PAGE_PATH
+                    ? "bg-red-50 text-red-400"
+                    : "text-gray-600"
+                } hover:bg-red-50 hover:text-red-600`}
+              >
+                <UserRound className="w-5 h-5"/>
+                <span className="font-medium">Profile</span>
               </Link>
               {/* <Link
                 href={PROFILE_PAGE_PATH}

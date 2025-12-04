@@ -5,10 +5,8 @@
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
-    console.log(`Environment variable "${name}" is missing`);
     throw new Error(`Environment variable "${name}" is missing`);
   }
-  console.log(`E variables : ${name}`)
   return value;
 }
 

@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { LeftProfilePropTypes } from "@/types/FeedPagePropTypes";
 import { PROFILE_PAGE_PATH } from "@/lib/constants";
 
+const DEFAULT_AVATAR = "/default-avatar.png";
+
 export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
   const router = useRouter();
-  
+
   if (loading) {
     return (
       <div className="lg:col-span-3 md:col-span-4">
@@ -23,36 +25,60 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
       </div>
     );
   }
-  
+
+  const name = user?.username || "Unknown User";
+  const title = user?.title || "No title provided";
+  const education = user?.education || "No education info";
+  const location = user?.location || "Unknown location";
+
   return (
     <div className="lg:col-span-3 md:col-span-4 flex justify-center md:justify-start">
-      <div className="bg-white md:rounded-lg border border-gray-200 overflow-hidden sticky top-20 w-full md:w-auto md:max-w-xs self-start">
+      <div className="bg-white md:rounded-lg border border-gray-200 overflow-hidden flex-1 sticky top-20 w-full md:w-auto md:max-w-xs self-start">
         <div className="hidden md:block h-24 bg-gray-200"></div>
+
         <div className="flex flex-row gap-6 md:gap-0 md:flex-col p-4 md:-mt-12">
+          {/* Avatar */}
           <div
+<<<<<<< HEAD
             onClick={() => router.push(`/profile/${user.slug}`)}
 
 
             className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 active:scale-95 hover:scale-105"
+=======
+            onClick={() => router.push(PROFILE_PAGE_PATH)}
+            className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 ative:scale-95 hover:scale-105"
+>>>>>>> feature/messages
           >
-            <Image
-              src={user.avatar}
-              alt={user.name}
-              fill
-              className="rounded-full border-4 border-white object-cover"
-            />
+            {user?.profilePic ? (
+              <Image
+                src={user.profilePic}
+                alt="avatar"
+                fill
+                className="rounded-full border-4 border-white object-cover"
+              />
+            ) : (
+              <Image
+                src={DEFAULT_AVATAR}
+                alt="default avatar"
+                fill
+                className="rounded-full border-4 border-white object-cover"
+              />
+            )}
           </div>
+
+          {/* Info */}
           <div
             onClick={() => router.push(`/profile/${user.slug}`)}
 
             className="cursor-pointer transition-all duration-200"
           >
             <h2 className="font-bold text-gray-900 text-lg hover:text-red-500 transition-colors">
-              {user.name}
+              {name}
             </h2>
-            <p className="text-sm text-gray-600 mb-1">{user.title}</p>
-            <p className="text-xs text-gray-500 mb-1">{user.education}</p>
-            <p className="text-xs text-gray-500">{user.location}</p>
+
+            <p className="text-sm text-gray-600 mb-1">{title}</p>
+            <p className="text-xs text-gray-500 mb-1">{education}</p>
+            <p className="text-xs text-gray-500">{location}</p>
           </div>
         </div>
       </div>

@@ -1,11 +1,17 @@
 type User = {
-    name: string
-    title: string
-    avatar: string
-    education: string
-    location: string
-    // followers: number
-    // following: number
-}
+  username?: string;
+  title?: string;
+  phoneNo?: string;
+  profilePic?: string;
+  createdAt?: string;
+  education?: string;
+  location?: string;
+  name: string;
+  avatar: string;
+  slug?: string;
+  coverPhoto?: string;
+  // followers: number
+  // following: number
+};
 
 export default User;
