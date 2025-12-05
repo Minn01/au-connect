@@ -3,13 +3,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LeftProfilePropTypes } from "@/types/FeedPagePropTypes";
 import { PROFILE_PAGE_PATH } from "@/lib/constants";
+import { buildSlug } from "@/app/profile/utils/buildSlug";
+
 
 const DEFAULT_AVATAR = "/default-avatar.png";
 
 export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
   const router = useRouter();
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="lg:col-span-3 md:col-span-4">
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden sticky top-20 w-full md:w-auto self-start">
@@ -26,10 +28,12 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
     );
   }
 
+  const slug = user?.slug ?? buildSlug(user?.username || "", user?.id || "");
   const name = user?.username || "Unknown User";
   const title = user?.title || "No title provided";
   const education = user?.education || "No education info";
   const location = user?.location || "Unknown location";
+  
 
   return (
     <div className="lg:col-span-3 md:col-span-4 flex justify-center md:justify-start">
@@ -37,18 +41,13 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
         <div className="hidden md:block h-24 bg-gray-200"></div>
 
         <div className="flex flex-row gap-6 md:gap-0 md:flex-col p-4 md:-mt-12">
+          
           {/* Avatar */}
           <div
-<<<<<<< HEAD
-            onClick={() => router.push(`/profile/${user.slug}`)}
-
-
+            onClick={() => router.push(`/profile/${slug}`)}
             className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 active:scale-95 hover:scale-105"
-=======
-            onClick={() => router.push(PROFILE_PAGE_PATH)}
-            className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 ative:scale-95 hover:scale-105"
->>>>>>> feature/messages
           >
+
             {user?.profilePic ? (
               <Image
                 src={user.profilePic}

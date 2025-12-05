@@ -1,4 +1,5 @@
 type User = {
+  id: string; 
   username?: string;
   title?: string;
   phoneNo?: string;
@@ -6,8 +7,8 @@ type User = {
   createdAt?: string;
   education?: string;
   location?: string;
-  name: string;
-  avatar: string;
+  // name: string;
+  // avatar: string;
   slug?: string;
   coverPhoto?: string;
   // followers: number

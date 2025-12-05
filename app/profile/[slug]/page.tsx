@@ -17,21 +17,21 @@ function isValidSlugFormat(slug: string) {
 }
 
 export default async function ProfilePage(props: { params: Promise<{ slug: string }> }) {
-  // 1️⃣ Await params safely
+  //  Await params safely
   const { slug } = await props.params;
 
   if (!slug || !isValidSlugFormat(slug)) {
     return redirect("/404");
   }
 
-  // 2️⃣ Extract ObjectId from slug
+  //  Extract ObjectId from slug
   const { id } = parseSlug(slug);
 
   if (!id || !isValidObjectId(id)) {
     return redirect("/404");
   }
 
-  // 3️⃣ Secure fetch — ONLY selected fields
+  //  Secure fetch — ONLY selected fields
   const user = await prisma.user.findUnique({
     where: { id },
     select: safeUserSelect,
@@ -42,17 +42,17 @@ export default async function ProfilePage(props: { params: Promise<{ slug: strin
     return redirect("/404");
   }
 
-  // 4️⃣ Validate correct slug (SEO + anti-guessing)
+  //  Validate correct slug (SEO + anti-guessing)
   const correctSlug = buildSlug(user.username, user.id);
   if (slug !== correctSlug) {
     return redirect(`/profile/${correctSlug}`);
   }
 
-  // 5️⃣ Determine ownership
+  //  Determine ownership
   const session = await getCurrentUser();
   const isOwner = session?.userId === user.id;
 
-  // 6️⃣ Render public-safe profile
+  // Render public-safe profile
   return (
     <ProfileView
       user={{
