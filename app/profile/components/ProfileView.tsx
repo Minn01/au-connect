@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { MoreHorizontal, Pencil, Camera } from "lucide-react";
+import { Pencil, Camera } from "lucide-react";
 
 import SectionCard from "./SectionCard";
 import ExperienceItem from "./ExperienceItem";
@@ -19,7 +19,7 @@ export default function ProfileView({ user, recommendedPeople, isOwner }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600);
+    const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
