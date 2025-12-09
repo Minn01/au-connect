@@ -82,21 +82,21 @@ export async function googleAuthSignIn(req: NextRequest) {
   } else {
     let profilePic: string | null = user.profilePic;
 
-    // if the user had a default picture, update it 
+    // if the user had a default picture, update it
     if (isDefaultPicture(user.profilePic)) {
       // but only if the picture from google is not default, use it
       if (!isDefaultPicture(profile.picture)) {
         profilePic = profile.picture;
-      }     
+      }
       // else keep existing picture
     }
 
     // update existing user with Google ID
     user = await prisma.user.update({
       where: { email: profile.email },
-      data: { 
+      data: {
         googleId: profile.sub,
-        profilePic: profilePic
+        profilePic: profilePic,
       },
     });
   }
@@ -164,7 +164,7 @@ export async function linkedinAuthSignIn(req: NextRequest) {
       // but only if the picture from linkedin is not default, use it
       if (!isDefaultPicture(userInfo.picture.original.url)) {
         profilePic = userInfo.picture.original.url;
-      }     
+      }
       // else keep existing picture
     }
 
@@ -305,11 +305,6 @@ export function verifyJwtToken(token: string) {
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : "Invalid token");
   }
-}
-
-export async function logout(req: NextRequest) {
-  req.cookies.delete(JWT_COOKIE);
-  return getResponse(SessionMethod.LOGOUT);
 }
 
 // checks email only

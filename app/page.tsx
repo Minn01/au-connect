@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import LeftProfile from "./components/Feed_LeftProfile";
 import MainFeed from "./components/Feed_MainFeed";
 import RightEvents from "./components/Feed_RightEvents";
-import { ME_API_PATH } from "@/lib/constants";
 import User from "@/types/User";
+import { fetchUser } from "./profile/utils/fetchfunctions";
 
 const mockUser = {
   name: "Zai Swan",
@@ -72,33 +72,10 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(ME_API_PATH, {
-          method: "GET",
-          credentials: "include",
-          cache: 'no-store'
-        });
-
-        if (!res.ok) {
-          console.error("Failed to fetch user:", res.status);
-          setUser(null);
-          return;
-        }
-        
-        const data = await res.json();
-        console.log("fetched response:", data.user);
-        setUser(data.user);
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        console.error("Error fetching user:", err);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
+    fetchUser(
+      (user: User | null) => setUser(user),
+      (state: boolean) => setLoading(state)
+    );
     // setTimeout(() => setLoading(false), 1500);
   }, []);
 

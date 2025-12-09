@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, SquarePen, Send, ImagePlus, Paperclip, Smile, MoreVertical, ArrowLeft } from "lucide-react";
+import { Search, SquarePen, Send, ImagePlus, Paperclip, Smile, MoreVertical, ArrowLeft, Users } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 
@@ -100,6 +100,7 @@ export default function MessagePages() {
             />
           </div>
           <SquarePen className="text-gray-500 w-5 h-5 shrink-0 cursor-pointer hover:text-gray-700" />
+          <Users className="text-gray-500 w-5 h-5 shrink-0 cursor-pointer hover:text-gray-700" />
         </div>
         
         <div className="border-t border-gray-200" />

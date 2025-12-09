@@ -18,7 +18,6 @@ model User {
   id            String   @id @map("_id") @default(auto()) @db.ObjectId
   username      String
   email         String   @unique
-  password      String?
   googleId      String?  @unique
   linkedinId    String?  @unique
   microsoftId   String?  @unique
@@ -32,7 +31,6 @@ model User {
 
   experience    Experience[]
   education     Education[]
-  posts         Post[]
 
   phoneNo       String?
   createdAt     DateTime @default(now())
@@ -58,10 +56,50 @@ model Education {
 }
 
 model Post {
-  id        String   @id @map("_id") @default(auto()) @db.ObjectId
-  content   String?
-  image     String?
-  createdAt DateTime @default(now())
-  userId    String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
+  id            String     @id @map("_id") @default(auto()) @db.ObjectId
+
+  // user info (denormalized)
+  userId        String     @db.ObjectId
+  username      String
+  profilePic    String
+
+  // post fields
+  title         String?
+  content       String
+  media         Json
+
+  likeCount     Int        @default(0)
+  commentCount  Int        @default(0)
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // relations
+  comments      Comment[]
+}
+
+model Comment {
+  id            String     @id @map("_id") @default(auto()) @db.ObjectId
+
+  // user info (denormalized)
+  userId        String     @db.ObjectId
+  username      String
+  profilePic    String
+
+  // comment fields
+  content       String
+  media         Json?
+
+  likeCount     Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // relation to post
+  postId        String     @db.ObjectId
+  post          Post       @relation(fields: [postId], references: [id])
+
+  // replies (self-relation)
+  parentId      String?    @db.ObjectId
+  parent        Comment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies       Comment[]  @relation("CommentReplies")
 }
