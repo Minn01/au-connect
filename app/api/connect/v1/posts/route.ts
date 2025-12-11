@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { createPost } from "@/lib/postFunctions";
+
+import { createPost, getAllPosts } from "@/lib/postFunctions";
 
 // create post 
 export async function POST(req: NextRequest) {
@@ -8,5 +9,5 @@ export async function POST(req: NextRequest) {
 
 // get all posts
 export async function GET(req: NextRequest) {
-  
+  return await getAllPosts(req);
 }
