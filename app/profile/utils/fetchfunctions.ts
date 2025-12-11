@@ -1,7 +1,7 @@
 import {
   LOGOUT_API_PATH,
   ME_API_PATH,
-  SIGNIN_PAGE_PATH,
+  POST_API_PATH,
 } from "@/lib/constants";
 import User from "@/types/User";
 
@@ -51,4 +51,34 @@ export async function handleLogout(redirect: () => void) {
     console.error("Logout error:", e instanceof Error ? e.message : e);
     return false;
   }
+}
+
+export async function handleCreatePost(
+  postType: string,
+  title: string,
+  postContent: string,
+  selectedVisibility: string,
+  disableComments: boolean,
+  setIsOpen: (state: boolean) => void
+) {
+    try {
+      await fetch(POST_API_PATH, {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          postType,
+          title,
+          content: postContent,
+          visibility: selectedVisibility,
+          disableComments,
+        }),
+      });
+
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Create post error:", error);
+    }
 }

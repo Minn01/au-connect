@@ -10,6 +10,7 @@ import { MainFeedPropTypes } from "@/types/FeedPagePropTypes";
 
 export default function MainFeed({ user, posts, loading }: MainFeedPropTypes) {
     const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+    const [selectedPostType, setSelectedPostType] = useState("discussion");
 
   return (
     <div className="lg:col-span-6 md:col-span-7 space-y-4">

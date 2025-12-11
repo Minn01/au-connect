@@ -58,15 +58,16 @@ model Education {
 model Post {
   id            String     @id @map("_id") @default(auto()) @db.ObjectId
 
-  // user info (denormalized)
   userId        String     @db.ObjectId
   username      String
-  profilePic    String
+  profilePic    String?
 
-  // post fields
+  postType      String
+  visibility    String?
+
   title         String?
   content       String
-  media         Json
+  media         Json?
 
   likeCount     Int        @default(0)
   commentCount  Int        @default(0)
@@ -74,7 +75,6 @@ model Post {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  // relations
   comments      Comment[]
 }
 

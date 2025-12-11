@@ -378,3 +378,8 @@ function isDefaultPicture(imageString: string | null) {
     imageString.startsWith("https://media.licdn.com/dms/image/")
   );
 }
+
+export function getHeaderUserInfo(req: NextRequest) {
+  return [req.headers.get("x-user-email"), req.headers.get("x-user-id")]
+}
+
