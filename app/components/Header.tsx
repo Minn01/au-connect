@@ -62,8 +62,7 @@ export default function Header() {
   }, [hidden]);
 
   return hidden ? null : (
-    // <header className="bg-[rgb(136,38,38)] border-b border-gray-200 sticky top-0 z-50">
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-[rgb(136,38,38)] border-b border-red-900/30 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Top Section */}
         <div className="flex items-center justify-between">
@@ -75,17 +74,17 @@ export default function Header() {
               height={45}
               alt="au-connect-logo"
             />
-            <h1 className="text-lg font-bold text-gray-900">AU Connect</h1>
+            <h1 className="text-lg font-bold text-white">AU Connect</h1>
           </div>
 
           {/* Desktop Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 text-gray-600 rounded-full focus:outline-none focus:border-red-400"
+                className="w-full pl-10 pr-4 py-2 bg-red-900/30 border border-red-800/50 text-white placeholder:text-white/60 rounded-full focus:outline-none focus:border-white/50 focus:bg-red-900/40"
               />
             </div>
           </div>
@@ -119,8 +118,10 @@ export default function Header() {
                 key={i}
                 href={item.href}
                 className={`flex flex-col items-center gap-1 ${
-                  currentPage === item.href ? "text-red-500" : "text-gray-600"
-                } hover:text-red-600`}
+                  currentPage === item.href 
+                    ? "text-yellow-300" 
+                    : "text-white/80"
+                } hover:text-yellow-200 transition-colors`}
               >
                 {item.icon}
                 <span className="text-xs">{item.label}</span>
@@ -131,9 +132,9 @@ export default function Header() {
             <div className="flex items-center gap-2">
               <Link
                 href={PROFILE_PAGE_PATH}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white/80 hover:bg-red-900/40 hover:text-white transition-colors"
               >
-                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-red-300 flex items-center justify-center bg-gray-100">
+                <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center bg-red-900/30">
                   {user?.profilePic ? (
                     <Image
                       src={user.profilePic}
@@ -142,7 +143,7 @@ export default function Header() {
                       className="object-cover"
                     />
                   ) : (
-                    <UserRound className="w-4 h-4 text-gray-500" />
+                    <UserRound className="w-4 h-4 text-white/60" />
                   )}
                 </div>
                 <span className="text-sm">{user?.username}</span>
@@ -150,7 +151,7 @@ export default function Header() {
 
               <button
                 onClick={() => setShowModal(true)}
-                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                className="p-2 text-white/80 hover:text-white hover:bg-red-900/40 rounded-lg transition-colors"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -160,7 +161,7 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-red-600"
+            className="md:hidden text-white/80 hover:text-white transition-colors"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -173,18 +174,18 @@ export default function Header() {
         {/* Mobile Search Bar */}
         <div className="md:hidden mt-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-5 h-5" />
             <input
               type="text"
               placeholder="Search"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 text-gray-600 rounded-full focus:outline-none focus:border-red-400"
+              className="w-full pl-10 pr-4 py-2 bg-red-900/30 border border-red-800/50 text-white placeholder:text-white/60 rounded-full focus:outline-none focus:border-white/50 focus:bg-red-900/40"
             />
           </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-red-900/30 pt-4">
             <div className="flex flex-col gap-3">
               {[
                 {
@@ -218,9 +219,9 @@ export default function Header() {
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
                     currentPage === item.href
-                      ? "bg-red-50 text-red-500"
-                      : "text-gray-600"
-                  } hover:bg-red-50 hover:text-red-600`}
+                      ? "bg-red-900/40 text-yellow-200"
+                      : "text-white/80"
+                  } hover:bg-red-900/40 hover:text-white transition-colors`}
                 >
                   {item.icon}
                   <span className="font-medium">{item.label}</span>
@@ -228,7 +229,7 @@ export default function Header() {
               ))}
               <button
                 onClick={() => setShowModal(true)}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-red-600`}
+                className="flex items-center gap-3 px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-red-900/40 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="font-medium">Logout</span>
