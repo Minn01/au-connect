@@ -56,7 +56,7 @@ export async function handleCreatePost(
   postContent: string,
   selectedVisibility: string,
   disableComments: boolean,
-  uploadedMedia: { url: string; type: string; name: string }[],
+  uploadedMedia: { blobName: string; type: string; name: string, mimetype: string; size: number }[],
   setIsOpen: (state: boolean) => void
 ) {
   try {

@@ -7,6 +7,7 @@ type PostType = {
   education?: string;
   avatar?: string;
   timestamp?: string;
+  image?: string;
 
   // ---------- real post fields ----------
   userId?: string;

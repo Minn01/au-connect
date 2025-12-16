@@ -18,7 +18,13 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "avatar.microsoft.com",
-      }
+      },
+      // blob storage allow
+      {
+        protocol: "https",
+        hostname: "aucstorage.blob.core.windows.net",
+        pathname: "/**",
+      },
     ],
   },
 };

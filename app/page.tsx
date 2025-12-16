@@ -81,7 +81,10 @@ export default function Home() {
   }, [user]);
 
   useEffect(() => {
-    console.log(postList);
+    console.log("POST LIST: ");
+    postList.map(item => {
+      console.log(item);
+    })
   }, [postList])  
 
   useEffect(() => {
@@ -95,7 +98,7 @@ export default function Home() {
         <LeftProfile user={user} loading={loading} />
 
         {/* MAIN FEED */}
-        {user && <MainFeed user={user} posts={mockPosts} loading={loading} />}
+        {user && <MainFeed user={user} posts={postList} loading={loading} />}
 
         {/* RIGHT EVENT SIDEBAR */}
         <RightEvents events={mockEvents} loading={loading} />

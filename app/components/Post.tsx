@@ -34,14 +34,14 @@ export default function Post({
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-start gap-3 mb-4">
         <Image
-          src={post.avatar}
+          src={post.profilePic ? post.profilePic : '/default-profile'}
           width={50}
           height={50}
-          alt={post.author}
+          alt={post.username ? post.username : "USER"}
           className="w-12 h-12 rounded-full"
         />
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900">{post.author}</h3>
+          <h3 className="font-semibold text-gray-900">{post.username}</h3>
           <p className="text-sm text-gray-500">{post.education}</p>
         </div>
       </div>
@@ -50,10 +50,19 @@ export default function Post({
         <h4 className="font-medium text-gray-900 mb-3">{post.title}</h4>
       )}
 
-      {post.image && (
-        <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden">
-          <Image
-            src={post.image}
+      {post.media && (
+        // <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden">
+        //   <Image
+        //     src={post.image}
+        //     width={100}
+        //     height={100}
+        //     alt={post.title || "Post image"}
+        //     className="w-full h-64 object-cover"
+        //   />
+        // </div>
+          <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden">
+          <img
+            src={post.media[0].url}
             width={100}
             height={100}
             alt={post.title || "Post image"}
@@ -75,7 +84,7 @@ export default function Post({
           <Send className="w-5 h-5" />
           <span>Send</span>
         </button>
-        <span className="text-sm text-gray-400">Posted {post.timestamp}</span>
+        <span className="text-sm text-gray-400">Posted {post.createdAt?.toString()}</span>
       </div>
     </div>
   );

@@ -75,14 +75,14 @@ export default function CreatePostModal({
       const uploadedMedia = await Promise.all(
         media.map(async (item) => {
           
-          const url = await uploadFile(item.file);
+          const blobName = await uploadFile(item.file);
 
-          if (!url) {
+          if (!blobName) {
             throw new Error("Upload failed: no URL returned");
           }
 
           return {
-            url,
+            blobName,
             type: item.type,
             name: item.file.name,
             mimetype: item.file.type,

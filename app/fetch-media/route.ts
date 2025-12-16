@@ -1,14 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+
 import {
   StorageSharedKeyCredential,
   generateBlobSASQueryParameters,
   BlobSASPermissions,
 } from "@azure/storage-blob";
-
+import {
+  AZURE_STORAGE_ACCOUNT_KEY,
+  AZURE_STORAGE_ACCOUNT_NAME,
+  AZURE_STORAGE_CONTAINER_NAME,
+} from "@/lib/env";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
-import { AZURE_STORAGE_ACCOUNT_KEY, AZURE_STORAGE_ACCOUNT_NAME, AZURE_STORAGE_CONTAINER_NAME } from "@/lib/env";
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const [userEmail, userId] = getHeaderUserInfo(req);
 
   if (!userEmail || !userId) {
@@ -18,12 +22,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const blobName = req.nextUrl.searchParams.get('blobName')
+
+  if (!blobName) {
+    return NextResponse.json(
+      { error: "Internal Server error; failed to receive blob/file name" },
+      { status: 400 }
+    );
+  }
+
   try {
     const accountName = AZURE_STORAGE_ACCOUNT_NAME;
     const accountKey = AZURE_STORAGE_ACCOUNT_KEY;
     const containerName = AZURE_STORAGE_CONTAINER_NAME;
-
-    const fileName = `${crypto.randomUUID()}.jpg`;
 
     const sharedKeyCredential = new StorageSharedKeyCredential(
       accountName,
@@ -33,16 +44,18 @@ export async function POST(req: NextRequest) {
     const sasToken = generateBlobSASQueryParameters(
       {
         containerName,
-        blobName: fileName,
-        permissions: BlobSASPermissions.parse("cw"), // create + write
+        blobName: blobName,
+        permissions: BlobSASPermissions.parse("r"), //  read
         expiresOn: new Date(Date.now() + 5 * 60 * 1000), // 5 min
       },
       sharedKeyCredential
     ).toString();
 
-    const uploadUrl = `https://${accountName}.blob.core.windows.net/${containerName}/${fileName}?${sasToken}`;
+    const signedurl=`https://${accountName}.blob.core.windows.net/${containerName}/${blobName}?${sasToken}`;
+    return NextResponse.json({
+        url: signedurl
+    })
 
-    return NextResponse.json({ uploadUrl: uploadUrl, blobName: fileName });
   } catch (err) {
     console.log(
       err instanceof Error

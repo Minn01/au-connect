@@ -3,7 +3,8 @@ import prisma from "./prisma";
 
 import { getHeaderUserInfo } from "./authFunctions";
 import { CreatePostSchema } from "@/zod/PostSchema";
-import { log } from "console";
+import { AZURE_STORAGE_ACCOUNT_KEY, AZURE_STORAGE_ACCOUNT_NAME, AZURE_STORAGE_CONTAINER_NAME } from "./env";
+import { BlobSASPermissions, generateBlobSASQueryParameters, StorageSharedKeyCredential } from "@azure/storage-blob";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -68,10 +69,20 @@ export async function createPost(req: NextRequest) {
   }
 }
 
+type PostMedia = {
+  blobName: string;
+  type: string;
+  name: string;
+  mimeType: string;
+  size: number;
+};
+
+type PostMediaWithUrl = PostMedia & {
+  url: string;
+};
+
 export async function getPosts(req: NextRequest) {
   try {
-    log("getpost function is being called");
-
     const [userEmail, userId] = getHeaderUserInfo(req);
 
     if (!userEmail || !userId) {
@@ -81,13 +92,9 @@ export async function getPosts(req: NextRequest) {
       );
     }
 
-    log("STEP 1");
-
     const cursor = req.nextUrl.searchParams.get("cursor");
-    log("cursor: " + cursor);
 
-    log("STEP 2");
-
+    // 1️⃣ Fetch posts
     const posts = await prisma.post.findMany({
       take: 10,
       ...(cursor && {
@@ -97,16 +104,53 @@ export async function getPosts(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    log("STEP 3");
+    // 2️⃣ Azure credential (reuse for all media)
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      AZURE_STORAGE_ACCOUNT_NAME,
+      AZURE_STORAGE_ACCOUNT_KEY
+    );
 
+    // 3️⃣ Attach signed URLs
+    const postsWithMedia = posts.map((post) => {
+      if (!post.media || !Array.isArray(post.media)) {
+        return post;
+      }
+
+      // 🔒 Cast JSON → typed array (safe if YOU control writes)
+      const media = post.media as PostMedia[];
+
+      const mediaWithUrls: PostMediaWithUrl[] = media.map((mediaItem) => {
+        const sasToken = generateBlobSASQueryParameters(
+          {
+            containerName: AZURE_STORAGE_CONTAINER_NAME,
+            blobName: mediaItem.blobName,
+            permissions: BlobSASPermissions.parse("r"),
+            expiresOn: new Date(Date.now() + 10 * 60 * 1000),
+          },
+          sharedKeyCredential
+        ).toString();
+
+        return {
+          ...mediaItem,
+          url: `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.blobName}?${sasToken}`,
+        };
+      });
+
+      return {
+        ...post,
+        media: mediaWithUrls,
+      };
+    });
+
+    // 4️⃣ Return render-ready posts
     return NextResponse.json({
-      posts,
+      posts: postsWithMedia,
       nextCursor: posts.length ? posts[posts.length - 1].id : null,
     });
   } catch (error) {
-    console.error("Error fetching post:", error);
+    console.error("Error fetching posts:", error);
     return NextResponse.json(
-      { error: "Internal server error; fetching post" },
+      { error: "Internal server error; fetching posts" },
       { status: 500 }
     );
   }

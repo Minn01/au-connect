@@ -15,7 +15,7 @@ import { MainFeedPropTypes } from "@/types/FeedPagePropTypes";
 export default function MainFeed({ user, posts, loading }: MainFeedPropTypes) {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState("media");
-  const [showSuccessModal, setShowSuccessModal] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const openModal = (postType: string) => {
     setSelectedPostType(postType);
