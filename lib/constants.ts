@@ -55,6 +55,9 @@ export const JWT_COOKIE_EXPIRATION_TIME = 7 * 24 * 60 * 60; // 7 days
 export const OAUTH_STATE_COOKIE_EXPIRATION_TIME = 600; // 10 minutes
 export const OAUTH_STATE_RANDOM_BYTES_LENGTH = 32
 
+// accessable image url duration for SAS token
+export const SAS_TOKEN_EXPIRE_DURATION = 10 * 60 * 1000 // 10 min
+
 // number of posts displayed before needing a refresh/another fetch
 export const POST_REFRESH_LIMIT = 10;
 

@@ -13,6 +13,7 @@ import {
   generateBlobSASQueryParameters,
   StorageSharedKeyCredential,
 } from "@azure/storage-blob";
+import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -67,7 +68,50 @@ export async function createPost(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(post, { status: 201 });
+    if (Array.isArray(post.media)) {
+      const sharedKeyCredential = new StorageSharedKeyCredential(
+        AZURE_STORAGE_ACCOUNT_NAME,
+        AZURE_STORAGE_ACCOUNT_KEY
+      );
+      const media = post.media as PostMedia[];
+
+      try {
+
+        const mediaWithUrls: PostMediaWithUrl[] = media.map((mediaItem) => {
+          const sasToken = generateBlobSASQueryParameters(
+            {
+              containerName: AZURE_STORAGE_CONTAINER_NAME,
+              blobName: mediaItem.blobName,
+              permissions: BlobSASPermissions.parse("r"),
+              expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+            },
+            sharedKeyCredential
+          ).toString();
+
+          return {
+            ...mediaItem,
+            url: `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.blobName}?${sasToken}`,
+          };
+        });
+
+        // assign the new post's media with the attached urls 
+        const createdPostWithUrlsAttached = {
+          ...post,
+          media: mediaWithUrls
+        }
+
+        return NextResponse.json(createdPostWithUrlsAttached, { status: 201 });
+      } catch (sasError) {
+        console.error("SAS TOKEN GENERATION ERROR:", sasError);
+        return NextResponse.json(
+          { error: "Failed to generate media access URLs" },
+          { status: 500 }
+        );
+      }
+
+    } else {
+      return NextResponse.json(post, { status: 201 });
+    }
   } catch (error) {
     console.error("Error creating post:", error);
     return NextResponse.json(
@@ -133,7 +177,7 @@ export async function getPosts(req: NextRequest) {
             containerName: AZURE_STORAGE_CONTAINER_NAME,
             blobName: mediaItem.blobName,
             permissions: BlobSASPermissions.parse("r"),
-            expiresOn: new Date(Date.now() + 10 * 60 * 1000),
+            expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
           },
           sharedKeyCredential
         ).toString();

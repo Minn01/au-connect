@@ -73,6 +73,7 @@ export default function CreatePostModal({
     try {
       const uploadedMedia = await Promise.all(
         media.map(async (item) => {
+          // uploading to azure
           const blobName = await uploadFile(item.file);
 
           if (!blobName) {
@@ -88,7 +89,9 @@ export default function CreatePostModal({
           };
         })
       );
+      console.log("azure upload completed...")
 
+      // creating post in database
       const createdPost = await handleCreatePost(
         postType,
         title,
@@ -99,18 +102,10 @@ export default function CreatePostModal({
         () => setIsOpen(false)
       );
 
-      const normalizedPost = {
-        ...createdPost,
-        profilePic: createdPost.profilePic || "/default_profile.jpg",
-        media: Array.isArray(createdPost.media)
-          ? createdPost.media.map((m: any) => ({
-              ...m,
-              url: null, // IMPORTANT
-            }))
-          : [],
-      };
-
-      onPostCreated(normalizedPost);
+      console.log("post upload to mongodb completed...")
+      console.log("prepearing to update postList for post : " + createdPost)
+      onPostCreated(createdPost);
+      console.log("create post modal; onPostCreated() has been called")
 
       enableSuccessModal();
     } finally {

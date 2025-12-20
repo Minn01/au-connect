@@ -11,6 +11,7 @@ import {
   AZURE_STORAGE_CONTAINER_NAME,
 } from "@/lib/env";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
+import { SAS_TOKEN_EXPIRE_DURATION } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   const [userEmail, userId] = getHeaderUserInfo(req);
@@ -46,7 +47,7 @@ export async function GET(req: NextRequest) {
         containerName,
         blobName: blobName,
         permissions: BlobSASPermissions.parse("r"), //  read
-        expiresOn: new Date(Date.now() + 5 * 60 * 1000), // 5 min
+        expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION), 
       },
       sharedKeyCredential
     ).toString();

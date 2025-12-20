@@ -5,7 +5,7 @@ import LeftProfile from "./components/Feed_LeftProfile";
 import MainFeed from "./components/Feed_MainFeed";
 import RightEvents from "./components/Feed_RightEvents";
 import User from "@/types/User";
-import { fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
+import { fetchMediaUrl, fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
 import PostType from "@/types/Post";
 
 const mockEvents = [
@@ -29,6 +29,10 @@ export default function Home() {
   const [postList, setPostList] = useState<PostType[] | []>([]);
   const [cursor, setCursor] = useState<string | null>(null);
 
+  const onNewPostCreated = (newPost: PostType) => {
+    setPostList(prev => [newPost, ...prev])
+  }
+
   useEffect(() => {
     fetchUser(
       (user: User | null) => setUser(user),
@@ -40,19 +44,12 @@ export default function Home() {
     if (!user) return;
 
     fetchPosts(cursor, setPostList, setCursor, setLoading);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
-    console.log("POST LIST: ");
-    postList.map(item => {
-      console.log(item);
-    })
-  }, [postList])  
-
-  useEffect(() => {
     console.log("Cursor" + cursor);
-  }, [cursor])  
+  }, [cursor])
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -61,7 +58,7 @@ export default function Home() {
         <LeftProfile user={user} loading={loading} />
 
         {/* MAIN FEED */}
-        {user && <MainFeed user={user} posts={postList} loading={loading} onPostCreated={(newPost) => { setPostList(prev => [newPost, ...prev])}}/>}
+        {user && <MainFeed user={user} posts={postList} loading={loading} onPostCreated={onNewPostCreated} />}
 
         {/* RIGHT EVENT SIDEBAR */}
         <RightEvents events={mockEvents} loading={loading} />

@@ -79,8 +79,8 @@ export async function handleCreatePost(
     }
 
     const createdPost = await res.json()
-    return createdPost
     setIsOpen(false);
+    return createdPost
   } catch (error) {
     console.error("Create post error:", error);
   }
@@ -116,4 +116,8 @@ export async function fetchPosts(
   } finally {
     setLoading(false);
   }
+}
+
+export async function fetchMediaUrl() {
+  
 }
