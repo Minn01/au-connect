@@ -335,7 +335,7 @@ export function createUserSession(
       value: token,
       httpOnly: true,
       secure: NODE_ENV === "production",
-      maxAge: JWT_COOKIE_EXPIRATION_TIME, // 7 days
+      maxAge: JWT_COOKIE_EXPIRATION_TIME, 
     });
   }
 

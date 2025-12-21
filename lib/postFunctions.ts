@@ -3,6 +3,17 @@ import prisma from "./prisma";
 
 import { getHeaderUserInfo } from "./authFunctions";
 import { CreatePostSchema } from "@/zod/PostSchema";
+import {
+  AZURE_STORAGE_ACCOUNT_KEY,
+  AZURE_STORAGE_ACCOUNT_NAME,
+  AZURE_STORAGE_CONTAINER_NAME,
+} from "./env";
+import {
+  BlobSASPermissions,
+  generateBlobSASQueryParameters,
+  StorageSharedKeyCredential,
+} from "@azure/storage-blob";
+import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -21,8 +32,12 @@ export async function createPost(req: NextRequest) {
     const parsed = CreatePostSchema.safeParse(body);
 
     if (!parsed.success) {
+      console.error("ZOD ERROR:", parsed.error.flatten());
       return NextResponse.json(
-        { error: parsed.error.message },
+        {
+          error: "Validation failed",
+          details: parsed.error.flatten(),
+        },
         { status: 400 }
       );
     }
@@ -48,14 +63,55 @@ export async function createPost(req: NextRequest) {
       data: {
         userId,
         username: user.username,
-        profilePic: user.profilePic ?? "",
+        profilePic: user.profilePic ?? null,
         ...data, // title, content, media
       },
     });
 
-    console.log("From the server: \n" + post);
+    if (Array.isArray(post.media)) {
+      const sharedKeyCredential = new StorageSharedKeyCredential(
+        AZURE_STORAGE_ACCOUNT_NAME,
+        AZURE_STORAGE_ACCOUNT_KEY
+      );
+      const media = post.media as PostMedia[];
 
-    return NextResponse.json(post, { status: 201 });
+      try {
+
+        const mediaWithUrls: PostMediaWithUrl[] = media.map((mediaItem) => {
+          const sasToken = generateBlobSASQueryParameters(
+            {
+              containerName: AZURE_STORAGE_CONTAINER_NAME,
+              blobName: mediaItem.blobName,
+              permissions: BlobSASPermissions.parse("r"),
+              expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+            },
+            sharedKeyCredential
+          ).toString();
+
+          return {
+            ...mediaItem,
+            url: `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.blobName}?${sasToken}`,
+          };
+        });
+
+        // assign the new post's media with the attached urls 
+        const createdPostWithUrlsAttached = {
+          ...post,
+          media: mediaWithUrls
+        }
+
+        return NextResponse.json(createdPostWithUrlsAttached, { status: 201 });
+      } catch (sasError) {
+        console.error("SAS TOKEN GENERATION ERROR:", sasError);
+        return NextResponse.json(
+          { error: "Failed to generate media access URLs" },
+          { status: 500 }
+        );
+      }
+
+    } else {
+      return NextResponse.json(post, { status: 201 });
+    }
   } catch (error) {
     console.error("Error creating post:", error);
     return NextResponse.json(
@@ -65,7 +121,19 @@ export async function createPost(req: NextRequest) {
   }
 }
 
-export async function getAllPosts(req: NextRequest) {
+type PostMedia = {
+  blobName: string;
+  type: string;
+  name: string;
+  mimeType: string;
+  size: number;
+};
+
+type PostMediaWithUrl = PostMedia & {
+  url: string;
+};
+
+export async function getPosts(req: NextRequest) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
 
@@ -75,10 +143,66 @@ export async function getAllPosts(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    const cursor = req.nextUrl.searchParams.get("cursor");
+
+    // 1️⃣ Fetch posts
+    const posts = await prisma.post.findMany({
+      take: 10,
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor },
+      }),
+      orderBy: { createdAt: "desc" },
+    });
+
+    // 2️⃣ Azure credential (reuse for all media)
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      AZURE_STORAGE_ACCOUNT_NAME,
+      AZURE_STORAGE_ACCOUNT_KEY
+    );
+
+    // 3️⃣ Attach signed URLs
+    const postsWithMedia = posts.map((post) => {
+      if (!post.media || !Array.isArray(post.media)) {
+        return post;
+      }
+
+      // 🔒 Cast JSON → typed array (safe if YOU control writes)
+      const media = post.media as PostMedia[];
+
+      const mediaWithUrls: PostMediaWithUrl[] = media.map((mediaItem) => {
+        const sasToken = generateBlobSASQueryParameters(
+          {
+            containerName: AZURE_STORAGE_CONTAINER_NAME,
+            blobName: mediaItem.blobName,
+            permissions: BlobSASPermissions.parse("r"),
+            expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+          },
+          sharedKeyCredential
+        ).toString();
+
+        return {
+          ...mediaItem,
+          url: `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.blobName}?${sasToken}`,
+        };
+      });
+
+      return {
+        ...post,
+        media: mediaWithUrls,
+      };
+    });
+
+    // 4️⃣ Return render-ready posts
+    return NextResponse.json({
+      posts: postsWithMedia,
+      nextCursor: posts.length ? posts[posts.length - 1].id : null,
+    });
   } catch (error) {
-    console.error("Error creating post:", error);
+    console.error("Error fetching posts:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error; fetching posts" },
       { status: 500 }
     );
   }

@@ -81,6 +81,8 @@ model Education {
 
 model Post {
   id            String     @id @map("_id") @default(auto()) @db.ObjectId
+  @@index([id])
+  
   user          User @relation(fields: [userId], references: [id])
   userId        String     @db.ObjectId
   username      String
@@ -91,7 +93,7 @@ model Post {
 
   title         String?
   content       String
-  media         Json?
+  media         Json? // [{ url, type, name, mimeType, size }]
 
   likeCount     Int        @default(0)
   commentCount  Int        @default(0)

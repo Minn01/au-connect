@@ -28,10 +28,10 @@ type User = {
   posts?: PostType[];
   connections?: number;
 
-  // name: string;
-  // avatar: string;
-  // followers: number
-  // following: number
+  name: string;
+  avatar: string;
+  followers: number
+  following: number
 };
 
 export default User;

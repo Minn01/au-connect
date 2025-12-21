@@ -1,14 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import {
+  ArrowBigLeft,
+  ArrowBigRight,
+  Image as ImageIcon,
+  Paperclip,
+  UserPlus,
+  Video,
+} from "lucide-react";
+
 import CreatePostModalPropTypes from "@/types/CreatePostModalPropTypes";
 import { handleCreatePost } from "../profile/utils/fetchfunctions";
+import { uploadFile } from "../profile/utils/uploadMedia";
+
+// TODO:put these in separate file
+type MediaType = "image" | "video" | "file";
+
+export type MediaItem = {
+  id: string;
+  file: File;
+  previewUrl: string | undefined;
+  type: MediaType;
+};
+
+const getMediaType = (file: File): MediaType => {
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("video/")) return "video";
+  return "file"; // pdf, docx, zip, etc
+};
 
 export default function CreatePostModal({
+  user,
   isOpen,
   setIsOpen,
-  initialType = "discussion",
+  initialType = "media",
+  enableSuccessModal,
+  onPostCreated,
 }: CreatePostModalPropTypes) {
   const [selectedVisibility, setSelectedVisibility] = useState("everyone");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -18,10 +47,71 @@ export default function CreatePostModal({
   const [title, setTitle] = useState("");
   const [disableComments, setDisableComments] = useState(false);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [currentImage, setCurrentImage] = useState(0);
+
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      media.forEach((m) =>
+        URL.revokeObjectURL(m.previewUrl ? m.previewUrl : "")
+      );
+    };
+  }, [media]);
+
   /** Update modal type whenever parent changes it */
   useEffect(() => {
     setPostType(initialType);
   }, [initialType]);
+
+  const handleSubmitPost = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const uploadedMedia = await Promise.all(
+        media.map(async (item) => {
+          // uploading to azure
+          const blobName = await uploadFile(item.file);
+
+          if (!blobName) {
+            throw new Error("Upload failed: no URL returned");
+          }
+
+          return {
+            blobName,
+            type: item.type,
+            name: item.file.name,
+            mimetype: item.file.type,
+            size: item.file.size,
+          };
+        })
+      );
+      console.log("azure upload completed...")
+
+      // creating post in database
+      const createdPost = await handleCreatePost(
+        postType,
+        title,
+        postContent,
+        selectedVisibility,
+        disableComments,
+        uploadedMedia,
+        () => setIsOpen(false)
+      );
+
+      console.log("post upload to mongodb completed...")
+      console.log("prepearing to update postList for post : " + createdPost)
+      onPostCreated(createdPost);
+      console.log("create post modal; onPostCreated() has been called")
+
+      enableSuccessModal();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const visibilityOptions = [
     {
@@ -78,7 +168,6 @@ export default function CreatePostModal({
   return (
     <main className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 animate-in fade-in duration-200">
       <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden transform animate-in zoom-in-95 duration-300">
-
         {/* Header */}
         <div className="flex items-start gap-4 px-6 pt-6 pb-4 border-b border-neutral-100">
           {/* Avatar */}
@@ -86,7 +175,7 @@ export default function CreatePostModal({
             <div className="h-14 w-14 rounded-2xl overflow-hidden p-0.5">
               <div className="h-full w-full rounded-2xl overflow-hidden bg-white relative">
                 <Image
-                  src="/au-connect-logo.png"
+                  src={user.profilePic || "/default_profile"}
                   alt="User"
                   fill
                   className="object-cover"
@@ -98,7 +187,7 @@ export default function CreatePostModal({
 
           <div className="flex-1">
             <div className="text-base font-bold text-neutral-900">
-              Thant Zin Min
+              {user.username}
             </div>
 
             {/* Visibility dropdown */}
@@ -159,8 +248,18 @@ export default function CreatePostModal({
             onClick={handleClose}
             className="ml-2 p-2 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -182,47 +281,149 @@ export default function CreatePostModal({
           <textarea
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
-            className="w-full h-44 text-gray-600 resize-none border-none outline-none text-base"
+            // className="w-full h-44 text-gray-600 resize-none border-none outline-none text-base"
+            className={`w-full ${
+              media.length == 0 ? "h-44" : "h-25"
+            } text-gray-600 resize-none border-none outline-none text-base`}
             placeholder="What's on your mind?"
           />
         </div>
 
+        {media.length > 0 && (
+          <div className="mb-10 px-5 relative w-full h-64 overflow-hidden">
+            {media[currentImage].type === "image" && (
+              <img
+                src={media[currentImage].previewUrl}
+                alt="preview"
+                className="h-full w-auto min-w-full object-cover mx-auto"
+              />
+            )}
+
+            {media[currentImage].type === "video" && (
+              <video
+                src={media[currentImage].previewUrl}
+                controls
+                className="h-full w-auto min-w-full object-cover mx-auto"
+              />
+            )}
+
+            {media[currentImage].type === "file" && (
+              <div className="flex items-center justify-center h-full bg-neutral-100 rounded-xl">
+                <div className="text-center">
+                  <Paperclip className="mx-auto h-8 w-8 mb-2" />
+                  <p className="text-sm font-semibold">
+                    {media[currentImage].file.name}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {(media[currentImage].file.size / 1024 / 1024).toFixed(2)}{" "}
+                    MB
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Prev */}
+            {currentImage > 0 && (
+              <button
+                onClick={() => setCurrentImage((i) => i - 1)}
+                className="absolute left-8 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+              >
+                <ArrowBigLeft />
+              </button>
+            )}
+
+            {/* Next */}
+            {currentImage < media.length - 1 && (
+              <button
+                onClick={() => setCurrentImage((i) => i + 1)}
+                className="absolute right-8 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+              >
+                <ArrowBigRight />
+              </button>
+            )}
+
+            {/* Remove */}
+            <button
+              onClick={() => {
+                const previewUrl = media[currentImage].previewUrl;
+                URL.revokeObjectURL(previewUrl ? previewUrl : "");
+                setMedia((prev) => prev.filter((_, i) => i !== currentImage));
+                setCurrentImage((i) => Math.max(0, i - 1));
+              }}
+              className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-lg text-sm"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+
         {/* Attachment row */}
         <div className="px-6 pb-4">
+          {/* hidden input element */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            hidden
+            multiple
+            accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.zip"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              if (!files.length) return;
+
+              const newItems: MediaItem[] = files.map((file) => {
+                const type = getMediaType(file);
+
+                return {
+                  id: crypto.randomUUID(),
+                  file,
+                  type,
+                  previewUrl:
+                    type === "image" || type === "video"
+                      ? URL.createObjectURL(file)
+                      : undefined,
+                };
+              });
+
+              setMedia((prev) => [...prev, ...newItems]);
+              e.target.value = "";
+            }}
+          />
+
           <div className="flex items-center gap-2 text-neutral-500 text-sm bg-neutral-50 rounded-2xl p-4 border border-neutral-200">
             <span className="text-xs font-semibold text-neutral-600 mr-2">
               Add to your post
             </span>
 
             {/* Keep your attachments */}
-            <button className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition">
-              <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                />
-              </svg>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition"
+            >
+              <ImageIcon className="h-5 w-5 text-green-600" />
             </button>
 
-            <button className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition">
-              <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-              </svg>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition"
+            >
+              <Video className="h-5 w-5 text-red-600" />
             </button>
 
-            <button className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition">
-              <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                />
-              </svg>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition"
+            >
+              <Paperclip className="h-5 w-5 text-blue-600" />
             </button>
 
-            <button className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition">
-              <svg className="h-5 w-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-              </svg>
+            {/* TODO:implement people tagging people */}
+            <button
+              onClick={() => {
+                console.log("Feature not yet implmented yet");
+              }}
+              className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition"
+            >
+              <UserPlus className="h-5 w-5 text-purple-600" />
             </button>
           </div>
         </div>
@@ -248,19 +449,15 @@ export default function CreatePostModal({
             </button>
 
             <button
-              onClick={() => {
-                handleCreatePost(postType, title, postContent, selectedVisibility, disableComments, 
-                  (state: boolean) => setIsOpen(state)
-                )
-              }}
-              disabled={!postContent.trim()}
+              onClick={() => handleSubmitPost()}
+              disabled={isSubmitting}
               className={`px-6 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition ${
-                postContent.trim()
-                  ? "bg-linear-to-r from-blue-600 via-purple-600 to-pink-600"
-                  : "bg-neutral-300 cursor-not-allowed"
+                isSubmitting
+                  ? "bg-neutral-300 cursor-not-allowed"
+                  : "bg-linear-to-r from-blue-600 via-purple-600 to-pink-600"
               }`}
             >
-              Post
+              {isSubmitting ? "Posting..." : "Post"}
             </button>
           </div>
         </div>

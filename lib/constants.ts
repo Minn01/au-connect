@@ -2,7 +2,6 @@
 * GLOBAL VARIABLES USED ACROSS THE APP
 * contains routes, paths and other constants 
 */
-import { buildSlug } from "@/app/profile/utils/buildSlug";
 export const BASE_API_PATH = '/api/connect/v1';
 
 export const MAIN_PAGE_PATH = '/';
@@ -26,6 +25,7 @@ export const MICROSOFT_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/azure-ad';
 // api routes 
 export const LOGOUT_API_PATH = BASE_API_PATH + '/auth/logout';
 export const ME_API_PATH = BASE_API_PATH + '/profile/me';
+
 export const POST_API_PATH = BASE_API_PATH + '/posts'
 // GET all my experiences
 export const GET_EXPERIENCE_API_PATH = ME_API_PATH + '/get/experienceFields';
@@ -52,7 +52,7 @@ export const UPDATE_EDUCATION_API_PATH = ME_API_PATH + '/update/educationFields'
 // DELETE specific education (/:edu_id)
 export const DELETE_EDUCATION_API_PATH = ME_API_PATH + '/delete/educationFields';
 
-
+export const MEDIA_UPLOAD_API_PATH = BASE_API_PATH + "/upload-media"
 
 // OAuth URLs
 
@@ -77,4 +77,10 @@ export const OAUTH_STATE_COOKIE = 'oauth_state_token';
 export const JWT_COOKIE_EXPIRATION_TIME = 7 * 24 * 60 * 60; // 7 days
 export const OAUTH_STATE_COOKIE_EXPIRATION_TIME = 600; // 10 minutes
 export const OAUTH_STATE_RANDOM_BYTES_LENGTH = 32
+
+// accessable image url duration for SAS token
+export const SAS_TOKEN_EXPIRE_DURATION = 10 * 60 * 1000 // 10 min
+
+// number of posts displayed before needing a refresh/another fetch
+export const POST_REFRESH_LIMIT = 10;
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { MAIN_PAGE_PATH } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, ChangeEvent } from "react";
 
@@ -33,9 +34,8 @@ export default function OnBoardingPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", form);
     alert("Form submitted!");
-    router.push("/");
+    router.push(MAIN_PAGE_PATH);
   };
 
   return (

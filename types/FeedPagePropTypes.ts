@@ -11,6 +11,7 @@ export type MainFeedPropTypes = {
   user: User 
   posts: Array<PostType>
   loading: boolean
+  onPostCreated: (post: PostType) => void
 };
 
 export type RightEventsProfileTypes = {
