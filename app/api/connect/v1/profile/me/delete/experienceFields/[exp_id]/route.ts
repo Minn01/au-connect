@@ -5,7 +5,7 @@ export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ exp_id: string }> }
 ) {
-  const { exp_id } = await context.params; // ✅ MUST await
+  const { exp_id } = await context.params; // MUST await
 
   if (!exp_id) {
     return new Response(

@@ -1,17 +1,39 @@
+"use client";
+
+import type Education from "@/types/Education";
+
+const MONTHS = [
+  "Jan","Feb","Mar","Apr","May","Jun",
+  "Jul","Aug","Sep","Oct","Nov","Dec",
+];
+
 export default function EducationItem({
   school,
   degree,
-  period,
-}: {
-  school: string;
-  degree: string;
-  period: string;
-}) {
+  fieldOfStudy,
+  startMonth,
+  startYear,
+  endMonth,
+  endYear,
+}: Education) {
+  const start = `${MONTHS[startMonth]} ${startYear}`;
+  const end = `${MONTHS[endMonth]} ${endYear} (expected)`;
+
   return (
-    <div className="mb-3">
-      <h3 className="font-semibold text-gray-900">{school}</h3>
-      <p className="text-gray-600 text-sm">{degree}</p>
-      <p className="text-gray-500 text-sm">{period}</p>
+    <div className="py-4 border-b border-gray-300 last:border-b-0">
+      <h3 className="font-semibold text-gray-900">
+        {school}
+      </h3>
+
+      {(degree || fieldOfStudy) && (
+        <p className="text-sm text-gray-800">
+          {[degree, fieldOfStudy].filter(Boolean).join(" · ")}
+        </p>
+      )}
+
+      <p className="text-sm text-gray-600">
+        {start} – {end}
+      </p>
     </div>
   );
 }

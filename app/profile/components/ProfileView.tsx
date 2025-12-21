@@ -11,10 +11,12 @@ import RecommendedList from "./RecommendedList";
 import RecommendedModal from "./RecommendedModal";
 import EditProfileModal from "./EditProfileModal";
 import ExperienceManagerModal from "./ExperienceManagerModal";
+import EducationManagerModal from "./EducationManagerModal"; 
 
 import Post from "@/app/components/Post";
 import User from "@/types/User";
 import Experience from "@/types/Experience";
+import Education from "@/types/Education"; 
 
 export default function ProfileView({
   user,
@@ -29,11 +31,17 @@ export default function ProfileView({
   const [openModal, setOpenModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openExperienceModal, setOpenExperienceModal] = useState(false);
+  const [openEducationModal, setOpenEducationModal] = useState(false); 
   const [loading, setLoading] = useState(true);
 
-  // ✅ FIX: experience must be client state
+  // EXISTING EXPERIENCE STATE (UNCHANGED)
   const [experience, setExperience] = useState<Experience[]>(
     user.experience ?? []
+  );
+
+  // ADD EDUCATION STATE (MIRROR EXPERIENCE)
+  const [education, setEducation] = useState<Education[]>(
+    user.education ?? []
   );
 
   useEffect(() => {
@@ -67,7 +75,7 @@ export default function ProfileView({
 
               <div className="relative p-4">
                 <div className="absolute top-4 right-4 flex items-center gap-3">
-                  {isOwner && (
+                  {isOwner ? (
                     <button
                       onClick={() => setOpenEditModal(true)}
                       className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 bg-white"
@@ -75,8 +83,15 @@ export default function ProfileView({
                       <Pencil size={16} />
                       Edit Profile
                     </button>
+                  ) : (
+                    <button
+                      className="flex items-center gap-2 px-4 py-2 border rounded-lg text-blue-600 border-blue-600 hover:bg-blue-50 bg-white"
+                    >
+                      Connect
+                    </button>
                   )}
                 </div>
+
 
                 <div className="relative -mt-16 w-32 h-32">
                   <Image
@@ -129,10 +144,28 @@ export default function ProfileView({
             </SectionCard>
 
             {/* EDUCATION */}
-            <SectionCard title="Education" icon={isOwner && <Pencil size={18} />}>
-              {user.education?.map((edu: any) => (
-                <EducationItem key={edu.id} {...edu} />
-              ))}
+            <SectionCard
+              title="Education"
+              icon={
+                isOwner && (
+                  <button
+                    onClick={() => setOpenEducationModal(true)}
+                    className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                )
+              }
+            >
+              {education.length > 0 ? (
+                education.map((edu) => (
+                  <EducationItem key={edu.id} {...edu} />
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">
+                  No education added yet.
+                </p>
+              )}
             </SectionCard>
 
             {/* ABOUT */}
@@ -153,11 +186,10 @@ export default function ProfileView({
                   <button
                     key={t}
                     onClick={() => setTab(t)}
-                    className={`pb-2 capitalize ${
-                      tab === t
+                    className={`pb-2 capitalize ${tab === t
                         ? "border-b-2 border-blue-600 text-blue-600"
                         : "text-gray-600"
-                    }`}
+                      }`}
                   >
                     {t}
                   </button>
@@ -211,12 +243,19 @@ export default function ProfileView({
         user={user}
       />
 
-      {/* ✅ KEY FIX: pass experience state */}
       <ExperienceManagerModal
         open={openExperienceModal}
         onClose={() => setOpenExperienceModal(false)}
         experiences={experience}
         setExperiences={setExperience}
+      />
+
+      {/* ADD EDUCATION MANAGER MODAL */}
+      <EducationManagerModal
+        open={openEducationModal}
+        onClose={() => setOpenEducationModal(false)}
+        education={education}
+        setEducation={setEducation}
       />
     </>
   );

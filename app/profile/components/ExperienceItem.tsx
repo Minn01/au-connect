@@ -14,7 +14,7 @@ export default function ExperienceItem(exp: Experience) {
     : `${MONTHS[exp.endMonth!]} ${exp.endYear}`;
 
   return (
-    <div className="mb-4">
+    <div className="py-4 border-b border-gray-300 last:border-b-0">
       <h3 className="font-semibold text-gray-900">
         {exp.title}
       </h3>

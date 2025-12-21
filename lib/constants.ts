@@ -40,6 +40,19 @@ export const UPDATE_EXPERIENCE_API_PATH = ME_API_PATH + '/update/experienceField
 // DELETE specific experience (/:exp_id)
 export const DELETE_EXPERIENCE_API_PATH = ME_API_PATH + '/delete/experienceFields';
 
+// GET all my education
+export const GET_EDUCATION_API_PATH = ME_API_PATH + '/get/educationFields';
+
+// ADD new education
+export const ADD_EDUCATION_API_PATH = ME_API_PATH + '/add/educationFields';
+
+// UPDATE specific education (/:edu_id)
+export const UPDATE_EDUCATION_API_PATH = ME_API_PATH + '/update/educationFields';
+
+// DELETE specific education (/:edu_id)
+export const DELETE_EDUCATION_API_PATH = ME_API_PATH + '/delete/educationFields';
+
+
 
 // OAuth URLs
 

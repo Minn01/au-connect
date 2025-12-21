@@ -31,7 +31,11 @@ export const safeUserSelect = {
       id: true,
       school: true,
       degree: true,
-      period: true,
+      fieldOfStudy: true,
+      startMonth: true,
+      startYear: true,
+      endMonth: true,
+      endYear: true,
     },
   },
 
