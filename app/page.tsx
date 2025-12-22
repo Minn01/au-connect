@@ -5,7 +5,7 @@ import LeftProfile from "./components/Feed_LeftProfile";
 import MainFeed from "./components/Feed_MainFeed";
 import RightEvents from "./components/Feed_RightEvents";
 import User from "@/types/User";
-import { fetchMediaUrl, fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
+import { fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
 import PostType from "@/types/Post";
 
 const mockEvents = [
@@ -30,8 +30,20 @@ export default function Home() {
   const [cursor, setCursor] = useState<string | null>(null);
 
   const onNewPostCreated = (newPost: PostType) => {
-    setPostList(prev => [newPost, ...prev])
-  }
+    setPostList((prev) => {
+      const exists = prev.some((p) => p.id === newPost.id);
+      if (exists) return prev;
+      return [newPost, ...prev];
+    });
+  };
+
+  useEffect(() => {
+    const ids = postList.map((p) => p.id);
+    const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
+    if (duplicates.length) {
+      console.warn("Duplicate post IDs:", duplicates);
+    }
+  }, [postList]);
 
   useEffect(() => {
     fetchUser(
@@ -49,7 +61,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log("Cursor" + cursor);
-  }, [cursor])
+  }, [cursor]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -58,7 +70,14 @@ export default function Home() {
         <LeftProfile user={user} loading={loading} />
 
         {/* MAIN FEED */}
-        {user && <MainFeed user={user} posts={postList} loading={loading} onPostCreated={onNewPostCreated} />}
+        {user && (
+          <MainFeed
+            user={user}
+            posts={postList}
+            loading={loading}
+            onPostCreated={onNewPostCreated}
+          />
+        )}
 
         {/* RIGHT EVENT SIDEBAR */}
         <RightEvents events={mockEvents} loading={loading} />

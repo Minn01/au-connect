@@ -17,7 +17,9 @@ function isValidSlugFormat(slug: string) {
   return /^[a-z0-9-]+-[a-fA-F0-9]{24}$/.test(slug);
 }
 
-export default async function ProfilePage(props: { params: Promise<{ slug: string }> }) {
+export default async function ProfilePage(props: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await props.params;
 
   if (!slug || !isValidSlugFormat(slug)) redirect("/404");
@@ -61,7 +63,7 @@ export default async function ProfilePage(props: { params: Promise<{ slug: strin
         ? user.profilePic
         : "/default_profile.jpg",
 
-   // createdAt: user.createdAt?.toISOString?.() ?? undefined,
+    // createdAt: user.createdAt?.toISOString?.() ?? undefined,
 
     phoneNo: user.phoneNo || "",
     phonePublic: user.phonePublic ?? false,
@@ -69,16 +71,17 @@ export default async function ProfilePage(props: { params: Promise<{ slug: strin
 
     connections: user.connections ?? 0,
 
-    experience: user.experience,
+    experience: user.experience.map((exp) => ({
+      ...exp,
+      endMonth: exp.endMonth ?? undefined,
+      endYear: exp.endYear ?? undefined,
+    })),
+
     education: user.education,
     posts: user.posts,
   };
 
   return (
-    <ProfileView
-      user={userData}
-      recommendedPeople={[]}
-      isOwner={isOwner}
-    />
+    <ProfileView user={userData} recommendedPeople={[]} isOwner={isOwner} />
   );
 }

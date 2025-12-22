@@ -1,6 +1,6 @@
 type PostType = {
   // ---------- core ----------
-  id: string | number; // mock uses number, DB uses string (ObjectId)
+  id: string; 
 
   // ---------- mock fields ----------
   author?: string;

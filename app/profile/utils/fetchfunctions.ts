@@ -56,7 +56,13 @@ export async function handleCreatePost(
   postContent: string,
   selectedVisibility: string,
   disableComments: boolean,
-  uploadedMedia: { blobName: string; type: string; name: string, mimetype: string; size: number }[],
+  uploadedMedia: {
+    blobName: string;
+    type: string;
+    name: string;
+    mimetype: string;
+    size: number;
+  }[],
   setIsOpen: (state: boolean) => void
 ) {
   try {
@@ -78,9 +84,9 @@ export async function handleCreatePost(
       throw new Error("Failed to create post");
     }
 
-    const createdPost = await res.json()
+    const createdPost = await res.json();
     setIsOpen(false);
-    return createdPost
+    return createdPost;
   } catch (error) {
     console.error("Create post error:", error);
   }
@@ -109,7 +115,21 @@ export async function fetchPosts(
 
     const { posts, nextCursor } = await res.json();
 
-    setPosts((prev) => [...prev, ...posts]);
+    setPosts((prev) => {
+      const map = new Map<string, PostType>();
+
+      // keep existing posts
+      for (const post of prev) {
+        if (post.id) map.set(post.id, post);
+      }
+
+      // add new posts (overwrites duplicates)
+      for (const post of posts) {
+        map.set(post.id, post);
+      }
+
+      return Array.from(map.values());
+    });
     setCursor(nextCursor);
   } catch (err) {
     console.error("Fetch posts error:", err);
@@ -118,6 +138,4 @@ export async function fetchPosts(
   }
 }
 
-export async function fetchMediaUrl() {
-  
-}
+export async function fetchMediaUrl() {}

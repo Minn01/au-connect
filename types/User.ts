@@ -5,12 +5,9 @@ import PostType from "./Post";
 
 type User = {
   id: string;
-
-  // required fields
-  username: string; 
+  username: string;
   slug: string;
 
-  // optional fields
   title?: string;
   about?: string;
   location?: string;
@@ -23,15 +20,11 @@ type User = {
   profilePic?: string;
   createdAt?: string;
 
+  connections?: number;
+
   experience?: Experience[];
   education?: Education[];
   posts?: PostType[];
-  connections?: number;
-
-  name: string;
-  avatar: string;
-  followers: number
-  following: number
 };
 
 export default User;
