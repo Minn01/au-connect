@@ -5,13 +5,10 @@ import { LeftProfilePropTypes } from "@/types/FeedPagePropTypes";
 
 import { buildSlug } from "@/app/profile/utils/buildSlug";
 
-
-
 const DEFAULT_AVATAR = "/default-avatar.png";
 
 export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
   const router = useRouter();
-
 
   // Safely handle navigation
   const handleProfileClick = () => {
@@ -42,23 +39,17 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
   const education = user?.education || "No education info";
   const location = user?.location || "Unknown location";
 
-
   return (
     <div className="lg:col-span-3 md:col-span-4 flex justify-center md:justify-start">
       <div className="bg-white md:rounded-lg border border-gray-200 overflow-hidden flex-1 sticky top-20 w-full md:w-auto md:max-w-xs self-start">
         <div className="hidden md:block h-24 bg-gray-200"></div>
 
         <div className="flex flex-row gap-6 md:gap-0 md:flex-col p-4 md:-mt-12">
-
           {/* Avatar */}
           <div
-
             onClick={handleProfileClick}
-
             className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 active:scale-95 hover:scale-105"
-
           >
-
             {user?.profilePic ? (
               <Image
                 src={user.profilePic}
@@ -78,7 +69,7 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
 
           {/* Info */}
           <div
-            onClick={()=> (handleProfileClick())}
+            onClick={() => handleProfileClick()}
             className="cursor-pointer transition-all duration-200"
           >
             <h2 className="font-bold text-gray-900 text-lg hover:text-red-500 transition-colors">

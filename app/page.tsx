@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
 
 import LeftProfile from "./components/Feed_LeftProfile";
 import MainFeed from "./components/Feed_MainFeed";
 import RightEvents from "./components/Feed_RightEvents";
-import User from "@/types/User";
 import { fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
 import PostType from "@/types/Post";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 const mockEvents = [
   {
@@ -24,63 +23,49 @@ const mockEvents = [
 ];
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [postList, setPostList] = useState<PostType[] | []>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  // USER
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+  });
 
-  const onNewPostCreated = (newPost: PostType) => {
-    setPostList((prev) => {
-      const exists = prev.some((p) => p.id === newPost.id);
-      if (exists) return prev;
-      return [newPost, ...prev];
-    });
-  };
+  // POSTS (infinite)
+  const {
+    data,
+    isLoading: postLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["posts"],
+    queryFn: fetchPosts,
+    enabled: !!user,
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
 
-  useEffect(() => {
-    const ids = postList.map((p) => p.id);
-    const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
-    if (duplicates.length) {
-      console.warn("Duplicate post IDs:", duplicates);
-    }
-  }, [postList]);
-
-  useEffect(() => {
-    fetchUser(
-      (user: User | null) => setUser(user),
-      (state: boolean) => setLoading(state)
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-
-    fetchPosts(cursor, setPostList, setCursor, setLoading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  useEffect(() => {
-    console.log("Cursor" + cursor);
-  }, [cursor]);
+  // FLATTEN POSTS
+  const posts: PostType[] = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      <div className="md:grid md:grid-cols-12 md:gap-6">
-        {/* LEFT PROFILE */}
-        <LeftProfile user={user} loading={loading} />
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="md:grid md:grid-cols-12 md:gap-6">
+          <LeftProfile user={user} loading={userLoading} />
 
-        {/* MAIN FEED */}
-        {user && (
-          <MainFeed
-            user={user}
-            posts={postList}
-            loading={loading}
-            onPostCreated={onNewPostCreated}
-          />
-        )}
+          {user && (
+            <MainFeed
+              user={user}
+              posts={posts}
+              loading={postLoading}
+              fetchNextPage={fetchNextPage}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+            />
+          )}
 
-        {/* RIGHT EVENT SIDEBAR */}
-        <RightEvents events={mockEvents} loading={loading} />
+          <RightEvents events={mockEvents} loading={false} />
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-import PostType from "./Post";
 import User from "./User";
 
 type CreatePostModalPropTypes = {
@@ -7,7 +6,6 @@ type CreatePostModalPropTypes = {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   initialType?: string;
   enableSuccessModal: () => void;
-  onPostCreated: (post: PostType) => void;
 };
 
 export default CreatePostModalPropTypes;

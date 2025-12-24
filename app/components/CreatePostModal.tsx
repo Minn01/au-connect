@@ -15,6 +15,7 @@ import CreatePostModalPropTypes from "@/types/CreatePostModalPropTypes";
 import { handleCreatePost } from "../profile/utils/fetchfunctions";
 import { uploadFile } from "../profile/utils/uploadMedia";
 import { MediaType, MediaItem } from "@/types/Media"
+import { useQueryClient } from "@tanstack/react-query";
 
 
 const getMediaType = (file: File): MediaType => {
@@ -29,7 +30,6 @@ export default function CreatePostModal({
   setIsOpen,
   initialType = "media",
   enableSuccessModal,
-  onPostCreated,
 }: CreatePostModalPropTypes) {
   const [selectedVisibility, setSelectedVisibility] = useState("everyone");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -44,6 +44,8 @@ export default function CreatePostModal({
 
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     return () => {
@@ -84,7 +86,7 @@ export default function CreatePostModal({
       console.log("azure upload completed...")
 
       // creating post in database
-      const createdPost = await handleCreatePost(
+      await handleCreatePost(
         postType,
         title,
         postContent,
@@ -94,10 +96,8 @@ export default function CreatePostModal({
         () => setIsOpen(false)
       );
 
-      console.log("post upload to mongodb completed...")
-      console.log("prepearing to update postList for post : " + createdPost)
-      onPostCreated(createdPost);
-      console.log("create post modal; onPostCreated() has been called")
+      // update the current post list
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
 
       enableSuccessModal();
     } finally {

@@ -42,7 +42,7 @@ export default function Post({
   return (
     <div className="bg-white border border-gray-200 rounded-lg">
       <div className="flex items-start gap-3 my-4 mx-5">
-        <Image
+        <img
           src={post.profilePic ? post.profilePic : "/default-profile"}
           width={50}
           height={50}

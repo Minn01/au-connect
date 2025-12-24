@@ -14,7 +14,8 @@ import {
   UserRound,
   LogOut,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 
 import {
@@ -27,16 +28,19 @@ import {
   PROFILE_PAGE_PATH,
 } from "@/lib/constants";
 import { fetchUser, handleLogout } from "../profile/utils/fetchfunctions";
-import User from "@/types/User";
 import LogoutModal from "./LogoutModal";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
-  const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const pathName = usePathname();
   const router = useRouter();
+
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser   
+  })
 
   const navBarIndicatedPages = [
     MAIN_PAGE_PATH,
@@ -57,15 +61,6 @@ export default function Header() {
     if (!user?.slug) return; // prevent runtime crash
     router.push(`/profile/${user.slug}`);
   };
-
-  useEffect(() => {
-    if (!hidden) {
-      fetchUser(
-        (u: User | null) => setUser(u),
-        () => {}
-      );
-    }
-  }, [hidden]);
 
   return hidden ? null : (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">

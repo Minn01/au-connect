@@ -8,11 +8,15 @@ export type LeftProfilePropTypes = {
 };
 
 export type MainFeedPropTypes = {
-  user: User 
-  posts: Array<PostType>
-  loading: boolean
-  onPostCreated: (post: PostType) => void
+  user: User;
+  posts: PostType[];
+  loading: boolean;
+
+  fetchNextPage: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
 };
+
 
 export type RightEventsProfileTypes = {
   events: Array<AC_Event>

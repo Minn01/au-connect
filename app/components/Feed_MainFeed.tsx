@@ -1,21 +1,45 @@
 "use client";
 
-import {
-  BookOpen,
-  Image as ImageIcon,
-  MessageSquare,
-} from "lucide-react";
-import { useState } from "react";
+import { BookOpen, Image as ImageIcon, MessageSquare } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import Post from "./Post";
 import CreatePostModal from "./CreatePostModal";
 import { MainFeedPropTypes } from "@/types/FeedPagePropTypes";
 
-export default function MainFeed({ user, posts, loading, onPostCreated }: MainFeedPropTypes) {
+export default function MainFeed({
+  user,
+  posts,
+  loading,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+}: MainFeedPropTypes) {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState("media");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // the load more content logic
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" } // prefetch early
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const openModal = (postType: string) => {
     setSelectedPostType(postType);
@@ -80,7 +104,6 @@ export default function MainFeed({ user, posts, loading, onPostCreated }: MainFe
           setIsOpen={setIsCreatePostModalOpen}
           initialType={selectedPostType}
           enableSuccessModal={enableSuccessModal}
-          onPostCreated={onPostCreated}
         />
       )}
 
@@ -96,14 +119,23 @@ export default function MainFeed({ user, posts, loading, onPostCreated }: MainFe
         )
       )}
 
+      <div ref={loadMoreRef} />
+
+      {isFetchingNextPage && (
+        <div className="text-center text-sm text-gray-500 py-4">
+          Loading more posts...
+        </div>
+      )}
+
       {/* Show SuccessModal */}
       <div
         className={`fixed top-25 right-1/2 left-1/2 z-50 w-67 flex justify-center transition-all duration-300 
       ${
-      showSuccessModal
-        ? "opacity-100 translate-y-0"
-        : "opacity-0 translate-y-4 pointer-events-none"
-      }`}>
+        showSuccessModal
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
+      >
         <div className="rounded-xl bg-green-500 text-white px-5 py-3 shadow-lg shadow-green-200">
           Post created successfully 🎉
         </div>
