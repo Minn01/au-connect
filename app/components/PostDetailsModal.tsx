@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import CommentItem from "./CommentItem";
+import CommentItem, { CommentType } from "./CommentItem";
 
 // TODO:move-to-type
 type PostDetailsModalTypes = {
