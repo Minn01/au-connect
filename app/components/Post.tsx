@@ -1,11 +1,13 @@
 import { ThumbsUp, MessageCircle, Send } from "lucide-react";
+import { useState } from "react";
+import Image from "next/image";
 
 import PostType from "@/types/Post";
 import PostMediaGrid from "./PostMediaGrid";
 import parseDate from "../profile/utils/parseDate";
 import PostAttachments from "./PostAttachments";
 import PostText from "./PostText";
-import Image from "next/image";
+import PostDetailsModal from "./PostDetailsModal";
 
 export default function Post({
   post,
@@ -14,6 +16,8 @@ export default function Post({
   post?: PostType;
   isLoading: boolean;
 }) {
+  const [postModalOpen, setPostModelOpen] = useState(false);
+
   // Skeleton UI
   if (isLoading) {
     return (
@@ -88,7 +92,18 @@ export default function Post({
       {post.content && <PostText text={post.content} />}
 
       {containsVideosOrImages && (
-        <PostMediaGrid media={videosAndImages} isLoading={isLoading} />
+        <PostMediaGrid
+          postInfo={{
+            id: post.id,
+            username: post.username,
+            profilePic: post.profilePic,
+            createdAt: post.createdAt,
+          }}
+          media={videosAndImages}
+          title={post.title ? post.title : null}
+          content={post.content}
+          isLoading={isLoading}
+        />
       )}
 
       {attachments && attachments.length > 0 && (
@@ -98,28 +113,57 @@ export default function Post({
         />
       )}
 
-      {/* likes and share counts */}
+      {/* likes, comments and share counts */}
       <div className="px-4 py-2">
         <div className="flex flex-row justify-end">
-          <span className="text-gray-500 mr-3">1000 likes</span>
-          <span className="text-gray-500">123 shares</span>
+          <span className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2">
+            {1000} likes
+          </span>
+          <span
+            onClick={() => setPostModelOpen(true)}
+            className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2"
+          >
+            {post.numOfComments && post.numOfComments > 0 ? `${post.numOfComments} comments` : "0 comments"}
+          </span>
+          <span className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2">
+            {123} shares
+          </span>
         </div>
       </div>
 
       <div className="flex items-center justify-evenly py-4 border-t border-gray-200">
-        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
+        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600 cursor-pointer">
           <ThumbsUp className="w-5 h-5" />
           <span>Like</span>
         </button>
-        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
+        <button
+          onClick={() => setPostModelOpen(true)}
+          className="flex items-center gap-2 text-gray-600 hover:text-red-600 cursor-pointer"
+        >
           <MessageCircle className="w-5 h-5" />
           <span>Comment</span>
         </button>
-        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600">
+        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600 cursor-pointer">
           <Send className="w-5 h-5" />
           <span>Share</span>
         </button>
       </div>
+
+      {postModalOpen && (
+        <PostDetailsModal
+          postInfo={{
+            id: post.id,
+            username: post.username,
+            profilePic: post.profilePic,
+            createdAt: post.createdAt,
+          }}
+          media={post.media}
+          title={post.title}
+          content={post.content}
+          clickedIndex={0}
+          onClose={() => setPostModelOpen(false)}
+        />
+      )}
     </div>
   );
 }

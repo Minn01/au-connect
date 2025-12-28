@@ -31,6 +31,7 @@ type PostType = {
 
   likeCount?: number;
   commentCount?: number;
+  numOfComments?: number;
 
   createdAt?: string | Date;
   updatedAt?: string | Date;

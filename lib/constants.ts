@@ -26,6 +26,13 @@ export const MICROSOFT_AUTH_DIRECT_PATH = BASE_API_PATH + '/auth/azure-ad';
 export const LOGOUT_API_PATH = BASE_API_PATH + '/auth/logout';
 export const ME_API_PATH = BASE_API_PATH + '/profile/me';
 
+// POST create comments/replies
+export const COMMENT_API_PATH = (postId: string) => 
+  BASE_API_PATH + `/posts/${postId}/comments`;
+
+export const REPLIES_API_PATH = (postId: string, commentId: string) =>
+  BASE_API_PATH + `/posts/${postId}/comments/${commentId}/replies`;
+
 export const POST_API_PATH = BASE_API_PATH + '/posts'
 // GET all my experiences
 export const GET_EXPERIENCE_API_PATH = ME_API_PATH + '/get/experienceFields';
@@ -83,4 +90,7 @@ export const SAS_TOKEN_EXPIRE_DURATION = 10 * 60 * 1000 // 10 min
 
 // number of posts displayed before needing a refresh/another fetch
 export const POST_REFRESH_LIMIT = 10;
+export const POSTS_PER_FETCH = 10;
+export const TOP_LEVEL_COMMENTS_FETCH_LIMIT = 15;
+export const REPLIES_PER_FETCH = 5;
 

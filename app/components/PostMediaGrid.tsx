@@ -3,11 +3,22 @@ import { useState } from "react";
 import PostDetailsModal from "./PostDetailsModal";
 
 export default function PostMediaGrid({
+  postInfo,
   media,
+  title,
+  content,
   maxVisible = 4,
   isLoading,
 }: {
+  postInfo: {
+    id: string;
+    username: string | undefined;
+    profilePic: string | undefined | null;
+    createdAt: string | Date | undefined;
+  };
   media: { url: string; type: string }[];
+  title: string | null;
+  content: string | undefined;
   maxVisible?: number;
   isLoading: boolean;
 }) {
@@ -17,7 +28,7 @@ export default function PostMediaGrid({
   const openPost = (index: number) => {
     setCurrentMediaIndex(index);
     setPostModalOpen(true);
-  }
+  };
 
   if (!media || media.length === 0) return null;
 
@@ -95,8 +106,15 @@ export default function PostMediaGrid({
         );
       })}
 
-      { postModalOpen && (
-        <PostDetailsModal media={media} clickedIndex={currentMediaIndex} onClose={() => setPostModalOpen(false)} />
+      {postModalOpen && (
+        <PostDetailsModal
+          postInfo={postInfo}
+          media={media}
+          title={title}
+          content={content}
+          clickedIndex={currentMediaIndex}
+          onClose={() => setPostModalOpen(false)}
+        />
       )}
     </div>
   );

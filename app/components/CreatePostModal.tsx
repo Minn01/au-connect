@@ -284,6 +284,7 @@ export default function CreatePostModal({
         {media.length > 0 && (
           <div className="mb-10 px-5 relative w-full h-64 overflow-hidden">
             {media[currentImage].type === "image" && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={media[currentImage].previewUrl}
                 alt="preview"

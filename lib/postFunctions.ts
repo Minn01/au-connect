@@ -1,5 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "./prisma";
+import {
+  BlobSASPermissions,
+  generateBlobSASQueryParameters,
+  StorageSharedKeyCredential,
+} from "@azure/storage-blob";
 
 import { getHeaderUserInfo } from "./authFunctions";
 import { CreatePostSchema } from "@/zod/PostSchema";
@@ -8,12 +13,7 @@ import {
   AZURE_STORAGE_ACCOUNT_NAME,
   AZURE_STORAGE_CONTAINER_NAME,
 } from "./env";
-import {
-  BlobSASPermissions,
-  generateBlobSASQueryParameters,
-  StorageSharedKeyCredential,
-} from "@azure/storage-blob";
-import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
+import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -121,6 +121,7 @@ export async function createPost(req: NextRequest) {
   }
 }
 
+// TODO:move-to-type
 type PostMedia = {
   blobName: string;
   type: string;
@@ -129,6 +130,7 @@ type PostMedia = {
   size: number;
 };
 
+// TODO:move-to-type
 type PostMediaWithUrl = PostMedia & {
   url: string;
 };
@@ -146,24 +148,37 @@ export async function getPosts(req: NextRequest) {
 
     const cursor = req.nextUrl.searchParams.get("cursor");
 
-    // 1️⃣ Fetch posts
+    // Fetch posts
     const posts = await prisma.post.findMany({
-      take: 10,
+      take: POSTS_PER_FETCH,
       ...(cursor && {
         skip: 1,
         cursor: { id: cursor },
       }),
       orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: {
+            comments: true,
+          }
+        }
+      }
     });
 
-    // 2️⃣ Azure credential (reuse for all media)
+    // adding comments count from _count
+    const postWithCommentCount = posts.map((post) => ({
+      ...post,
+      numOfComments: post._count.comments,
+    }));
+
+    // Azure credential (reuse for all media)
     const sharedKeyCredential = new StorageSharedKeyCredential(
       AZURE_STORAGE_ACCOUNT_NAME,
       AZURE_STORAGE_ACCOUNT_KEY
     );
 
-    // 3️⃣ Attach signed URLs
-    const postsWithMedia = posts.map((post) => {
+    // Attach signed URLs
+    const postsWithMedia = postWithCommentCount.map((post) => {
       if (!post.media || !Array.isArray(post.media)) {
         return post;
       }
@@ -194,7 +209,7 @@ export async function getPosts(req: NextRequest) {
       };
     });
 
-    // 4️⃣ Return render-ready posts
+    // Return render-ready posts
     return NextResponse.json({
       posts: postsWithMedia,
       nextCursor: posts.length ? posts[posts.length - 1].id : null,

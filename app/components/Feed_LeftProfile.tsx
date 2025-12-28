@@ -3,7 +3,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LeftProfilePropTypes } from "@/types/FeedPagePropTypes";
 
-import { buildSlug } from "@/app/profile/utils/buildSlug";
 
 const DEFAULT_AVATAR = "/default-avatar.png";
 
@@ -33,10 +32,8 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
     );
   }
 
-  const slug = user?.slug ?? buildSlug(user?.username || "", user?.id || "");
   const name = user?.username || "Unknown User";
   const title = user?.title || "No title provided";
-  const education = user?.education || "No education info";
   const location = user?.location || "Unknown location";
 
   return (
