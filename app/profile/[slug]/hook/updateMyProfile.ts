@@ -4,7 +4,6 @@ import type User from "@/types/User";
 export interface UpdateProfilePayload {
   username: string;
   title?: string;
-  about?: string;
   location?: string;
   phoneNo?: string;
   phonePublic?: boolean;

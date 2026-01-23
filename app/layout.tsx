@@ -32,7 +32,7 @@ export default function RootLayout({
         <Provider>
           <div className="flex flex-col h-screen">
             <Header />
-            <main className="flex-1 overflow-hidden">{children}</main>
+            <main className="flex-1 overflow-y-auto">{children}</main>
           </div>
         </Provider>
       </body>

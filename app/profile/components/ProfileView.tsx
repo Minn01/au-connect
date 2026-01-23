@@ -1,3 +1,4 @@
+// ProfileView.tsx
 "use client";
 
 import Image from "next/image";
@@ -11,12 +12,13 @@ import RecommendedList from "./RecommendedList";
 import RecommendedModal from "./RecommendedModal";
 import EditProfileModal from "./EditProfileModal";
 import ExperienceManagerModal from "./ExperienceManagerModal";
-import EducationManagerModal from "./EducationManagerModal"; 
+import EducationManagerModal from "./EducationManagerModal";
+import EditAboutModal from "./EditAboutModal"; // ✅ ADD THIS
 
 import Post from "@/app/components/Post";
 import User from "@/types/User";
 import Experience from "@/types/Experience";
-import Education from "@/types/Education"; 
+import Education from "@/types/Education";
 
 export default function ProfileView({
   user,
@@ -31,18 +33,13 @@ export default function ProfileView({
   const [openModal, setOpenModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openExperienceModal, setOpenExperienceModal] = useState(false);
-  const [openEducationModal, setOpenEducationModal] = useState(false); 
+  const [openEducationModal, setOpenEducationModal] = useState(false);
+  const [openAboutModal, setOpenAboutModal] = useState(false); // ✅ ADD
   const [loading, setLoading] = useState(true);
 
-  // EXISTING EXPERIENCE STATE (UNCHANGED)
-  const [experience, setExperience] = useState<Experience[]>(
-    user.experience ?? []
-  );
-
-  // ADD EDUCATION STATE (MIRROR EXPERIENCE)
-  const [education, setEducation] = useState<Education[]>(
-    user.education ?? []
-  );
+  const [experience, setExperience] = useState<Experience[]>(user.experience ?? []);
+  const [education, setEducation] = useState<Education[]>(user.education ?? []);
+  const [about, setAbout] = useState(user.about ?? ""); // ✅ ADD (UI updates after save)
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -51,12 +48,9 @@ export default function ProfileView({
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 overflow-y-auto">
         <div className="grid grid-cols-12 gap-6">
-
-          {/* LEFT MAIN CONTENT */}
           <div className="col-span-12 lg:col-span-8 space-y-4">
-
             {/* PROFILE HEADER */}
             <div className="bg-white rounded-lg border overflow-hidden">
               <div className="relative h-56 w-full bg-gray-200">
@@ -84,14 +78,11 @@ export default function ProfileView({
                       Edit Profile
                     </button>
                   ) : (
-                    <button
-                      className="flex items-center gap-2 px-4 py-2 border rounded-lg text-blue-600 border-blue-600 hover:bg-blue-50 bg-white"
-                    >
+                    <button className="flex items-center gap-2 px-4 py-2 border rounded-lg text-blue-600 border-blue-600 hover:bg-blue-50 bg-white">
                       Connect
                     </button>
                   )}
                 </div>
-
 
                 <div className="relative -mt-16 w-32 h-32">
                   <Image
@@ -102,19 +93,10 @@ export default function ProfileView({
                   />
                 </div>
 
-                <h1 className="text-2xl font-bold text-gray-900 mt-2">
-                  {user.username}
-                </h1>
-
+                <h1 className="text-2xl font-bold text-gray-900 mt-2">{user.username}</h1>
                 <p className="text-gray-700">{user.title}</p>
-
-                <p className="text-sm text-gray-600 mt-1">
-                  {user.location}
-                </p>
-
-                <p className="text-sm text-gray-600">
-                  {user.connections} connections
-                </p>
+                <p className="text-sm text-gray-600 mt-1">{user.location}</p>
+                <p className="text-sm text-gray-600">{user.connections} connections</p>
               </div>
             </div>
 
@@ -133,13 +115,9 @@ export default function ProfileView({
               }
             >
               {experience.length > 0 ? (
-                experience.map((exp) => (
-                  <ExperienceItem key={exp.id} {...exp} />
-                ))
+                experience.map((exp) => <ExperienceItem key={exp.id} {...exp} />)
               ) : (
-                <p className="text-sm text-gray-500">
-                  No experience added yet.
-                </p>
+                <p className="text-sm text-gray-500">No experience added yet.</p>
               )}
             </SectionCard>
 
@@ -158,28 +136,35 @@ export default function ProfileView({
               }
             >
               {education.length > 0 ? (
-                education.map((edu) => (
-                  <EducationItem key={edu.id} {...edu} />
-                ))
+                education.map((edu) => <EducationItem key={edu.id} {...edu} />)
               ) : (
-                <p className="text-sm text-gray-500">
-                  No education added yet.
-                </p>
+                <p className="text-sm text-gray-500">No education added yet.</p>
               )}
             </SectionCard>
 
-            {/* ABOUT */}
-            <SectionCard title="About" icon={isOwner && <Pencil size={18} />}>
-              <p className="text-sm text-gray-700">
-                {user.about || "This user has not added an about section yet."}
+            {/* ABOUT ✅ NOW EDITABLE LIKE LINKEDIN */}
+            <SectionCard
+              title="About"
+              icon={
+                isOwner && (
+                  <button
+                    onClick={() => setOpenAboutModal(true)}
+                    className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                )
+              }
+            >
+              <p className="text-sm text-gray-700 whitespace-pre-line">
+                {about || "This user has not added an about section yet."}
               </p>
+
             </SectionCard>
 
             {/* ACTIVITY */}
             <SectionCard title="Activity">
-              <p className="text-sm text-gray-600 mb-3">
-                {user.connections} connections
-              </p>
+              <p className="text-sm text-gray-600 mb-3">{user.connections} connections</p>
 
               <div className="flex gap-4 border-b pb-2">
                 {["posts", "videos", "images", "documents"].map((t) => (
@@ -198,13 +183,9 @@ export default function ProfileView({
 
               <div className="mt-4 space-y-4">
                 {tab === "posts" ? (
-                  user.posts?.map((p: any) => (
-                    <Post key={p.id} post={p} isLoading={loading} />
-                  ))
+                  user.posts?.map((p: any) => <Post key={p.id} post={p} isLoading={loading} />)
                 ) : (
-                  <div className="text-center text-gray-600 py-10">
-                    No {tab} yet
-                  </div>
+                  <div className="text-center text-gray-600 py-10">No {tab} yet</div>
                 )}
               </div>
             </SectionCard>
@@ -213,16 +194,9 @@ export default function ProfileView({
           {/* RIGHT SIDEBAR */}
           <div className="hidden lg:block col-span-4 space-y-4 sticky top-20">
             <div className="bg-white rounded-lg border p-4">
-              <h2 className="font-semibold text-gray-900 mb-3">
-                People you may be interested in
-              </h2>
-
+              <h2 className="font-semibold text-gray-900 mb-3">People you may be interested in</h2>
               <RecommendedList users={recommendedPeople} limit={4} />
-
-              <button
-                onClick={() => setOpenModal(true)}
-                className="mt-4 text-sm text-blue-600 font-semibold"
-              >
+              <button onClick={() => setOpenModal(true)} className="mt-4 text-sm text-blue-600 font-semibold">
                 Show more
               </button>
             </div>
@@ -231,17 +205,9 @@ export default function ProfileView({
       </div>
 
       {/* MODALS */}
-      <RecommendedModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        users={recommendedPeople}
-      />
+      <RecommendedModal open={openModal} onClose={() => setOpenModal(false)} users={recommendedPeople} />
 
-      <EditProfileModal
-        open={openEditModal}
-        onClose={() => setOpenEditModal(false)}
-        user={user}
-      />
+      <EditProfileModal open={openEditModal} onClose={() => setOpenEditModal(false)} user={user} />
 
       <ExperienceManagerModal
         open={openExperienceModal}
@@ -250,12 +216,19 @@ export default function ProfileView({
         setExperiences={setExperience}
       />
 
-      {/* ADD EDUCATION MANAGER MODAL */}
       <EducationManagerModal
         open={openEducationModal}
         onClose={() => setOpenEducationModal(false)}
         education={education}
         setEducation={setEducation}
+      />
+
+      {/* ✅ NEW ABOUT MODAL */}
+      <EditAboutModal
+        open={openAboutModal}
+        onClose={() => setOpenAboutModal(false)}
+        initialAbout={about}
+        onSaved={(newAbout) => setAbout(newAbout)}
       />
     </>
   );

@@ -40,15 +40,17 @@ export const safeUserSelect = {
   },
 
   posts: {
-    select: {
-      id: true,
-      content: true,
-      title: true,
-      postType: true,
-      visibility: true,
-      profilePic: true,
-      username: true,
-      createdAt: true,
-    },
+  select: {
+    id: true,
+    content: true,
+    title: true,
+    postType: true,
+    visibility: true,
+    profilePic: true,
+    username: true,
+    createdAt: true,
+    media: true,
   },
+},
+
 };

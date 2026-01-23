@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
+import { safeUserSelect } from "@/lib/safeUserCall";
 
 /* =========================
    VALIDATION
@@ -55,20 +56,7 @@ export async function updateGeneralFields(req: NextRequest) {
         phonePublic: body.phonePublic,
         emailPublic: body.emailPublic,
       },
-      select: {
-        id: true,
-        username: true,
-        title: true,
-        about: true,
-        location: true,
-        phoneNo: true,
-        phonePublic: true,
-        emailPublic: true,
-        profilePic: true,
-        coverPhoto: true,
-        connections: true,
-        createdAt: true,
-      },
+      select: safeUserSelect,
     });
 
     return NextResponse.json(

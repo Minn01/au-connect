@@ -16,7 +16,7 @@ export default function EditProfileModal({ open, onClose, user }: EditProfileMod
         originalUsername: user.username || "",
         newUsername: user.username || "",
         title: user.title || "",
-        about: user.about || "",
+        //about: user.about || "",
         location: user.location || "",
         phoneNo: user.phoneNo || "",
         phonePublic: user.phonePublic ?? false,
@@ -33,7 +33,7 @@ export default function EditProfileModal({ open, onClose, user }: EditProfileMod
                 originalUsername: user.username || "",
                 newUsername: user.username || "",
                 title: user.title || "",
-                about: user.about || "",
+                //about: user.about || "",
                 location: user.location || "",
                 phoneNo: user.phoneNo || "",
                 phonePublic: user.phonePublic ?? false,
@@ -80,7 +80,7 @@ export default function EditProfileModal({ open, onClose, user }: EditProfileMod
             await updateMyProfile({
                 username: finalUsername,
                 title: form.title,
-                about: form.about,
+                //about: form.about,
                 location: form.location,
                 phoneNo: form.phoneNo,
                 phonePublic: form.phonePublic,
@@ -133,7 +133,7 @@ export default function EditProfileModal({ open, onClose, user }: EditProfileMod
                 </label>
 
                 {/* ABOUT */}
-                <label className="block mb-3">
+                {/* <label className="block mb-3">
                     <span className="text-gray-900 text-sm font-medium">About</span>
                     <textarea
                         name="about"
@@ -144,7 +144,7 @@ export default function EditProfileModal({ open, onClose, user }: EditProfileMod
                        text-gray-900 placeholder-gray-500
                        h-24 resize-none focus:ring-2 focus:ring-blue-500"
                     />
-                </label>
+                </label> */}
 
                 {/* LOCATION */}
                 <label className="block mb-3">
