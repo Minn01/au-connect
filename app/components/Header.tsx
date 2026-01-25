@@ -30,6 +30,7 @@ import {
 } from "@/lib/constants";
 import { fetchUser, handleLogout } from "../profile/utils/fetchfunctions";
 import LogoutModal from "./LogoutModal";
+import { useFeedStore } from "@/lib/stores/feedStore";
 
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
@@ -65,13 +66,18 @@ export default function Header() {
     router.push(`/profile/${user.slug}`);
   };
 
+  const scrollFeedToTop = useFeedStore((s) => s.scrollToTop);
+
   return hidden ? null : (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Top Section */}
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div
+            onClick={scrollFeedToTop}
+            className="flex items-center gap-3 cursor-pointer"
+          >
             <Image
               src="/au-connect-logo.png"
               width={45}
@@ -138,9 +144,10 @@ export default function Header() {
                 disabled={userLoading}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 disabled:cursor-default disabled:hover:bg-transparent cursor-pointer"
               >
-                <div 
-                title="Profile"
-                className="relative w-8 h-8 rounded-full overflow-hidden border border-red-300 flex items-center justify-center bg-gray-100">
+                <div
+                  title="Profile"
+                  className="relative w-8 h-8 rounded-full overflow-hidden border border-red-300 flex items-center justify-center bg-gray-100"
+                >
                   {userLoading ? (
                     <Skeleton className="w-full h-full rounded-full" />
                   ) : user?.profilePic ? (

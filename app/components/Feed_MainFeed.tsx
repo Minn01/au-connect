@@ -1,13 +1,14 @@
 "use client";
 
 import { BookOpen, Image as ImageIcon, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 
 import Post from "./Post";
 import CreatePostModal from "./CreatePostModal";
 import { MainFeedPropTypes } from "@/types/FeedPagePropTypes";
+import { useFeedStore } from "@/lib/stores/feedStore";
 
 export default function MainFeed({
   user,
@@ -20,6 +21,9 @@ export default function MainFeed({
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState("media");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null!);
+  const setVirtuosoRef = useFeedStore((s) => s.setVirtuosoRef);
 
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -113,6 +117,12 @@ export default function MainFeed({
       ) : (
         <div style={{ height: "calc(100vh - 97px)" }}>
           <Virtuoso
+            ref={(ref) => {
+              if (ref) {
+                virtuosoRef.current = ref;
+                setVirtuosoRef(virtuosoRef);
+              }
+            }}
             data={posts}
             endReached={loadMore}
             overscan={200}
