@@ -31,6 +31,7 @@ import {
 import { fetchUser, handleLogout } from "../profile/utils/fetchfunctions";
 import LogoutModal from "./LogoutModal";
 import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
+import { useFeedStore } from "@/lib/stores/feedStore";
 
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
@@ -72,13 +73,18 @@ export default function Header() {
     router.push(`/profile/${user.slug}`);
   };
 
+  const scrollFeedToTop = useFeedStore((s) => s.scrollToTop);
+
   return hidden ? null : (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Top Section */}
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div
+            onClick={scrollFeedToTop}
+            className="flex items-center gap-3 cursor-pointer"
+          >
             <Image
               src="/au-connect-logo.png"
               width={45}

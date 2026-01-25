@@ -12,11 +12,13 @@ import {
   X,
   Eraser,
 } from "lucide-react";
+
 import CreatePostModalPropTypes from "@/types/CreatePostModalPropTypes";
 import { MediaType, MediaItem } from "@/types/Media";
 import { useUploadStore } from "@/lib/stores/uploadStore";
 import { processUpload } from "@/lib/services/uploadService";
 import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
+import { useDraftStore } from "@/lib/stores/draftStore";
 
 const getMediaType = (file: File): MediaType => {
   if (file.type.startsWith("image/")) return "image";
@@ -58,6 +60,37 @@ export default function CreatePostModal({
     DEFAULT_PROFILE_PIC
   );
 
+  const { draft, saveDraft, clearDraft, hasDraft } = useDraftStore();
+
+  useEffect(() => {
+    if (hasDraft()) {
+      setPostType(draft.postType);
+      setTitle(draft.title);
+      setPostContent(draft.content);
+      setSelectedVisibility(draft.visibility);
+      setDisableComments(draft.disableComments);
+      // Note: Can't restore media files, user needs to re-select
+    }
+  }, [isOpen]); // Load when modal opens
+
+  // Auto-save draft as user types
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (postContent || title || media.length > 0) {
+        saveDraft({
+          postType,
+          title,
+          content: postContent,
+          visibility: selectedVisibility,
+          disableComments,
+          mediaFileNames: media.map((m) => m.file.name),
+        });
+      }
+    }, 1000); // Save 1 second after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [postContent, title, media, selectedVisibility, disableComments]);
+
   /** Update modal type whenever parent changes it */
   useEffect(() => {
     setPostType(initialType);
@@ -66,6 +99,14 @@ export default function CreatePostModal({
   useEffect(() => {
     console.log("Upload jobs:", useUploadStore.getState().jobs);
   }, []);
+
+  const handleClearDraft = () => {
+    clearDraft();
+    setTitle("");
+    setPostContent("");
+    setMedia([]);
+    setDisableComments(false);
+  };
 
   const handleSubmitPost = async () => {
     if (isSubmitting) return;
@@ -87,6 +128,9 @@ export default function CreatePostModal({
 
       // String upload in background
       processUpload(jobId);
+
+      // clear draft after posting
+      clearDraft();
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +270,7 @@ export default function CreatePostModal({
             {/* clear draft button */}
             <button
               title="clear draft"
-              onClick={() => {}}
+              onClick={handleClearDraft}
               className="ml-2 p-2 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
             >
               <Eraser className="text-gray-400" />
