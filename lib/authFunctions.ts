@@ -15,6 +15,7 @@ import {
   SIGNIN_PAGE_PATH,
   MICROSOFT_ACCESS_TOKEN_URL,
   MICROSOFT_USERINFO_URL,
+  EXTENSIONS,
 } from "./constants";
 import {
   GOOGLE_CLIENT_ID,
@@ -28,7 +29,11 @@ import {
   MICROSOFT_CLIENT_SECRET,
   MICROSOFT_REDIRECT_URI,
   NODE_ENV,
+  AZURE_STORAGE_CONNECTION_STRING,
+  AZURE_STORAGE_CONTAINER_NAME,
 } from "./env";
+
+import { BlobServiceClient } from "@azure/storage-blob";
 
 // TODO: check for errors from providers in each function
 // TODO: google and linkedin are missing error handline for fetching token
@@ -71,12 +76,25 @@ export async function googleAuthSignIn(req: NextRequest) {
 
   // if user does not exist create new user record
   if (!user) {
+    // Pattern A: import provider avatar into Azure (new users only)
+    const providerAvatarUrl: string | null =
+      typeof profile.picture === "string" ? profile.picture : null;
+
+    const importedBlobName =
+      providerAvatarUrl && !isDefaultPicture(providerAvatarUrl)
+        ? await importProviderAvatarToAzure(providerAvatarUrl)
+        : null;
+
     user = await prisma.user.create({
       data: {
         username: profile.name,
         email: profile.email,
         googleId: profile.sub,
-        profilePic: profile.picture,
+
+        // store blobName (internal) for both
+        profilePic: importedBlobName ?? null,
+        profilePicOriginal: importedBlobName ?? null,
+        profilePicCrop: null,
       },
     });
   } else {
@@ -148,12 +166,24 @@ export async function linkedinAuthSignIn(req: NextRequest) {
 
   // if user does not exist create new user record
   if (!user) {
+    // ✅ Pattern A: import provider avatar into Azure (new users only)
+    const providerAvatarUrl = getLinkedInAvatarUrl(userInfo);
+
+    const importedBlobName =
+      providerAvatarUrl && !isDefaultPicture(providerAvatarUrl)
+        ? await importProviderAvatarToAzure(providerAvatarUrl)
+        : null;
+
     user = await prisma.user.create({
       data: {
         username: userInfo.name,
         email: userInfo.email,
         linkedinId: userInfo.sub,
-        profilePic: userInfo.picture,
+
+        // store blobName (internal) for both
+        profilePic: importedBlobName ?? null,
+        profilePicOriginal: importedBlobName ?? null,
+        profilePicCrop: null,
       },
     });
   } else {
@@ -386,3 +416,91 @@ export function getHeaderUserInfo(req: NextRequest) {
   return [req.headers.get("x-user-email"), req.headers.get("x-user-id")]
 }
 
+/**
+ * ✅ Provider avatar → Azure import (new users only)
+ * - downloads provider image
+ * - validates type & size
+ * - uploads to Azure as blob
+ * - returns blobName
+ */
+async function importProviderAvatarToAzure(imageUrl: string): Promise<string | null> {
+  try {
+    // fetch provider image
+    const res = await fetch(imageUrl);
+
+    if (!res.ok) {
+      console.log("Failed to fetch provider avatar:", res.status);
+      return null;
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(contentType)) {
+      console.log("Provider avatar type not allowed:", contentType);
+      return null;
+    }
+
+    const arrayBuffer = await res.arrayBuffer();
+
+    // max 5MB
+    const maxBytes = 5 * 1024 * 1024;
+    if (arrayBuffer.byteLength > maxBytes) {
+      console.log("Provider avatar too large:", arrayBuffer.byteLength);
+      return null;
+    }
+
+    const extension = EXTENSIONS[contentType] || ".jpg";
+    const blobName = `images/provider/${crypto.randomUUID()}${extension}`;
+
+    const blobServiceClient = BlobServiceClient.fromConnectionString(
+      AZURE_STORAGE_CONNECTION_STRING
+    );
+
+    const containerClient = blobServiceClient.getContainerClient(
+      AZURE_STORAGE_CONTAINER_NAME
+    );
+
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    await blockBlobClient.uploadData(Buffer.from(arrayBuffer), {
+      blobHTTPHeaders: {
+        blobContentType: contentType,
+      },
+    });
+
+    return blobName;
+  } catch (err) {
+    console.log(
+      err instanceof Error ? err.message : "Failed to import provider avatar"
+    );
+    return null;
+  }
+}
+
+/**
+ * LinkedIn userinfo picture shape can vary. This safely extracts a usable URL.
+ * We only use this for NEW USER avatar import.
+ */
+function getLinkedInAvatarUrl(userInfo: any): string | null {
+  try {
+    if (!userInfo) return null;
+
+    // most ideal: direct string
+    if (typeof userInfo.picture === "string") return userInfo.picture;
+
+    // common nested structure
+    if (userInfo.picture?.original?.url && typeof userInfo.picture.original.url === "string") {
+      return userInfo.picture.original.url;
+    }
+
+    // fallback: some providers return { url: "..." }
+    if (userInfo.picture?.url && typeof userInfo.picture.url === "string") {
+      return userInfo.picture.url;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}

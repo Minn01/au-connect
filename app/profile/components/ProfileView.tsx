@@ -13,13 +13,15 @@ import RecommendedModal from "./RecommendedModal";
 import EditProfileModal from "./EditProfileModal";
 import ExperienceManagerModal from "./ExperienceManagerModal";
 import EducationManagerModal from "./EducationManagerModal";
-import EditAboutModal from "./EditAboutModal"; // ✅ ADD THIS
+import EditAboutModal from "./EditAboutModal";
+import ProfilePhotoModal from "./ProfilePhotoModal";
 
 import Post from "@/app/components/Post";
 import User from "@/types/User";
 import Experience from "@/types/Experience";
 import Education from "@/types/Education";
 import PostType from "@/types/Post";
+import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 
 // ✅ ADD: react-query + profile posts fetcher
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -40,16 +42,27 @@ export default function ProfileView({
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openExperienceModal, setOpenExperienceModal] = useState(false);
   const [openEducationModal, setOpenEducationModal] = useState(false);
-  const [openAboutModal, setOpenAboutModal] = useState(false); // ✅ ADD
+  const [openAboutModal, setOpenAboutModal] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const [openProfilePhotoModal, setOpenProfilePhotoModal] = useState(false);
 
   const [experience, setExperience] = useState<Experience[]>(
     user.experience ?? []
   );
-  const [education, setEducation] = useState<Education[]>(
-    user.education ?? []
+  const [education, setEducation] = useState<Education[]>(user.education ?? []);
+  const [about, setAbout] = useState(user.about ?? "");
+
+  // ✅ local profile pic value so UI updates after upload/delete without refresh
+  const [profilePicValue, setProfilePicValue] = useState<string>(
+    user.profilePic || "/default_profile.jpg"
   );
-  const [about, setAbout] = useState(user.about ?? ""); // ✅ ADD (UI updates after save)
+
+  // ✅ resolve using hook (cached)
+  const resolvedProfilePicUrl = useResolvedMediaUrl(
+    profilePicValue,
+    "/default_profile.jpg"
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -118,12 +131,25 @@ export default function ProfileView({
                 </div>
 
                 <div className="relative -mt-16 w-32 h-32">
-                  <Image
-                    src={user.profilePic || "/default_profile.jpg"}
-                    alt="avatar"
-                    fill
-                    className="rounded-full border-4 border-white object-cover"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setOpenProfilePhotoModal(true)}
+                    className="relative w-32 h-32 block"
+                    aria-label="Open profile photo"
+                  >
+                    <Image
+                      src={resolvedProfilePicUrl}
+                      alt="avatar"
+                      fill
+                      className="rounded-full border-4 border-white object-cover"
+                    />
+
+                    {isOwner && (
+                      <span className="absolute bottom-1 right-1 bg-white/90 p-2 rounded-full shadow border">
+                        <Camera size={18} className="text-gray-700" />
+                      </span>
+                    )}
+                  </button>
                 </div>
 
                 <h1 className="text-2xl font-bold text-gray-900 mt-2">
@@ -179,7 +205,7 @@ export default function ProfileView({
               )}
             </SectionCard>
 
-            {/* ABOUT ✅ NOW EDITABLE LIKE LINKEDIN */}
+            {/* ABOUT */}
             <SectionCard
               title="About"
               icon={
@@ -306,12 +332,22 @@ export default function ProfileView({
         setEducation={setEducation}
       />
 
-      {/* ✅ NEW ABOUT MODAL */}
       <EditAboutModal
         open={openAboutModal}
         onClose={() => setOpenAboutModal(false)}
         initialAbout={about}
         onSaved={(newAbout) => setAbout(newAbout)}
+      />
+
+      <ProfilePhotoModal
+        open={openProfilePhotoModal}
+        onClose={() => setOpenProfilePhotoModal(false)}
+        isOwner={isOwner}
+        user={user}
+        resolvedProfilePicUrl={resolvedProfilePicUrl}
+        onProfilePicChanged={(newProfilePicValue: string) =>
+          setProfilePicValue(newProfilePicValue)
+        }
       />
     </>
   );

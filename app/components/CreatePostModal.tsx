@@ -16,6 +16,7 @@ import CreatePostModalPropTypes from "@/types/CreatePostModalPropTypes";
 import { MediaType, MediaItem } from "@/types/Media";
 import { useUploadStore } from "@/lib/stores/uploadStore";
 import { processUpload } from "@/lib/services/uploadService";
+import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 
 const getMediaType = (file: File): MediaType => {
   if (file.type.startsWith("image/")) return "image";
@@ -28,6 +29,8 @@ const formatFileSize = (bytes: number): string => {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
+
+const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
 export default function CreatePostModal({
   user,
@@ -48,6 +51,12 @@ export default function CreatePostModal({
 
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ✅ resolved avatar url (blobName -> signed url) via cached hook
+  const resolvedProfilePicUrl = useResolvedMediaUrl(
+    user?.profilePic,
+    DEFAULT_PROFILE_PIC
+  );
 
   /** Update modal type whenever parent changes it */
   useEffect(() => {
@@ -132,7 +141,7 @@ export default function CreatePostModal({
   if (!isOpen) return null;
 
   const currentVisibility = visibilityOptions.find(
-    (opt) => opt.id === selectedVisibility,
+    (opt) => opt.id === selectedVisibility
   );
 
   return (
@@ -145,7 +154,7 @@ export default function CreatePostModal({
             <div className="h-14 w-14 rounded-2xl overflow-hidden p-0.5">
               <div className="h-full w-full rounded-2xl overflow-hidden bg-white relative">
                 <Image
-                  src={user.profilePic || "/default_profile"}
+                  src={resolvedProfilePicUrl}
                   alt="User"
                   fill
                   className="object-cover"
@@ -372,7 +381,7 @@ export default function CreatePostModal({
                     type,
                     previewUrl,
                   };
-                }),
+                })
               );
 
               setMedia((prev) => [...prev, ...newItems]);

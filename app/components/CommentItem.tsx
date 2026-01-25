@@ -5,7 +5,9 @@ import CommentInput from "./CommentInput";
 import parseDate from "../profile/utils/parseDate";
 import { useReplies } from "../profile/utils/fetchfunctions";
 import CommentType from "@/types/CommentType";
+import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 
+const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
 export default function CommentItem({
   comment,
@@ -30,6 +32,8 @@ export default function CommentItem({
   const [isReplying, setIsReplying] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  const avatarUrl = useResolvedMediaUrl(comment.profilePic, DEFAULT_PROFILE_PIC);
+
   const {
     data,
     isLoading,
@@ -39,14 +43,17 @@ export default function CommentItem({
     isFetchingNextPage,
   } = useReplies(postId, comment.id);
 
-  const replies =
-    data?.pages.flatMap((page) => page.replies) ?? [];
+  const replies = data?.pages.flatMap((page) => page.replies) ?? [];
 
   return (
     <div style={{ marginLeft: depth * 16 }}>
       <div className="flex gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={comment.profilePic} className="w-8 h-8 rounded-full" alt="" />
+        <img
+          src={avatarUrl}
+          className="w-8 h-8 rounded-full object-cover"
+          alt=""
+        />
 
         <div className="text-sm text-gray-900">
           <span className="font-semibold mr-1">{comment.username}</span>
@@ -60,9 +67,7 @@ export default function CommentItem({
                 onClick={() => setIsOpen((v) => !v)}
                 className="hover:text-blue-500"
               >
-                {isOpen
-                  ? "Hide replies"
-                  : `View replies (${comment.replyCount})`}
+                {isOpen ? "Hide replies" : `View replies (${comment.replyCount})`}
               </button>
             )}
 
@@ -97,14 +102,10 @@ export default function CommentItem({
       {/* Replies */}
       {isOpen && (
         <div className="mt-2 ml-11 space-y-3">
-          {isLoading && (
-            <div className="text-xs text-gray-500">Loading replies…</div>
-          )}
+          {isLoading && <div className="text-xs text-gray-500">Loading replies…</div>}
 
           {isError && (
-            <div className="text-xs text-red-500">
-              Failed to load replies
-            </div>
+            <div className="text-xs text-red-500">Failed to load replies</div>
           )}
 
           {replies.map((reply) => (

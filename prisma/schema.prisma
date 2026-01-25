@@ -23,7 +23,10 @@ model User {
   linkedinId    String?  
   microsoftId   String?  
 
-  profilePic    String?
+  profilePic          String?
+  profilePicOriginal  String?
+  profilePicCrop      Json?
+
   coverPhoto    String?
   title         String?
   location      String?

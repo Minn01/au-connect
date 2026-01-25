@@ -2,6 +2,7 @@
 import Experience from "./Experience";
 import Education from "./Education";
 import PostType from "./Post";
+import { ProfilePicCrop } from "./ProfilePicCrop";
 
 type User = {
   id: string;
@@ -17,7 +18,11 @@ type User = {
   emailPublic?: boolean;
 
   coverPhoto?: string;
+
   profilePic?: string;
+  profilePicOriginal?: string;
+  profilePicCrop?: ProfilePicCrop | null;
+
   createdAt?: string;
 
   connections?: number;

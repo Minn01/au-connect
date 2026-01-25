@@ -2,6 +2,8 @@ export const safeUserSelect = {
   id: true,
   username: true,
   profilePic: true,
+  profilePicOriginal: true,
+  profilePicCrop: true,
   coverPhoto: true,
   title: true,
   location: true,
@@ -40,17 +42,17 @@ export const safeUserSelect = {
   },
 
   posts: {
-  select: {
-    id: true,
-    content: true,
-    title: true,
-    postType: true,
-    visibility: true,
-    profilePic: true,
-    username: true,
-    createdAt: true,
-    media: true,
+    select: {
+      id: true,
+      content: true,
+      title: true,
+      postType: true,
+      visibility: true,
+      profilePic: true,
+      username: true,
+      createdAt: true,
+      media: true,
+    },
   },
-},
 
 };

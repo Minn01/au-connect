@@ -37,7 +37,7 @@ export async function createComments(
         { status: 400 }
       );
     }
-    const  { content, parentCommentId: parentId } = parsed.data;
+    const { content, parentCommentId: parentId } = parsed.data;
 
     // grab user info from db
     const user = await prisma.user.findUnique({
@@ -65,7 +65,11 @@ export async function createComments(
         // denormalized user info
         userId: user.id,
         username: user.username,
-        profilePic: user.profilePic || "",
+        profilePic:
+          user.profilePic && user.profilePic.trim() !== ""
+            ? user.profilePic
+            : "/default_profile.jpg",
+
       },
     });
 

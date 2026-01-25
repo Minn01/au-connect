@@ -64,7 +64,10 @@ export async function createPost(req: NextRequest) {
       data: {
         userId,
         username: user.username,
-        profilePic: user.profilePic ?? null,
+        profilePic:
+          user.profilePic && user.profilePic.trim() !== ""
+            ? user.profilePic
+            : "/default_profile.jpg",
         ...data, // title, content, media
       },
     });
@@ -89,22 +92,22 @@ export async function createPost(req: NextRequest) {
             sharedKeyCredential
           ).toString();
 
-            const thumbnailUrl = mediaItem.thumbnailBlobName
-                ? `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.thumbnailBlobName}?${generateBlobSASQueryParameters(
-                    {
-                      containerName: AZURE_STORAGE_CONTAINER_NAME,
-                      blobName: mediaItem.thumbnailBlobName,
-                      permissions: BlobSASPermissions.parse("r"),
-                      expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
-                    },
-                    sharedKeyCredential
-                  ).toString()}`
-                : undefined;
+          const thumbnailUrl = mediaItem.thumbnailBlobName
+            ? `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.thumbnailBlobName}?${generateBlobSASQueryParameters(
+              {
+                containerName: AZURE_STORAGE_CONTAINER_NAME,
+                blobName: mediaItem.thumbnailBlobName,
+                permissions: BlobSASPermissions.parse("r"),
+                expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+              },
+              sharedKeyCredential
+            ).toString()}`
+            : undefined;
 
           return {
             ...mediaItem,
             url: `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.blobName}?${sasToken}`,
-                thumbnailUrl: thumbnailUrl,
+            thumbnailUrl: thumbnailUrl,
           };
         });
 

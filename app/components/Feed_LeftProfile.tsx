@@ -2,11 +2,17 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LeftProfilePropTypes } from "@/types/FeedPagePropTypes";
+import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 
 const DEFAULT_AVATAR = "/default-avatar.png";
 
 export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
   const router = useRouter();
+
+  const resolvedProfilePicUrl = useResolvedMediaUrl(
+    user?.profilePic,
+    DEFAULT_AVATAR
+  );
 
   // Safely handle navigation
   const handleProfileClick = () => {
@@ -53,21 +59,12 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
             onClick={handleProfileClick}
             className="relative w-20 h-20 mb-3 cursor-pointer transition-transform duration-200 active:scale-95 hover:scale-105"
           >
-            {user?.profilePic ? (
-              <Image
-                src={user.profilePic}
-                alt="avatar"
-                fill
-                className="rounded-full border-4 border-white object-cover"
-              />
-            ) : (
-              <Image
-                src={DEFAULT_AVATAR}
-                alt="default avatar"
-                fill
-                className="rounded-full border-4 border-white object-cover"
-              />
-            )}
+            <Image
+              src={resolvedProfilePicUrl}
+              alt="avatar"
+              fill
+              className="rounded-full border-4 border-white object-cover"
+            />
           </div>
 
           {/* Info */}

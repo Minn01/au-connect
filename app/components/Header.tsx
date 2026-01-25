@@ -30,6 +30,7 @@ import {
 } from "@/lib/constants";
 import { fetchUser, handleLogout } from "../profile/utils/fetchfunctions";
 import LogoutModal from "./LogoutModal";
+import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
@@ -45,6 +46,12 @@ export default function Header() {
     queryKey: ["user"],
     queryFn: fetchUser,
   });
+
+  // ✅ resolved avatar (cached)
+  const resolvedProfilePicUrl = useResolvedMediaUrl(
+    user?.profilePic,
+    "/default_profile.jpg"
+  );
 
   const navBarIndicatedPages = [
     MAIN_PAGE_PATH,
@@ -138,20 +145,19 @@ export default function Header() {
                 disabled={userLoading}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 disabled:cursor-default disabled:hover:bg-transparent cursor-pointer"
               >
-                <div 
-                title="Profile"
-                className="relative w-8 h-8 rounded-full overflow-hidden border border-red-300 flex items-center justify-center bg-gray-100">
+                <div
+                  title="Profile"
+                  className="relative w-8 h-8 rounded-full overflow-hidden border border-red-300 flex items-center justify-center bg-gray-100"
+                >
                   {userLoading ? (
                     <Skeleton className="w-full h-full rounded-full" />
-                  ) : user?.profilePic ? (
+                  ) : (
                     <Image
-                      src={user.profilePic}
+                      src={resolvedProfilePicUrl}
                       alt="Profile Avatar"
                       fill
                       className="object-cover"
                     />
-                  ) : (
-                    <UserRound className="w-4 h-4 text-gray-500" />
                   )}
                 </div>
 
