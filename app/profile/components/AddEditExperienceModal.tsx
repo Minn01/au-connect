@@ -18,6 +18,9 @@ const MONTHS = [
 ];
 
 const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth(); // 0-11
+const currentValue = currentYear * 12 + currentMonth;
+
 const YEARS = Array.from({ length: 101 }, (_, i) => currentYear - i);
 
 export default function AddEditExperienceModal({
@@ -92,12 +95,21 @@ export default function AddEditExperienceModal({
     if (!form.startMonth || !form.startYear)
       return setError("Start date is required");
 
+    // ✅ start date cannot be in the future
+    if (startValue > currentValue)
+      return setError("Start date cannot be in the future");
+
     if (!form.isCurrent) {
       if (!form.endMonth || !form.endYear)
         return setError("End date is required");
 
+      // ✅ end must be after start
       if (endValue <= startValue)
         return setError("End date must be later than start date");
+
+      // ✅ end date cannot be in the future
+      if (endValue > currentValue)
+        return setError("End date cannot be in the future");
     }
 
     await onSave({
@@ -115,6 +127,9 @@ export default function AddEditExperienceModal({
   };
 
   if (!open) return null;
+
+  const startYearNum = Number(form.startYear);
+  const endYearNum = Number(form.endYear);
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 font-inter">
@@ -159,10 +174,10 @@ export default function AddEditExperienceModal({
                      text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Employment type</option>
-          <option value="FULL_TIME">Full-time</option>
-          <option value="PART_TIME">Part-time</option>
-          <option value="FREELANCE">Freelance</option>
-          <option value="INTERNSHIP">Internship</option>
+          <option value="FULL_TIME">{EMPLOYMENT_LABELS.FULL_TIME}</option>
+          <option value="PART_TIME">{EMPLOYMENT_LABELS.PART_TIME}</option>
+          <option value="FREELANCE">{EMPLOYMENT_LABELS.FREELANCE}</option>
+          <option value="INTERNSHIP">{EMPLOYMENT_LABELS.INTERNSHIP}</option>
         </select>
 
         {/* COMPANY */}
@@ -203,9 +218,16 @@ export default function AddEditExperienceModal({
                        text-gray-900 focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Start month</option>
-            {MONTHS.map((m, i) => (
-              <option key={i} value={i}>{m}</option>
-            ))}
+            {MONTHS.map((m, i) => {
+              const disableFutureMonth =
+                startYearNum === currentYear && i > currentMonth;
+
+              return (
+                <option key={i} value={i} disabled={disableFutureMonth}>
+                  {m}
+                </option>
+              );
+            })}
           </select>
 
           <select
@@ -231,9 +253,16 @@ export default function AddEditExperienceModal({
                          text-gray-900 focus:ring-2 focus:ring-blue-500"
             >
               <option value="">End month</option>
-              {MONTHS.map((m, i) => (
-                <option key={i} value={i}>{m}</option>
-              ))}
+              {MONTHS.map((m, i) => {
+                const disableFutureMonth =
+                  endYearNum === currentYear && i > currentMonth;
+
+                return (
+                  <option key={i} value={i} disabled={disableFutureMonth}>
+                    {m}
+                  </option>
+                );
+              })}
             </select>
 
             <select

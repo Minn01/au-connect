@@ -10,7 +10,14 @@ const MONTHS = [
 ];
 
 const currentYear = new Date().getFullYear();
-const YEARS = Array.from({ length: 101 }, (_, i) => currentYear - i);
+const currentMonth = new Date().getMonth(); // 0-11
+const currentValue = currentYear * 12 + currentMonth;
+
+// Start year: past 100 years (same behavior as before)
+const START_YEARS = Array.from({ length: 101 }, (_, i) => currentYear - i);
+
+// End year: include +10 future years AND past 100 years (total 111 years)
+const END_YEARS = Array.from({ length: 111 }, (_, i) => currentYear + 10 - i);
 
 export default function AddEditEducationModal({
   open,
@@ -81,6 +88,10 @@ export default function AddEditEducationModal({
     if (!form.endMonth || !form.endYear)
       return setError("End date is required");
 
+    // ✅ Security/validation: start date cannot be in the future
+    if (startValue > currentValue)
+      return setError("Start date cannot be in the future");
+
     if (endValue <= startValue)
       return setError("End date must be later than start date");
 
@@ -98,6 +109,8 @@ export default function AddEditEducationModal({
   };
 
   if (!open) return null;
+
+  const startYearNum = Number(form.startYear);
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 font-inter">
@@ -158,9 +171,16 @@ export default function AddEditEducationModal({
                        text-gray-900 focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Start month</option>
-            {MONTHS.map((m, i) => (
-              <option key={i} value={i}>{m}</option>
-            ))}
+            {MONTHS.map((m, i) => {
+              const disableFutureMonth =
+                startYearNum === currentYear && i > currentMonth;
+
+              return (
+                <option key={i} value={i} disabled={disableFutureMonth}>
+                  {m}
+                </option>
+              );
+            })}
           </select>
 
           <select
@@ -170,13 +190,13 @@ export default function AddEditEducationModal({
                        text-gray-900 focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Start year</option>
-            {YEARS.map((y) => (
+            {START_YEARS.map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
         </div>
 
-        {/* END DATE (EXPECTED) */}
+        {/* END DATE */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <select
             value={form.endMonth}
@@ -184,7 +204,7 @@ export default function AddEditEducationModal({
             className="px-3 py-2 border border-gray-300 rounded-lg
                        text-gray-900 focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">End month (expected)</option>
+            <option value="">End month</option>
             {MONTHS.map((m, i) => (
               <option key={i} value={i}>{m}</option>
             ))}
@@ -196,8 +216,8 @@ export default function AddEditEducationModal({
             className="px-3 py-2 border border-gray-300 rounded-lg
                        text-gray-900 focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">End year (expected)</option>
-            {YEARS.map((y) => (
+            <option value="">End year</option>
+            {END_YEARS.map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>

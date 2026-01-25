@@ -74,7 +74,7 @@ export default function EducationManagerModal({
 
                   <p className="text-sm text-gray-600 mt-1">
                     {MONTHS[edu.startMonth]} {edu.startYear} –{" "}
-                    {MONTHS[edu.endMonth]} {edu.endYear} (expected)
+                    {MONTHS[edu.endMonth]} {edu.endYear} 
                   </p>
                 </div>
 

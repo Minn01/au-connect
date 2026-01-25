@@ -17,7 +17,7 @@ export default function EducationItem({
   endYear,
 }: Education) {
   const start = `${MONTHS[startMonth]} ${startYear}`;
-  const end = `${MONTHS[endMonth]} ${endYear} (expected)`;
+  const end = `${MONTHS[endMonth]} ${endYear} `;
 
   return (
     <div className="py-4 border-b border-gray-300 last:border-b-0">
