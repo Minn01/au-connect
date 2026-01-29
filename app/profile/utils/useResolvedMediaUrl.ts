@@ -26,26 +26,41 @@ export function useResolvedMediaUrl(
 ) {
   const raw = (value ?? "").trim();
 
+  // Determine if we can use the value immediately without fetching
   const immediate =
     !raw ? fallback : isLocalPath(raw) || isHttpUrl(raw) ? raw : null;
 
-  const shouldFetch = immediate === null;
+  const shouldFetch = immediate === null && raw !== "";
 
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["media-url", raw],
     enabled: shouldFetch,
     queryFn: async () => {
-      const res = await fetch(
-        `/api/connect/v1/fetch-media?blobName=${encodeURIComponent(raw)}`
-      );
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to fetch media url");
-      return json?.url as string;
+      try {
+        const res = await fetch(
+          `/api/connect/v1/fetch-media?blobName=${encodeURIComponent(raw)}`
+        );
+        const json = await res.json();
+        if (!res.ok) {
+          console.error("Failed to fetch media URL:", json?.error);
+          throw new Error(json?.error || "Failed to fetch media url");
+        }
+        return json?.url as string;
+      } catch (err) {
+        console.error("Error fetching media URL for:", raw, err);
+        throw err;
+      }
     },
     staleTime: 8 * 60 * 1000, // 8 min (SAS is 10 min)
     gcTime: 15 * 60 * 1000,
     retry: 1,
   });
+
+  // If there was an error fetching, return fallback
+  if (error) {
+    console.warn("Using fallback due to error:", error);
+    return fallback;
+  }
 
   return immediate ?? data ?? fallback;
 }
