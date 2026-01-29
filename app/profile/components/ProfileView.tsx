@@ -102,6 +102,31 @@ export default function ProfileView({
 
   const posts: PostType[] =
     postData?.pages.flatMap((page: { posts: PostType[] }) => page.posts) ?? [];
+  const imagePosts = posts.filter(
+    (p) => (p.media ?? []).some((m) => m.type === "image")
+  );
+
+  const videoPosts = posts.filter(
+    (p) => (p.media ?? []).some((m) => m.type === "video")
+  );
+
+  const documentPosts = posts.filter(
+    (p) => (p.media ?? []).some((m) => m.type === "file")
+  );
+
+  let tabPosts: PostType[] = [];
+  if (tab === "posts") {
+    tabPosts = posts;
+  } else if (tab === "images") {
+    tabPosts = imagePosts;
+  } else if (tab === "videos") {
+    tabPosts = videoPosts;
+  } else if (tab === "documents") {
+    tabPosts = documentPosts;
+  } else {
+    tabPosts = [];
+  }
+
 
   const isPostsLoading = loading || profilePostLoading;
 
@@ -356,41 +381,31 @@ export default function ProfileView({
               </div>
 
               <div className="mt-4 space-y-4">
-                {tab === "posts" ? (
+                {isPostsLoading ? (
                   <>
-                    {isPostsLoading ? (
-                      <>
-                        <Post isLoading={true} />
-                        <Post isLoading={true} />
-                      </>
-                    ) : posts.length > 0 ? (
-                      <>
-                        {posts.map((p: PostType) => (
-                          <Post key={p.id} post={p} isLoading={false} />
-                        ))}
+                    <Post isLoading={true} />
+                    <Post isLoading={true} />
+                  </>
+                ) : tabPosts.length > 0 ? (
+                  <>
+                    {tabPosts.map((p: PostType) => (
+                      <Post key={p.id} post={p} isLoading={false} />
+                    ))}
 
-                        {hasNextPage && (
-                          <div className="flex justify-center pt-2">
-                            <button
-                              onClick={() => fetchNextPage()}
-                              disabled={isFetchingNextPage}
-                              className="text-sm text-blue-600 hover:underline disabled:opacity-50"
-                            >
-                              {isFetchingNextPage ? "Loading..." : "Load more"}
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-center text-gray-600 py-10">
-                        No posts yet
+                    {hasNextPage && (
+                      <div className="flex justify-center pt-2">
+                        <button
+                          onClick={() => fetchNextPage()}
+                          disabled={isFetchingNextPage}
+                          className="text-sm text-blue-600 hover:underline disabled:opacity-50"
+                        >
+                          {isFetchingNextPage ? "Loading..." : "Load more"}
+                        </button>
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className="text-center text-gray-600 py-10">
-                    No {tab} yet
-                  </div>
+                  <div className="text-center text-gray-600 py-10">No {tab} yet</div>
                 )}
               </div>
             </SectionCard>
