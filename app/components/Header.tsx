@@ -79,7 +79,6 @@ export default function Header() {
     queryFn: fetchUser,
   });
 
-  // 🔍 SEARCH QUERY (✅ FIXED PATH)
   const { data: searchResults = [], isFetching } = useQuery({
     queryKey: ["search-users", query],
     queryFn: async () => {
