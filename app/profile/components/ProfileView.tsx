@@ -283,7 +283,7 @@ export default function ProfileView({
         throw new Error(json?.error || "Failed to cancel request");
       }
 
-      // ✅ success => reset to initial state
+      //  success => reset to initial state
       setConnectSuccess(false);
       setRequestId(null);
     } catch (e: unknown) {
@@ -561,7 +561,7 @@ export default function ProfileView({
                 ) : tabPosts.length > 0 ? (
                   <>
                     {tabPosts.map((p: PostType) => (
-                      <Post key={p.id} post={p} isLoading={false} />
+                      <Post user={user} key={p.id} post={p} isLoading={false} />
                     ))}
 
                     {hasNextPage && (

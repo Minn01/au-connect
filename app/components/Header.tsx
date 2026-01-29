@@ -225,7 +225,7 @@ export default function Header() {
               </button>
 
               <button onClick={() => setShowModal(true)}>
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-5 h-5 text-gray-600 ml-5" />
               </button>
             </div>
           </nav>
