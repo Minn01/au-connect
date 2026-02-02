@@ -32,7 +32,10 @@ export default function CommentItem({
   const [isReplying, setIsReplying] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const avatarUrl = useResolvedMediaUrl(comment.profilePic, DEFAULT_PROFILE_PIC);
+  const avatarUrl = useResolvedMediaUrl(
+    comment.profilePic,
+    DEFAULT_PROFILE_PIC,
+  );
 
   const {
     data,
@@ -67,7 +70,9 @@ export default function CommentItem({
                 onClick={() => setIsOpen((v) => !v)}
                 className="hover:text-blue-500"
               >
-                {isOpen ? "Hide replies" : `View replies (${comment.replyCount})`}
+                {isOpen
+                  ? "Hide replies"
+                  : `View replies (${comment.replyCount})`}
               </button>
             )}
 
@@ -102,7 +107,9 @@ export default function CommentItem({
       {/* Replies */}
       {isOpen && (
         <div className="mt-2 ml-11 space-y-3">
-          {isLoading && <div className="text-xs text-gray-500">Loading replies…</div>}
+          {isLoading && (
+            <div className="text-xs text-gray-500">Loading replies…</div>
+          )}
 
           {isError && (
             <div className="text-xs text-red-500">Failed to load replies</div>
@@ -124,7 +131,9 @@ export default function CommentItem({
               disabled={isFetchingNextPage}
               className="text-xs text-blue-500 hover:underline disabled:opacity-50"
             >
-              {isFetchingNextPage ? "Loading…" : replies.length > 5 && "Load more replies"}
+              {isFetchingNextPage
+                ? "Loading…"
+                : replies.length > 5 && "Load more replies"}
             </button>
           )}
         </div>

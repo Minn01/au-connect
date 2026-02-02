@@ -113,6 +113,7 @@ model Post {
   content       String
   media         Json? // [{ url, type, name, mimetype, size }]
 
+  commentsDisabled Boolean @default(false)
   commentCount  Int        @default(0)
   likeCount     Int        @default(0)
   shareCount    Int        @default(0)

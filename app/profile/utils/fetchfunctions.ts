@@ -1,4 +1,5 @@
 import {
+  useQuery,
   useInfiniteQuery,
   useQueryClient,
   useMutation,
@@ -12,6 +13,7 @@ import {
   ME_API_PATH,
   POST_API_PATH,
   REPLIES_API_PATH,
+  SINGLE_POST_API_PATH,
 } from "@/lib/constants";
 import PostsPage from "@/types/PostsPage";
 
@@ -78,7 +80,7 @@ export async function handleCreatePost(
         title,
         content: postContent,
         visibility: selectedVisibility,
-        disableComments,
+        commentsDisabled: disableComments,
         media: uploadedMedia,
       }),
     });
@@ -146,17 +148,17 @@ export async function createComment({
   return res.json();
 }
 
-export function useTopLevelComments(postId: string) {
+export function useTopLevelComments(postId: string, commentsDisabled = false) {
   return useInfiniteQuery({
     queryKey: ["comments", postId],
     initialPageParam: null,
+    enabled: !commentsDisabled,
     queryFn: async ({ pageParam }) => {
       const res = await fetch(
         COMMENT_API_PATH(postId) + (pageParam ? `?cursor=${pageParam}` : ""),
       );
-
       if (!res.ok) throw new Error("Failed to fetch comments");
-      return res.json(); // must return { comments, nextCursor }
+      return res.json();
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
   });
@@ -172,16 +174,17 @@ export async function fetchReplies({
   cursor?: string | null;
 }) {
   const params = cursor ? `?cursor=${cursor}` : "";
+  // ✅ FIXED: Changed from fetch` to fetch(
   const res = await fetch(`${REPLIES_API_PATH(postId, commentId)}${params}`);
-
   if (!res.ok) throw new Error("Failed to fetch replies");
   return res.json();
 }
 
-export function useReplies(postId: string, commentId: string) {
+export function useReplies(postId: string, commentId: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: ["replies", commentId],
     initialPageParam: null,
+    enabled,
     queryFn: ({ pageParam }) =>
       fetchReplies({
         postId,
@@ -340,5 +343,20 @@ export function useEditPost() {
         };
       });
     },
+  });
+}
+
+export async function fetchSinglePost(postId: string) {
+  const res = await fetch(SINGLE_POST_API_PATH(postId));
+
+  if (!res.ok) throw new Error("Failed to fetch post");
+  return res.json();
+}
+
+export function usePost(postId: string) {
+  return useQuery({
+    queryKey: ["post", postId],
+    queryFn: () => fetchSinglePost(postId),
+    enabled: !!postId, // safety
   });
 }

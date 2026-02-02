@@ -8,11 +8,7 @@ import PostProfile from "./PostProfile";
 import PostAttachments from "./PostAttachments";
 import PostText from "./PostText";
 import PostDetailsModal from "./PostDetailsModal";
-import {
-  useToggleLike,
-  useDeletePost,
-  useEditPost,
-} from "../profile/utils/fetchfunctions";
+import { useToggleLike, useDeletePost } from "../profile/utils/fetchfunctions";
 import CreatePostModal from "./CreatePostModal";
 
 export default function Post({
@@ -29,7 +25,6 @@ export default function Post({
 
   const toggleLike = useToggleLike();
   const deletePost = useDeletePost();
-  const editPostMutation = useEditPost();
 
   // Skeleton UI
   if (isLoading) {
@@ -57,6 +52,18 @@ export default function Post({
 
   const containsVideosOrImages = (videosAndImages?.length ?? 0) > 0;
   const attachments = post.media?.filter((m) => m.type === "file");
+
+  const numOfCommentsContent = (post: PostType) => {
+    if (post.commentsDisabled) {
+      return "";
+    }
+
+    if (post.numOfComments && post.numOfComments > 0) {
+      return `${post.numOfComments} comments`;
+    }
+
+    return "0 comments";
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg">
@@ -105,9 +112,7 @@ export default function Post({
             onClick={() => setPostModelOpen(true)}
             className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2"
           >
-            {post.numOfComments && post.numOfComments > 0
-              ? `${post.numOfComments} comments`
-              : "0 comments"}
+            {numOfCommentsContent(post)}
           </span>
           <span className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2">
             {123} shares
@@ -153,6 +158,7 @@ export default function Post({
             username: post.username,
             profilePic: post.profilePic,
             createdAt: post.createdAt,
+            commentsDisabled: post.commentsDisabled,
           }}
           media={post.media}
           title={post.title}

@@ -139,6 +139,7 @@ export async function processEdit(jobId: string) {
         title: job.title,
         content: job.content,
         visibility: job.visibility,
+        commentsDisabled: job.disableComments,
         media: finalMedia,
       },
     });

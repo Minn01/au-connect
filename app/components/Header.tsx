@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   MessageCircleMore,
-  UserRound,
   LogOut,
 } from "lucide-react";
 import { useState } from "react";
@@ -38,9 +37,18 @@ const Skeleton = ({ className = "" }) => (
 );
 
 // Component to properly resolve profile pic for each search result
-const SearchResultItem = ({ user, onClick }: { user: any; onClick: () => void }) => {
-  const resolvedProfilePic = useResolvedMediaUrl(user.profilePic, "/default_profile.jpg");
-  
+const SearchResultItem = ({
+  user,
+  onClick,
+}: {
+  user: any;
+  onClick: () => void;
+}) => {
+  const resolvedProfilePic = useResolvedMediaUrl(
+    user.profilePic,
+    "/default_profile.jpg",
+  );
+
   return (
     <button
       onClick={onClick}
@@ -55,9 +63,7 @@ const SearchResultItem = ({ user, onClick }: { user: any; onClick: () => void })
       />
       <div>
         <p className="text-sm font-medium text-gray-900">{user.username}</p>
-        {user.title && (
-          <p className="text-xs text-gray-500">{user.title}</p>
-        )}
+        {user.title && <p className="text-xs text-gray-500">{user.title}</p>}
       </div>
     </button>
   );
@@ -83,7 +89,7 @@ export default function Header() {
     queryKey: ["search-users", query],
     queryFn: async () => {
       const res = await fetch(
-        `/api/connect/v1/search/users?q=${encodeURIComponent(query)}`
+        `/api/connect/v1/search/users?q=${encodeURIComponent(query)}`,
       );
       if (!res.ok) throw new Error("Search failed");
       return res.json();
@@ -93,7 +99,7 @@ export default function Header() {
 
   const resolvedProfilePicUrl = useResolvedMediaUrl(
     user?.profilePic,
-    "/default_profile.jpg"
+    "/default_profile.jpg",
   );
 
   const navBarIndicatedPages = [
@@ -123,11 +129,22 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div
-            onClick={scrollFeedToTop}
-            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => {
+              if (currentPage == MAIN_PAGE_PATH) {
+                scrollFeedToTop();
+              } else {
+                router.push(MAIN_PAGE_PATH);
+              }
+            }}
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-1"
           >
-            <Image src="/au-connect-logo.png" width={45} height={45} alt="logo" />
-            <h1 className="text-lg font-bold text-gray-900">AU Connect</h1>
+            <Image
+              src="/au-connect-logo.png"
+              width={45}
+              height={45}
+              alt="logo"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">AU Connect</h1>
           </div>
 
           {/* 🔍 DESKTOP SEARCH */}
@@ -159,7 +176,7 @@ export default function Header() {
                     searchResults.map((u: any) => {
                       // Ensure we have a proper slug (API should provide it, but fallback to buildSlug)
                       const userSlug = u.slug || buildSlug(u.username, u.id);
-                      
+
                       return (
                         <SearchResultItem
                           key={u.id}
@@ -173,9 +190,7 @@ export default function Header() {
                       );
                     })
                   ) : (
-                    <div className="p-3 text-sm text-gray-500">
-                      No results
-                    </div>
+                    <div className="p-3 text-sm text-gray-500">No results</div>
                   )}
                 </div>
               )}
@@ -201,11 +216,10 @@ export default function Header() {
               <Link
                 key={i}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 ${
-                  currentPage === item.href
-                    ? "text-red-500"
-                    : "text-gray-600"
+                className={`flex flex-col items-center gap-1 hover:text-red-500 rounded-lg ${
+                  currentPage === item.href ? "text-red-500" : "text-gray-600"
                 }`}
+                title={`${item.label}`}
               >
                 {item.icon}
                 <span className="text-xs">{item.label}</span>
@@ -218,14 +232,19 @@ export default function Header() {
                 <Image
                   src={resolvedProfilePicUrl}
                   alt="avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
+                  title="Profile"
+                  width={38}
+                  height={38}
+                  className="rounded-full border-red-400 border-2 shadow-lg hover:transition-transform hover:scale-105 active:opacity-80 cursor-pointer"
                 />
               </button>
 
-              <button onClick={() => setShowModal(true)}>
-                <LogOut className="w-5 h-5 text-gray-600 ml-5" />
+              <button
+                title="Logout"
+                className="hover:bg-gray-100 rounded-lg p-3 ml-2 active:opacity-80 acitve:scale-95 transition cursor-pointer"
+                onClick={() => setShowModal(true)}
+              >
+                <LogOut className="w-5 h-5 text-gray-600" />
               </button>
             </div>
           </nav>

@@ -7,6 +7,7 @@ export const CreatePostSchema = z.object({
   visibility: z.enum(["everyone", "friends", "only-me"]).optional(),
   title: z.string().optional(),
   content: z.string(),
+  commentsDisabled: z.boolean(),
   media: z.array(MediaSchema).optional(),
 });
 
@@ -15,6 +16,6 @@ export const EditPostSchema = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
   visibility: z.enum(["everyone", "friends", "only-me"]).optional(),
-  disableComments: z.boolean().optional(),
+  commentsDisabled: z.boolean(),
   media: z.array(MediaSchema).optional(),
 });

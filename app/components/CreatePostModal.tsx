@@ -205,6 +205,7 @@ export default function CreatePostModal({
               title,
               content: postContent,
               visibility: selectedVisibility,
+              commentsDisabled: disableComments,
               media: existingMedia.map((m) => ({
                 blobName: m.blobName,
                 thumbnailBlobName: m.thumbnailBlobName,
@@ -319,7 +320,7 @@ export default function CreatePostModal({
 
   return (
     <main className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden transform animate-in zoom-in-95 duration-300">
+      <div className="w-full max-w-2xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-y-auto transform animate-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="flex items-start gap-4 px-6 pt-6 pb-4 border-b border-neutral-100">
           <div className="relative">
@@ -452,7 +453,7 @@ export default function CreatePostModal({
                   <img
                     src={currentMedia.url}
                     alt="preview"
-                    className="h-full w-auto min-w-full object-cover mx-auto rounded-lg"
+                    className="w-full h-auto max-h-[400px] object-contain mx-auto rounded-lg"
                   />
                 )}
                 {currentMedia.type === "video" && (
@@ -488,7 +489,7 @@ export default function CreatePostModal({
                   <img
                     src={currentMedia.previewUrl}
                     alt="preview"
-                    className="h-full w-auto min-w-full object-cover mx-auto rounded-lg"
+                    className="w-full h-auto max-h-[400px] object-contain mx-auto rounded-lg"
                   />
                 )}
                 {currentMedia.type === "video" && (

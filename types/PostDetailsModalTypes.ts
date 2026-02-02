@@ -4,6 +4,7 @@ type PostDetailsModalTypes = {
     username: string | undefined;
     profilePic: string | undefined | null;
     createdAt: string | Date | undefined;
+    commentsDisabled?: boolean | undefined;
   };
   media?: { url: string; type: string }[] | null;
   title?: string | null;
@@ -13,3 +14,4 @@ type PostDetailsModalTypes = {
 };
 
 export default PostDetailsModalTypes;
+

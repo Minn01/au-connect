@@ -20,6 +20,8 @@ type PostType = {
   title?: string | null;
   content?: string;
 
+  commentsDisabled?: boolean;
+
   media?:
     | {
         blobName: string;

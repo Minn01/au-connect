@@ -1,9 +1,9 @@
 "use client";
 import { useEffect } from "react";
-import LeftProfile from "./components/Feed_LeftProfile";
-import MainFeed from "./components/Feed_MainFeed";
-import RightEvents from "./components/Feed_RightEvents";
-import { fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
+import LeftProfile from "../components/Feed_LeftProfile";
+import MainFeed from "../components/Feed_MainFeed";
+import RightEvents from "../components/Feed_RightEvents";
+import { fetchPosts, fetchUser } from "../profile/utils/fetchfunctions";
 import PostType from "@/types/Post";
 import {
   useInfiniteQuery,
