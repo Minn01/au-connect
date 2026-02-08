@@ -112,7 +112,6 @@ export default function ConnectPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Failed to accept request");
 
-
       //  pop out from connects page
 
       setRequests((prev) => prev.filter((r) => r.id !== requestId));
@@ -125,8 +124,8 @@ export default function ConnectPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="w-full px-10 py-10">
-        <section className="mb-12">
+      <div className="h-full overflow-y-auto flex flex-col items-center pt-6 px-4 sm:pt-8 md:pt-10">
+        <section className="w-full sm:w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2">
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-lg font-bold text-neutral-800">
               Connect Requests
@@ -235,4 +234,3 @@ export default function ConnectPage() {
     </main>
   );
 }
-

@@ -32,15 +32,25 @@ import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 import { useFeedStore } from "@/lib/stores/feedStore";
 import { buildSlug } from "@/app/profile/utils/buildSlug";
 import PopupModal from "./PopupModal";
+import { fetchUnreadCount } from "@/lib/notifications";
 
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
 );
 
 // Component to properly resolve profile pic for each search result
-const SearchResultItem = ({ user, onClick }: { user: any; onClick: () => void }) => {
-  const resolvedProfilePic = useResolvedMediaUrl(user.profilePic, "/default_profile.jpg");
-  
+const SearchResultItem = ({
+  user,
+  onClick,
+}: {
+  user: any;
+  onClick: () => void;
+}) => {
+  const resolvedProfilePic = useResolvedMediaUrl(
+    user.profilePic,
+    "/default_profile.jpg"
+  );
+
   return (
     <button
       onClick={onClick}
@@ -117,6 +127,15 @@ export default function Header() {
 
   const scrollFeedToTop = useFeedStore((s) => s.scrollToTop);
 
+  //  notifications unread count
+  const { data: unreadData, refetch: refetchUnread } = useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: fetchUnreadCount,
+    refetchInterval: 60_000, // refresh
+  });
+
+  const unreadCount = unreadData?.count ?? 0;
+
   return hidden ? null : (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3">
@@ -126,7 +145,12 @@ export default function Header() {
             onClick={scrollFeedToTop}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <Image src="/au-connect-logo.png" width={45} height={45} alt="logo" />
+            <Image
+              src="/au-connect-logo.png"
+              width={45}
+              height={45}
+              alt="logo"
+            />
             <h1 className="text-lg font-bold text-gray-900">AU Connect</h1>
           </div>
 
@@ -157,9 +181,8 @@ export default function Header() {
                     </div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map((u: any) => {
-                      // Ensure we have a proper slug (API should provide it, but fallback to buildSlug)
                       const userSlug = u.slug || buildSlug(u.username, u.id);
-                      
+
                       return (
                         <SearchResultItem
                           key={u.id}
@@ -194,13 +217,27 @@ export default function Header() {
               },
               {
                 href: NOTIFICATION_PAGE_PATH,
-                icon: <Bell />,
+                icon: (
+                  <div className="relative">
+                    <Bell />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                ),
                 label: "Notification",
               },
             ].map((item, i) => (
               <Link
                 key={i}
                 href={item.href}
+                onClick={() => {
+                  if (item.href === NOTIFICATION_PAGE_PATH) {
+                    refetchUnread();
+                  }
+                }}
                 className={`flex flex-col items-center gap-1 ${
                   currentPage === item.href
                     ? "text-red-500"

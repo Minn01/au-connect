@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { normalizePair } from "@/lib/connect";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
+import { createNotification } from "@/lib/notifications";
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -45,6 +47,13 @@ export async function POST(req: NextRequest) {
 
         const created = await prisma.connectionRequest.create({
             data: { fromUserId, toUserId, status: "PENDING" },
+        });
+
+        await createNotification({
+            userId: toUserId,          // receiver
+            fromUserId: fromUserId,    // sender
+            type: "CONNECTION_REQUEST",
+            entityId: created.id,
         });
 
         return NextResponse.json({ ok: true, request: created });

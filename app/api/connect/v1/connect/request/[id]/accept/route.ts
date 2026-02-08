@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { normalizePair } from "@/lib/connect";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
+import { createNotification } from "@/lib/notifications";
+
 
 export async function POST(
   req: NextRequest,
@@ -39,6 +41,13 @@ export async function POST(
       data: { connections: { increment: 1 } },
     }),
   ]);
+
+  await createNotification({
+    userId: row.fromUserId,    // original sender
+    fromUserId: authUserId,    // accepter
+    type: "CONNECTION_ACCEPTED",
+  });
+
 
   return NextResponse.json({ ok: true });
 }
