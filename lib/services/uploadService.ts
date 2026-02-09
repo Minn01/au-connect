@@ -3,11 +3,19 @@ import { uploadFile } from "@/app/profile/utils/uploadMedia";
 import { handleCreatePost } from "@/app/profile/utils/fetchfunctions";
 import { editPost } from "@/app/profile/utils/fetchfunctions";
 
-let queryClientInstance: any = null;
+let invalidatePostsFn: (() => void) | null = null;
 
-export function setQueryClient(client: any) {
-  queryClientInstance = client;
-  console.log("✅ Query client set:", !!client);
+export function setInvalidatePosts(fn: () => void) {
+  invalidatePostsFn = fn;
+  console.log("✅ invalidatePostsFn set");
+}
+
+function invalidatePostsSafe() {
+  if (invalidatePostsFn) {
+    invalidatePostsFn();
+  } else {
+    console.warn("⚠️ invalidatePostsFn not set yet");
+  }
 }
 
 export async function processUpload(jobId: string) {
@@ -60,6 +68,9 @@ export async function processUpload(jobId: string) {
       job.disableComments,
       uploadedMedia,
       () => {},
+      job.links,
+      job.pollOptions,
+      job.pollDuration,
     );
 
     console.log("✅ Post created:", createdPost);
@@ -67,16 +78,7 @@ export async function processUpload(jobId: string) {
     store.updateJobProgress(jobId, 100);
     store.updateJobStatus(jobId, "complete");
 
-    // ✅ Update post list
-    console.log("🔄 Invalidating queries...");
-    console.log("Query client exists?", !!queryClientInstance);
-
-    if (queryClientInstance) {
-      await queryClientInstance.invalidateQueries({ queryKey: ["posts"] });
-      console.log("✅ Queries invalidated - posts should refresh now!");
-    } else {
-      console.error("❌ Query client is null! Did you call setQueryClient?");
-    }
+    invalidatePostsSafe();
 
     setTimeout(() => store.removeJob(jobId), 3000);
   } catch (error) {
@@ -139,16 +141,20 @@ export async function processEdit(jobId: string) {
         title: job.title,
         content: job.content,
         visibility: job.visibility,
+        commentsDisabled: job.disableComments,
+        links: job.links,
         media: finalMedia,
+        ...(job.postType === "poll" && {
+          pollOptions: job.pollOptions,
+          pollDuration: job.pollDuration,
+        }),
       },
     });
 
     store.updateJobProgress(jobId, 100);
     store.updateJobStatus(jobId, "complete");
 
-    if (queryClientInstance) {
-      await queryClientInstance.invalidateQueries({ queryKey: ["posts"] });
-    }
+    invalidatePostsSafe();
 
     setTimeout(() => store.removeJob(jobId), 3000);
   } catch (err) {

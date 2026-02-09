@@ -8,7 +8,7 @@ import { CreateCommentSchema } from "@/zod/CommentSchema";
 // function to create comments/replies
 export async function createComments(
   req: NextRequest,
-  params: { postId: string }
+  params: { postId: string },
 ) {
   try {
     // validate user info from headers
@@ -17,7 +17,7 @@ export async function createComments(
     if (!userEmail || !userId) {
       return NextResponse.json(
         { error: "Unauthorized action please sign in again" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -34,7 +34,7 @@ export async function createComments(
           error: "Validation failed",
           details: parsed.error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const { content, parentCommentId: parentId } = parsed.data;
@@ -51,7 +51,7 @@ export async function createComments(
           error:
             "Internal Server Error; Failed to retrieve user information or user not found",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -69,7 +69,6 @@ export async function createComments(
           user.profilePic && user.profilePic.trim() !== ""
             ? user.profilePic
             : "/default_profile.jpg",
-
       },
     });
 
@@ -86,14 +85,14 @@ export async function createComments(
     console.log(
       err instanceof Error
         ? err.message
-        : "Internal Server Error; Something went wrong while creating comment"
+        : "Internal Server Error; Something went wrong while creating comment",
     );
   }
 }
 
 export async function getCommentsForPost(
   req: NextRequest,
-  params: { postId: string }
+  params: { postId: string },
 ) {
   try {
     const { postId } = params;
@@ -103,7 +102,19 @@ export async function getCommentsForPost(
     if (!postId) {
       return NextResponse.json(
         { error: "postId is required" },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { commentsDisabled: true },
+    });
+
+    if (post && post.commentsDisabled) {
+      return NextResponse.json(
+        { error: "comments for this posts are disabled" },
+        { status: 400 },
       );
     }
 
@@ -132,7 +143,7 @@ export async function getCommentsForPost(
           ...comment,
           replyCount: totalReplies,
         };
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -145,14 +156,14 @@ export async function getCommentsForPost(
     console.error("Failed to fetch comments:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function getRepliesForComment(
   req: NextRequest,
-  params: { postId: string; commentId: string }
+  params: { postId: string; commentId: string },
 ) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
@@ -160,17 +171,37 @@ export async function getRepliesForComment(
     if (!userEmail || !userId) {
       return NextResponse.json(
         { error: "Unauthorized action please sign in again" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { postId, commentId } = params;
+
+    if (!postId || !commentId) {
+      return NextResponse.json(
+        { error: "postId and commentId are required" },
+        { status: 400 },
+      );
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { commentsDisabled: true },
+    });
+
+    if (post && post.commentsDisabled) {
+      return NextResponse.json(
+        { error: "comments for this posts are disabled" },
+        { status: 401 },
+      );
+    }
+
     const cursor = req.nextUrl.searchParams.get("cursor");
 
     if (!postId || !commentId) {
       return NextResponse.json(
         { error: "postId and commentId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -197,7 +228,7 @@ export async function getRepliesForComment(
     console.error("Failed to fetch replies:", error);
     return NextResponse.json(
       { error: "Internal server error; fetching replies" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -11,6 +11,7 @@ export default function PostMediaGrid({
   content,
   maxVisible = 4,
   isLoading,
+  onClick,
 }: {
   postInfo: {
     id: string;
@@ -32,13 +33,14 @@ export default function PostMediaGrid({
   content: string | undefined;
   maxVisible?: number;
   isLoading: boolean;
+  onClick?: (index: number) => void;
 }) {
   const [postModalOpen, setPostModalOpen] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   const openPost = (index: number) => {
     setCurrentMediaIndex(index);
-    setPostModalOpen(true);
+    onClick?.(index);
   };
 
   if (!media || media.length === 0) return null;
@@ -141,17 +143,6 @@ export default function PostMediaGrid({
           </div>
         );
       })}
-
-      {postModalOpen && (
-        <PostDetailsModal
-          postInfo={postInfo}
-          media={nMedia}
-          title={title}
-          content={content}
-          clickedIndex={currentMediaIndex}
-          onClose={() => setPostModalOpen(false)}
-        />
-      )}
     </div>
   );
 }

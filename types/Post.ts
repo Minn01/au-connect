@@ -1,3 +1,5 @@
+import LinkEmbed from "./LinkEmbeds";
+
 type PostType = {
   // ---------- core ----------
   id: string;
@@ -20,6 +22,8 @@ type PostType = {
   title?: string | null;
   content?: string;
 
+  commentsDisabled?: boolean;
+
   media?:
     | {
         blobName: string;
@@ -32,9 +36,19 @@ type PostType = {
       }[]
     | null;
 
+  links?: LinkEmbed[] | null;
+
+  pollOptions: string[] | null;
+  pollEndsAt: Date | undefined;
+  pollVotes?: Record<string, string[]>;
+  // pollSettings?: {
+  //   multipleChoice?: boolean;
+  // } | null;
+
   isLiked?: boolean;
   likeCount?: number;
   commentCount?: number;
+  shareCount?: number;
   numOfComments?: number;
 
   createdAt?: string | Date;

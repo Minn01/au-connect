@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-import prisma from "./prisma";
 import {
   BlobSASPermissions,
   BlobServiceClient,
@@ -7,6 +6,7 @@ import {
   StorageSharedKeyCredential,
 } from "@azure/storage-blob";
 
+import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
 import { CreatePostSchema, EditPostSchema } from "@/zod/PostSchema";
 import {
@@ -43,7 +43,7 @@ export async function createPost(req: NextRequest) {
       );
     }
 
-    const data = parsed.data;
+    const { pollDuration, ...data } = parsed.data;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -60,6 +60,20 @@ export async function createPost(req: NextRequest) {
       );
     }
 
+    // handle post duration
+    const pollData: any = {};
+    if (data.postType === "poll") {
+      pollData.pollOptions = data.pollOptions || [];
+      pollData.pollVotes = {}; // Initialize empty votes
+
+      // Calculate poll end date
+      if (pollDuration) {
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + pollDuration);
+        pollData.pollEndsAt = endDate;
+      }
+    }
+
     const post = await prisma.post.create({
       data: {
         userId,
@@ -68,7 +82,8 @@ export async function createPost(req: NextRequest) {
           user.profilePic && user.profilePic.trim() !== ""
             ? user.profilePic
             : "/default_profile.jpg",
-        ...data, // title, content, media
+        ...pollData,
+        ...data, // title, content, media, visibility and stuff
       },
     });
 
@@ -269,12 +284,16 @@ export async function editPost(req: NextRequest) {
       );
     }
 
-    const data = parsed.data;
+    const { pollDuration, ...data } = parsed.data;
 
     // Check if post exists and belongs to user
     const existingPost = await prisma.post.findUnique({
       where: { id: postId },
-      select: { userId: true, media: true },
+      select: {
+        userId: true,
+        media: true,
+        pollVotes: true,
+      },
     });
 
     if (!existingPost) {
@@ -286,6 +305,20 @@ export async function editPost(req: NextRequest) {
         { error: "Unauthorized to edit this post" },
         { status: 403 },
       );
+    }
+
+    // 🔒 Prevent editing poll structure after votes exist
+    if (
+      data.postType === "poll" &&
+      existingPost.pollVotes &&
+      typeof existingPost.pollVotes === "object" &&
+      !Array.isArray(existingPost.pollVotes)
+    ) {
+      const hasVotes = Object.keys(existingPost.pollVotes).length > 0;
+
+      if (hasVotes) {
+        delete data.pollOptions;
+      }
     }
 
     // Handle blob deletion if media changed
@@ -354,6 +387,10 @@ export async function editPost(req: NextRequest) {
       where: { id: postId },
       data: {
         ...data,
+        // Calculate pollEndsAt if pollDuration is provided
+        ...(pollDuration && {
+          pollEndsAt: new Date(Date.now() + pollDuration * 86400000),
+        }),
         updatedAt: new Date(),
       },
     });

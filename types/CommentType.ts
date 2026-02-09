@@ -9,3 +9,4 @@ type CommentType = {
 };
 
 export default CommentType;
+

@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   MessageCircleMore,
-  UserRound,
   LogOut,
 } from "lucide-react";
 import { useState } from "react";
@@ -32,7 +31,6 @@ import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 import { useFeedStore } from "@/lib/stores/feedStore";
 import { buildSlug } from "@/app/profile/utils/buildSlug";
 import PopupModal from "./PopupModal";
-import { fetchUnreadCount } from "@/lib/notifications";
 
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
@@ -48,7 +46,7 @@ const SearchResultItem = ({
 }) => {
   const resolvedProfilePic = useResolvedMediaUrl(
     user.profilePic,
-    "/default_profile.jpg"
+    "/default_profile.jpg",
   );
 
   return (
@@ -65,9 +63,7 @@ const SearchResultItem = ({
       />
       <div>
         <p className="text-sm font-medium text-gray-900">{user.username}</p>
-        {user.title && (
-          <p className="text-xs text-gray-500">{user.title}</p>
-        )}
+        {user.title && <p className="text-xs text-gray-500">{user.title}</p>}
       </div>
     </button>
   );
@@ -93,7 +89,7 @@ export default function Header() {
     queryKey: ["search-users", query],
     queryFn: async () => {
       const res = await fetch(
-        `/api/connect/v1/search/users?q=${encodeURIComponent(query)}`
+        `/api/connect/v1/search/users?q=${encodeURIComponent(query)}`,
       );
       if (!res.ok) throw new Error("Search failed");
       return res.json();
@@ -103,7 +99,7 @@ export default function Header() {
 
   const resolvedProfilePicUrl = useResolvedMediaUrl(
     user?.profilePic,
-    "/default_profile.jpg"
+    "/default_profile.jpg",
   );
 
   const navBarIndicatedPages = [
@@ -127,23 +123,20 @@ export default function Header() {
 
   const scrollFeedToTop = useFeedStore((s) => s.scrollToTop);
 
-  //  notifications unread count
-  const { data: unreadData, refetch: refetchUnread } = useQuery({
-    queryKey: ["notifications-unread-count"],
-    queryFn: fetchUnreadCount,
-    refetchInterval: 60_000, // refresh
-  });
-
-  const unreadCount = unreadData?.count ?? 0;
-
   return hidden ? null : (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div
-            onClick={scrollFeedToTop}
-            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => {
+              if (currentPage == MAIN_PAGE_PATH) {
+                scrollFeedToTop();
+              } else {
+                router.push(MAIN_PAGE_PATH);
+              }
+            }}
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-1"
           >
             <Image
               src="/au-connect-logo.png"
@@ -151,7 +144,7 @@ export default function Header() {
               height={45}
               alt="logo"
             />
-            <h1 className="text-lg font-bold text-gray-900">AU Connect</h1>
+            <h1 className="text-2xl font-bold text-gray-900">AU Connect</h1>
           </div>
 
           {/* 🔍 DESKTOP SEARCH */}
@@ -181,6 +174,7 @@ export default function Header() {
                     </div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map((u: any) => {
+                      // Ensure we have a proper slug (API should provide it, but fallback to buildSlug)
                       const userSlug = u.slug || buildSlug(u.username, u.id);
 
                       return (
@@ -196,9 +190,7 @@ export default function Header() {
                       );
                     })
                   ) : (
-                    <div className="p-3 text-sm text-gray-500">
-                      No results
-                    </div>
+                    <div className="p-3 text-sm text-gray-500">No results</div>
                   )}
                 </div>
               )}
@@ -217,32 +209,17 @@ export default function Header() {
               },
               {
                 href: NOTIFICATION_PAGE_PATH,
-                icon: (
-                  <div className="relative">
-                    <Bell />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                  </div>
-                ),
+                icon: <Bell />,
                 label: "Notification",
               },
             ].map((item, i) => (
               <Link
                 key={i}
                 href={item.href}
-                onClick={() => {
-                  if (item.href === NOTIFICATION_PAGE_PATH) {
-                    refetchUnread();
-                  }
-                }}
-                className={`flex flex-col items-center gap-1 ${
-                  currentPage === item.href
-                    ? "text-red-500"
-                    : "text-gray-600"
+                className={`flex flex-col items-center gap-1 hover:text-red-500 rounded-lg ${
+                  currentPage === item.href ? "text-red-500" : "text-gray-600"
                 }`}
+                title={`${item.label}`}
               >
                 {item.icon}
                 <span className="text-xs">{item.label}</span>
@@ -255,14 +232,19 @@ export default function Header() {
                 <Image
                   src={resolvedProfilePicUrl}
                   alt="avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
+                  title="Profile"
+                  width={38}
+                  height={38}
+                  className="rounded-full border-red-400 border-2 shadow-lg hover:transition-transform hover:scale-105 active:opacity-80 cursor-pointer"
                 />
               </button>
 
-              <button onClick={() => setShowModal(true)}>
-                <LogOut className="w-5 h-5 text-gray-600 ml-5" />
+              <button
+                title="Logout"
+                className="hover:bg-gray-100 rounded-lg p-3 ml-2 active:opacity-80 acitve:scale-95 transition cursor-pointer"
+                onClick={() => setShowModal(true)}
+              >
+                <LogOut className="w-5 h-5 text-gray-600" />
               </button>
             </div>
           </nav>

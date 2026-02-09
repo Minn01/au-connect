@@ -1,10 +1,7 @@
+import PostType from "./Post";
+
 type PostDetailsModalTypes = {
-  postInfo: {
-    id: string;
-    username: string | undefined;
-    profilePic: string | undefined | null;
-    createdAt: string | Date | undefined;
-  };
+  postInfo: PostType;
   media?: { url: string; type: string }[] | null;
   title?: string | null;
   content: string | undefined;

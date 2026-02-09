@@ -1,3 +1,4 @@
+"use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import CommentInput from "./CommentInput";
@@ -13,7 +14,6 @@ import parseDate from "../profile/utils/parseDate";
 import PostDetailsModalTypes from "@/types/PostDetailsModalTypes";
 import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 
-
 export default function PostDetailsModal({
   postInfo,
   media,
@@ -23,10 +23,16 @@ export default function PostDetailsModal({
   onClose,
 }: PostDetailsModalTypes) {
   const mediaList = media ?? [];
-  const hasMedia = mediaList.length > 0;
-  const avatarUrl = useResolvedMediaUrl(postInfo.profilePic, "/default_profile.jpg");
+  const hasMedia = mediaList.length > 0 || postInfo.postType === "poll";
+  const avatarUrl = useResolvedMediaUrl(
+    postInfo.profilePic,
+    "/default_profile.jpg",
+  );
 
   const queryClient = useQueryClient();
+
+  // Check if comments are disabled for this post
+  const commentsDisabled = postInfo.commentsDisabled ?? false;
 
   const {
     data,
@@ -36,21 +42,26 @@ export default function PostDetailsModal({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useTopLevelComments(postInfo.id);
+  } = useTopLevelComments(postInfo.id, commentsDisabled ?? false);
 
   const comments: CommentType[] =
     data?.pages.flatMap((page) => page.comments) ?? [];
 
   const createCommentMutation = useMutation({
     mutationFn: createComment,
-
     onSuccess: (newComment, variables) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { postId, parentId } = variables;
+      const { postId, parentCommentId } = variables;
 
       queryClient.invalidateQueries({
         queryKey: ["comments", postId],
       });
+
+      // Also invalidate replies if it was a nested reply
+      if (parentCommentId) {
+        queryClient.invalidateQueries({
+          queryKey: ["replies", parentCommentId],
+        });
+      }
     },
   });
 
@@ -60,13 +71,46 @@ export default function PostDetailsModal({
       onClick={onClose}
     >
       <div
-        className={`bg-white w-full ${hasMedia ? "max-w-6xl md:flex-row" : "max-w-xl"
-          } h-[90vh] rounded-lg overflow-hidden flex`}
+        className={`bg-white w-full ${
+          hasMedia ? "max-w-6xl md:flex-row" : "max-w-xl"
+        } h-[90vh] rounded-lg overflow-hidden flex`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* LEFT: Media carousel */}
+        {/* LEFT: Media / Content Side */}
+
+        {postInfo.postType === "poll" ? (
+          /* 
+
+          <PostPollView
+            options={postInfo.pollOptions ?? []}
+            votes={postInfo.pollVotes}
+            endsAt={postInfo.pollEndsAt}
+          />
+            */
+
+          <MediaCarousel
+            postType={postInfo.postType}
+            pollOptions={postInfo.pollOptions ?? []}
+            pollVotes={postInfo.pollVotes}
+            pollEndsAt={postInfo.pollEndsAt}
+            mediaList={mediaList}
+            clickedIndex={clickedIndex}
+            onClose={onClose}
+          />
+        ) : (
+          hasMedia && (
+            <MediaCarousel
+              postType={postInfo.postType ?? "media"}
+              mediaList={mediaList}
+              clickedIndex={clickedIndex}
+              onClose={onClose}
+            />
+          )
+        )}
 
         {/* show media carousel only if the post contains images */}
+        {/* 
+
         {hasMedia && (
           <MediaCarousel
             mediaList={mediaList}
@@ -74,11 +118,13 @@ export default function PostDetailsModal({
             onClose={onClose}
           />
         )}
+            */}
 
         {/* RIGHT: Post details + comments */}
         <div
-          className={`flex flex-col ${hasMedia ? "w-full md:w-[420px] border-l" : "w-full"
-            }`}
+          className={`flex flex-col ${
+            hasMedia ? "w-full md:w-[420px] border-l" : "w-full"
+          }`}
         >
           {/* Header */}
           <div className="flex items-center gap-3 p-4">
@@ -109,71 +155,103 @@ export default function PostDetailsModal({
 
           <PostContentSection title={title} content={content} />
 
-          {/* Comments */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {/* Initial loading */}
-            {isLoading && (
-              <div className="text-sm text-gray-500">Loading comments...</div>
-            )}
-
-            {/* Error */}
-            {isError && (
-              <div className="text-sm text-red-500">
-                Failed to load comments
+          {/* Comments Section */}
+          {commentsDisabled ? (
+            // Disabled comments message
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="text-center">
+                <svg
+                  className="w-12 h-12 mx-auto mb-3 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                  />
+                </svg>
+                <p className="text-gray-600 font-medium">
+                  Comments are disabled
+                </p>
+                <p className="text-gray-500 text-sm mt-1">
+                  The author has turned off commenting for this post
+                </p>
               </div>
-            )}
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Initial loading */}
+                {isLoading && (
+                  <div className="text-sm text-gray-500">
+                    Loading comments...
+                  </div>
+                )}
 
-            {/* Render comments */}
-            {!isLoading &&
-              comments.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  postId={postInfo.id}
-                  comment={comment}
-                  createCommentMutation={createCommentMutation}
+                {/* Error */}
+                {isError && (
+                  <div className="text-sm text-red-500">
+                    Failed to load comments
+                  </div>
+                )}
+
+                {/* Render comments */}
+                {!isLoading &&
+                  comments.map((comment) => (
+                    <CommentItem
+                      key={comment.id}
+                      postId={postInfo.id}
+                      comment={comment}
+                      createCommentMutation={createCommentMutation}
+                    />
+                  ))}
+
+                {/* Empty state */}
+                {!isLoading && comments.length === 0 && (
+                  <div className="text-sm text-gray-500">
+                    No comments yet. Be the first 👀
+                  </div>
+                )}
+
+                {/* Load more comments */}
+                {hasNextPage && (
+                  <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="block mx-auto text-sm text-blue-500 hover:underline disabled:opacity-50"
+                  >
+                    {isFetchingNextPage
+                      ? "Loading more..."
+                      : comments.length > 15 && "Load more comments"}
+                  </button>
+                )}
+
+                {/* error handling */}
+                {isError && (
+                  <div className="text-sm text-red-500">
+                    {error instanceof Error
+                      ? error.message
+                      : "Something went wrong while loading comments"}
+                  </div>
+                )}
+              </div>
+              {/* Comment input */}
+              <div className="border-t p-3">
+                <CommentInput
+                  isLoading={createCommentMutation.isPending}
+                  onSubmit={(text) => {
+                    createCommentMutation.mutate({
+                      postId: postInfo.id,
+                      content: text, // no parentId for top-level
+                    });
+                  }}
                 />
-              ))}
-
-            {/* Empty state */}
-            {!isLoading && comments.length === 0 && (
-              <div className="text-sm text-gray-500">
-                No comments yet. Be the first 👀
               </div>
-            )}
-
-            {/* Load more comments */}
-            {hasNextPage && (
-              <button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="block mx-auto text-sm text-blue-500 hover:underline disabled:opacity-50"
-              >
-                {isFetchingNextPage ? "Loading more..." : comments.length > 15 && "Load more comments"}
-              </button>
-            )}
-
-            {/* error handling */}
-            {isError && (
-              <div className="text-sm text-red-500">
-                {error instanceof Error
-                  ? error.message
-                  : "Something went wrong while loading comments"}
-              </div>
-            )}
-          </div>
-
-          {/* Comment input */}
-          <div className="border-t p-3">
-            <CommentInput
-              isLoading={createCommentMutation.isPending}
-              onSubmit={(text) => {
-                createCommentMutation.mutate({
-                  postId: postInfo.id,
-                  content: text, // no parentId for top-level
-                });
-              }}
-            />
-          </div>
+            </>
+          )}
         </div>
       </div>
 

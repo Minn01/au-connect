@@ -1,39 +1,5 @@
 import { Download } from "lucide-react";
-
-const FILE_STYLES: Record<string, { label: string; className: string }> = {
-  "application/pdf": {
-    label: "PDF",
-    className: "bg-red-100 text-red-700",
-  },
-  "application/msword": {
-    label: "DOC",
-    className: "bg-blue-100 text-blue-700",
-  },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
-    label: "DOCX",
-    className: "bg-blue-100 text-blue-700",
-  },
-  "application/vnd.ms-excel": {
-    label: "XLS",
-    className: "bg-green-100 text-green-700",
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
-    label: "XLSX",
-    className: "bg-green-100 text-green-700",
-  },
-  "application/vnd.ms-powerpoint": {
-    label: "PPT",
-    className: "bg-orange-100 text-orange-700",
-  },
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
-    label: "PPTX",
-    className: "bg-orange-100 text-orange-700",
-  },
-  "application/zip": {
-    label: "ZIP",
-    className: "bg-purple-100 text-purple-700",
-  },
-};
+import { FILE_STYLES } from "@/lib/constants";
 
 function formatBytes(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -111,4 +77,3 @@ export default function PostAttachments({
     </div>
   );
 }
-
