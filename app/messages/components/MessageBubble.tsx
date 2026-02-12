@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChatMessage } from "@/types/ChatMessage";
-import { formatTime } from "../util/messagingUtils";
+import { formatSmartStamp, formatFullDateTime } from "../util/messagingUtils";
 
 export default function MessageBubble({
   m,
@@ -27,8 +27,13 @@ export default function MessageBubble({
     isFailed ? "opacity-80" : "",
   ].join(" ");
 
-  const statusText =
-    isIncoming ? null : isFailed ? "Failed" : isSending ? "Sending…" : null;
+  const statusText = isIncoming
+    ? null
+    : isFailed
+      ? "Failed"
+      : isSending
+        ? "Sending…"
+        : null;
 
   return (
     <div className={`px-4 md:px-6 py-2 flex ${isIncoming ? "justify-start" : "justify-end"}`}>
@@ -43,7 +48,14 @@ export default function MessageBubble({
               {statusText}
             </span>
           )}
-          <p className="text-xs text-gray-400">{formatTime(m.createdAt)}</p>
+
+          {/* ✅ Smart time + hover full date-time */}
+          <p
+            className="text-xs text-gray-400 cursor-default"
+            title={formatFullDateTime(m.createdAt)}
+          >
+            {formatSmartStamp(m.createdAt)}
+          </p>
         </div>
 
         {canActions && (

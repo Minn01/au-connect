@@ -1,4 +1,3 @@
-// lib/messagingFunctions.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
@@ -23,28 +22,15 @@ export async function getMyInbox(req: NextRequest) {
   try {
     const authUserId = getAuthUserIdFromReq(req);
 
-    const connections = await prisma.connection.findMany({
-      where: { OR: [{ userAId: authUserId }, { userBId: authUserId }] },
-      select: { userAId: true, userBId: true },
-    });
-
-    const friendIds = connections.map((c) =>
-      c.userAId === authUserId ? c.userBId : c.userAId
-    );
-
-    if (!friendIds.length) return NextResponse.json({ data: [] });
-
-    const friends = await prisma.user.findMany({
-      where: { id: { in: friendIds } },
-      select: { id: true, username: true, title: true, profilePic: true },
-    });
-
-    const pairs = friendIds.map((fid) => normalizePair(authUserId, fid));
-
-    const convs = await prisma.conversation.findMany({
+    // 1️⃣ Get all conversations where I am userA or userB
+    const conversations = await prisma.conversation.findMany({
       where: {
-        OR: pairs.map((p) => ({ userAId: p.userAId, userBId: p.userBId })),
+        OR: [
+          { userAId: authUserId },
+          { userBId: authUserId },
+        ],
       },
+      orderBy: { lastMessageAt: "desc" },
       select: {
         id: true,
         userAId: true,
@@ -55,51 +41,52 @@ export async function getMyInbox(req: NextRequest) {
       },
     });
 
-    // otherUserId -> conv
-    const convByOther = new Map<
-      string,
-      {
-        id: string;
-        userAId: string;
-        userBId: string;
-        lastMessageAt: Date | null;
-        userALastReadAt: Date | null;
-        userBLastReadAt: Date | null;
-      }
-    >();
-
-    for (const c of convs) {
-      const otherId = c.userAId === authUserId ? c.userBId : c.userAId;
-      convByOther.set(otherId, c);
+    if (!conversations.length) {
+      return NextResponse.json({ data: [] });
     }
 
-    // last message per conversation (mongo-safe, N queries but ok for small lists)
+    // 2️⃣ Determine the "other user" ids
+    const otherUserIds = conversations.map((c) =>
+      c.userAId === authUserId ? c.userBId : c.userAId
+    );
+
+    // 3️⃣ Fetch those users
+    const users = await prisma.user.findMany({
+      where: { id: { in: otherUserIds } },
+      select: { id: true, username: true, title: true, profilePic: true },
+    });
+
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    // 4️⃣ Get last message for each conversation
     const lastMsgMap = new Map<
       string,
       { text: string | null; senderId: string; createdAt: Date }
     >();
 
-    for (const c of convs) {
+    for (const c of conversations) {
       const last = await prisma.message.findFirst({
         where: { conversationId: c.id },
         orderBy: { createdAt: "desc" },
         select: { text: true, senderId: true, createdAt: true },
       });
-      if (last) lastMsgMap.set(c.id, last);
+
+      if (last) {
+        lastMsgMap.set(c.id, last);
+      }
     }
 
-    // unread count per conversation
+    // 5️⃣ Compute unread count
     const unreadCountMap = new Map<string, number>();
 
-    for (const c of convs) {
-      const readField = getMyReadField(c, authUserId);
-      const myLastReadAt =
-        readField === "userALastReadAt" ? c.userALastReadAt : c.userBLastReadAt;
+    for (const c of conversations) {
+      const isUserA = c.userAId === authUserId;
+      const myLastReadAt = isUserA ? c.userALastReadAt : c.userBLastReadAt;
 
       const count = await prisma.message.count({
         where: {
           conversationId: c.id,
-          receiverId: authUserId, // only messages sent TO ME
+          receiverId: authUserId,
           ...(myLastReadAt ? { createdAt: { gt: myLastReadAt } } : {}),
         },
       });
@@ -107,27 +94,28 @@ export async function getMyInbox(req: NextRequest) {
       unreadCountMap.set(c.id, count);
     }
 
-    const inbox = friends
-      .map((f) => {
-        const conv = convByOther.get(f.id);
-        const last = conv ? lastMsgMap.get(conv.id) : null;
+    // 6️⃣ Build inbox
+    const inbox = conversations.map((c) => {
+      const otherUserId =
+        c.userAId === authUserId ? c.userBId : c.userAId;
 
-        const lastPrefix = last && last.senderId === authUserId ? "You: " : "";
-        const lastText = last?.text ?? null;
+      const user = userMap.get(otherUserId);
+      if (!user) return null;
 
-        return {
-          user: f,
-          conversationId: conv?.id ?? null,
-          lastMessageAt: conv?.lastMessageAt ?? null,
-          lastMessageText: lastText ? `${lastPrefix}${lastText}` : null,
-          unreadCount: conv ? unreadCountMap.get(conv.id) ?? 0 : 0,
-        };
-      })
-      .sort((a, b) => {
-        const ta = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
-        const tb = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
-        return tb - ta;
-      });
+      const last = lastMsgMap.get(c.id);
+      const lastPrefix =
+        last && last.senderId === authUserId ? "You: " : "";
+
+      return {
+        user,
+        conversationId: c.id,
+        lastMessageAt: c.lastMessageAt,
+        lastMessageText: last?.text
+          ? `${lastPrefix}${last.text}`
+          : null,
+        unreadCount: unreadCountMap.get(c.id) ?? 0,
+      };
+    }).filter(Boolean);
 
     return NextResponse.json({ data: inbox });
   } catch (e: unknown) {
@@ -136,27 +124,36 @@ export async function getMyInbox(req: NextRequest) {
   }
 }
 
+
 /* =========================
    GET OR CREATE CONVERSATION
    POST /api/connect/v1/messages/conversation/with/:otherUserId
 ========================= */
-export async function getOrCreateConversation(req: NextRequest, otherUserId: string) {
+export async function getOrCreateConversation(
+  req: NextRequest,
+  otherUserId: string
+) {
   try {
     const authUserId = getAuthUserIdFromReq(req);
-    if (!otherUserId) return jsonError("otherUserId required", 400);
-    if (otherUserId === authUserId) return jsonError("Cannot message yourself", 400);
+
+    if (!otherUserId)
+      return jsonError("otherUserId required", 400);
+
+    if (otherUserId === authUserId)
+      return jsonError("Cannot message yourself", 400);
 
     const pair = normalizePair(authUserId, otherUserId);
 
-    const isConnected = await prisma.connection.findFirst({
-      where: { userAId: pair.userAId, userBId: pair.userBId },
-      select: { id: true },
-    });
+    // Anyone can message anyone
 
-    if (!isConnected) return jsonError("Not connected", 403);
-
+    // Check if conversation already exists
     const existing = await prisma.conversation.findUnique({
-      where: { userAId_userBId: { userAId: pair.userAId, userBId: pair.userBId } },
+      where: {
+        userAId_userBId: {
+          userAId: pair.userAId,
+          userBId: pair.userBId,
+        },
+      },
       select: { id: true },
     });
 
@@ -173,12 +170,15 @@ export async function getOrCreateConversation(req: NextRequest, otherUserId: str
         select: { id: true },
       }));
 
-    return NextResponse.json({ data: { conversationId: conversation.id } });
+    return NextResponse.json({
+      data: { conversationId: conversation.id },
+    });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+
 
 /* =========================
    MARK CONVERSATION AS READ

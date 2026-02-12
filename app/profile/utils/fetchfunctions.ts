@@ -195,7 +195,7 @@ export function useEditPost() {
   return useMutation({
     mutationFn: editPost,
     onSuccess: (updatedPost) => {
-      // ✅ Update the post in the infinite query cache
+      // Update the post in the infinite query cache
       queryClient.setQueryData(["posts"], (oldData: any) => {
         if (!oldData?.pages) return oldData;
 

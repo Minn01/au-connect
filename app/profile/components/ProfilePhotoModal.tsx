@@ -28,7 +28,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 function isInternalProfileImageBlobName(blobName?: string) {
-  return !!blobName && blobName.startsWith("images/");
+  return !!blobName && blobName.startsWith("images/") ;
 }
 
 /**
