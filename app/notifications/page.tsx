@@ -8,16 +8,28 @@ import {
   fetchNotifications,
   markNotificationRead,
   markAllNotificationsRead,
-} from "@/lib/notifications";
+} from "@/lib/client/notifications.client";
 
 import { timeAgo } from "@/lib/timeAgo";
 import { buildSlug } from "@/app/profile/utils/buildSlug";
 
+type NotificationType =
+  | "CONNECTION_REQUEST"
+  | "CONNECTION_ACCEPTED"
+  | "POST_LIKED"
+  | "POST_COMMENTED"
+  | "COMMENT_REPLIED"
+  | "POST_SHARED"
+  | "POST_VOTED";
+
 type Notification = {
   id: string;
-  type: "CONNECTION_REQUEST" | "CONNECTION_ACCEPTED";
+  type: NotificationType;
   isRead: boolean;
   createdAt: string;
+
+  entityId?: string; 
+
   fromUser?: {
     id: string;
     username: string;
@@ -25,10 +37,19 @@ type Notification = {
   };
 };
 
+const notificationMessages: Record<NotificationType, string> = {
+  CONNECTION_REQUEST: "sent you a connection request",
+  CONNECTION_ACCEPTED: "accepted your connection request",
+  POST_LIKED: "liked your post",
+  POST_COMMENTED: "commented on your post",
+  COMMENT_REPLIED: "replied to your comment",
+  POST_SHARED: "shared your post",
+  POST_VOTED: "voted on your poll",
+};
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-
   const router = useRouter();
 
   useEffect(() => {
@@ -48,10 +69,44 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  const handleClick = async (notification: Notification) => {
+  // Mark as read
+  if (!notification.isRead) {
+    await markNotificationRead(notification.id);
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === notification.id ? { ...n, isRead: true } : n
+      )
+    );
+  }
+
+  // CONNECTION notifications → go to profile
+  if (
+    notification.type === "CONNECTION_REQUEST" ||
+    notification.type === "CONNECTION_ACCEPTED"
+  ) {
+    if (notification.fromUser?.id) {
+      const slug = buildSlug(
+        notification.fromUser.username || "",
+        notification.fromUser.id
+      );
+      router.push(`/profile/${slug}`);
+    }
+    return;
+  }
+
+  // POST + COMMENT notifications → go to post page
+  if (notification.entityId) {
+    router.push(`/posts/${notification.entityId}`);
+  }
+};
+
+
   return (
     <main className="min-h-screen bg-white">
-      <div className="h-full overflow-y-auto flex flex-col items-center pt-6 px-4 sm:pt-8 md:pt-10">
-        <section className="w-full sm:w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2">
+      <div className="h-full overflow-y-auto flex flex-col items-center pt-6 px-4">
+        <section className="w-full max-w-2xl">
+          {/* HEADER */}
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-lg font-bold text-neutral-800">
               Notifications
@@ -78,10 +133,14 @@ export default function NotificationsPage() {
             )}
           </div>
 
+          {/* LOADING */}
           {loading && (
-            <p className="text-neutral-500 text-sm">Loading notifications...</p>
+            <p className="text-neutral-500 text-sm">
+              Loading notifications...
+            </p>
           )}
 
+          {/* EMPTY STATE */}
           {!loading && notifications.length === 0 && (
             <div className="py-20 text-center">
               <h3 className="text-lg font-semibold text-neutral-800">
@@ -93,6 +152,7 @@ export default function NotificationsPage() {
             </div>
           )}
 
+          {/* LIST */}
           <div className="space-y-4">
             {notifications.map((notification) => {
               const fromUser = notification.fromUser;
@@ -100,36 +160,17 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={notification.id}
-                  onClick={async () => {
-                    if (!notification.isRead) {
-                      await markNotificationRead(notification.id);
-                      setNotifications((prev) =>
-                        prev.map((n) =>
-                          n.id === notification.id
-                            ? { ...n, isRead: true }
-                            : n
-                        )
-                      );
-                    }
-
-                    if (fromUser?.id) {
-                      const slug = buildSlug(
-                        fromUser.username || "",
-                        fromUser.id
-                      );
-                      router.push(`/profile/${slug}`);
-                    }
-                  }}
+                  onClick={() => handleClick(notification)}
                   className={`group relative overflow-hidden rounded-2xl p-6 border cursor-pointer transition-all duration-300 ${
                     notification.isRead
-                      ? "bg-linear-to-br from-neutral-50 to-neutral-100/50 border-neutral-200/50 hover:shadow-xl hover:scale-[1.02]"
-                      : "bg-linear-to-br from-blue-50 to-blue-100/50 border-blue-200 hover:shadow-xl hover:scale-[1.02]"
+                      ? "bg-neutral-50 border-neutral-200 hover:shadow-lg"
+                      : "bg-blue-50 border-blue-200 hover:shadow-lg"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     {/* AVATAR */}
                     <div className="relative">
-                      <div className="relative h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-neutral-200 group-hover:ring-blue-400 transition-all">
+                      <div className="relative h-14 w-14 rounded-xl overflow-hidden">
                         <Image
                           src={fromUser?.profilePic || "/default_profile.jpg"}
                           alt={fromUser?.username || "User"}
@@ -138,21 +179,17 @@ export default function NotificationsPage() {
                         />
                       </div>
                       {!notification.isRead && (
-                        <div className="absolute -top-1 -right-1 h-4 w-4 bg-blue-500 rounded-full border-2 border-white" />
+                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full border-2 border-white" />
                       )}
                     </div>
 
-                    {/* CONTENT */}
+                    {/* TEXT */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-neutral-900 hover:underline">
-                        {fromUser?.username || "Unknown user"}
-                      </p>
-
-                      <p className="text-sm text-neutral-600 font-medium">
-                        {notification.type === "CONNECTION_REQUEST" &&
-                          "sent you a connection request"}
-                        {notification.type === "CONNECTION_ACCEPTED" &&
-                          "accepted your connection request"}
+                      <p className="text-sm font-semibold text-neutral-900">
+                        <span className="font-bold">
+                          {fromUser?.username || "Someone"}
+                        </span>{" "}
+                        {notificationMessages[notification.type]}
                       </p>
 
                       <span className="text-xs text-neutral-500 mt-1 block">

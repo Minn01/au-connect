@@ -1,26 +1,3 @@
-import prisma from "./prisma";
-
-export async function createNotification({
-  userId,
-  fromUserId,
-  type,
-  entityId,
-}: {
-  userId: string;
-  fromUserId: string;
-  type: "CONNECTION_REQUEST" | "CONNECTION_ACCEPTED";
-  entityId?: string;
-}) {
-  return prisma.notification.create({
-    data: {
-      userId,
-      fromUserId,
-      type,
-      entityId,
-    },
-  });
-}
-
 export async function fetchNotifications() {
   const res = await fetch("/api/connect/v1/notifications", {
     credentials: "include",
@@ -31,10 +8,14 @@ export async function fetchNotifications() {
 }
 
 export async function markNotificationRead(id: string) {
-  await fetch(`/api/connect/v1/notifications/${id}`, {
+  const res = await fetch(`/api/connect/v1/notifications/${id}`, {
     method: "PATCH",
     credentials: "include",
   });
+
+  if (!res.ok) {
+    throw new Error("Failed to mark notification as read");
+  }
 }
 
 export async function fetchUnreadCount() {
@@ -42,6 +23,10 @@ export async function fetchUnreadCount() {
     "/api/connect/v1/notifications/unread-count",
     { credentials: "include" }
   );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch unread count");
+  }
 
   return res.json();
 }
@@ -61,4 +46,3 @@ export async function markAllNotificationsRead() {
 
   return res.json();
 }
-
