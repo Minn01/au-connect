@@ -24,6 +24,8 @@ export default function MessagePages() {
     deleteLocalMessage,
     getRowPreview,
     draftPeer,
+    deleteMessageForEveryone,
+    clearConversation,
   } = useMessaging();
 
   const selectedRow =
@@ -53,8 +55,8 @@ export default function MessagePages() {
         <ChatPane
           showChatMobile={showChatMobile}
           onBackMobile={() => setShowChatMobile(false)}
-          selectedName={headerName}      
-          selectedProfilePic={headerPic}   
+          selectedName={headerName}
+          selectedProfilePic={headerPic}
           selectedUserId={selectedUserId}
           selectedConversationId={selectedConversationId}
           messages={activeMessages}
@@ -67,6 +69,8 @@ export default function MessagePages() {
           loadingOlder={loadingOlder}
           onRetryMessage={retryMessage}
           onDeleteLocalMessage={deleteLocalMessage}
+          onDeleteForEveryone={deleteMessageForEveryone}
+          onClearConversation={clearConversation}
         />
       </div>
     </div>

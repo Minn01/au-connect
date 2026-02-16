@@ -14,7 +14,7 @@ import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 import MessageBubble from "./MessageBubble";
 import type { ChatMessage } from "@/types/ChatMessage";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatDayLabel } from "../util/messagingUtils";
 
 type TimelineItem =
@@ -43,6 +43,8 @@ export default function ChatPane({
   loadingOlder,
   onRetryMessage,
   onDeleteLocalMessage,
+  onDeleteForEveryone,
+  onClearConversation,
 }: {
   showChatMobile: boolean;
   onBackMobile: () => void;
@@ -60,15 +62,35 @@ export default function ChatPane({
   loadingOlder: boolean;
   onRetryMessage: (messageId: string) => void;
   onDeleteLocalMessage: (messageId: string) => void;
+  onDeleteForEveryone: (messageId: string) => void;
+  onClearConversation: () => void;
 }) {
   const hasSelection = !!selectedUserId;
-  const selectedAvatarUrl = useResolvedMediaUrl(selectedProfilePic, "/default_profile.jpg");
+  const selectedAvatarUrl = useResolvedMediaUrl(
+    selectedProfilePic,
+    "/default_profile.jpg"
+  );
+
+  const [openMenu, setOpenMenu] = useState(false);
+
+  // ✅ OPTIONAL logic only: close menu when click outside (no UI changes)
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!openMenu) return;
+
+    const onDocClick = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target as Node)) setOpenMenu(false);
+    };
+
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [openMenu]);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const lastConvRef = useRef<string | null>(null);
   const didInitialScrollRef = useRef(false);
 
-  // ✅ Build timeline with day separators
   const timeline = useMemo<TimelineItem[]>(() => {
     if (!messages.length) return [];
 
@@ -98,7 +120,6 @@ export default function ChatPane({
     }
   }, [selectedConversationId]);
 
-  // initial scroll to bottom
   useEffect(() => {
     if (!selectedConversationId) return;
     if (!timeline.length) return;
@@ -106,19 +127,26 @@ export default function ChatPane({
     if (!didInitialScrollRef.current) {
       didInitialScrollRef.current = true;
       requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({ index: "LAST", behavior: "auto", align: "end" });
+        virtuosoRef.current?.scrollToIndex({
+          index: "LAST",
+          behavior: "auto",
+          align: "end",
+        });
       });
     }
   }, [selectedConversationId, timeline.length]);
 
-  // keep at bottom when new messages arrive
   useEffect(() => {
     if (!selectedConversationId) return;
     if (!timeline.length) return;
 
     if (isAtBottomRef.current) {
       requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({ index: "LAST", behavior: "smooth", align: "end" });
+        virtuosoRef.current?.scrollToIndex({
+          index: "LAST",
+          behavior: "smooth",
+          align: "end",
+        });
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,7 +161,6 @@ export default function ChatPane({
         showChatMobile ? "flex" : "hidden md:flex",
       ].join(" ")}
     >
-      {/* ✅ EMPTY STATE (no user selected) */}
       {!hasSelection ? (
         <div className="flex-1 min-h-0 bg-gray-50 flex items-center justify-center p-8">
           <div className="w-full max-w-md bg-white border rounded-2xl shadow-sm p-8 text-center">
@@ -141,15 +168,19 @@ export default function ChatPane({
               <MailPlus className="w-7 h-7 text-gray-500" />
             </div>
 
-            <div className="mt-4 text-lg font-semibold text-gray-900">Your messages</div>
+            <div className="mt-4 text-lg font-semibold text-gray-900">
+              Your messages
+            </div>
 
             <div className="mt-2 text-sm text-gray-500 leading-relaxed">
               Select a conversation on the left, or click the{" "}
-              <span className="font-medium text-gray-700">Mail+</span> icon to start a new chat.
+              <span className="font-medium text-gray-700">Mail+</span> icon to
+              start a new chat.
             </div>
 
             <div className="mt-5 text-xs text-gray-400">
-              Tip: You can also click <span className="font-medium">Message</span> on someone’s profile.
+              Tip: You can also click{" "}
+              <span className="font-medium">Message</span> on someone’s profile.
             </div>
           </div>
         </div>
@@ -164,7 +195,12 @@ export default function ChatPane({
               />
 
               <div className="relative w-11 h-11 shrink-0">
-                <Image src={selectedAvatarUrl} alt={selectedName} fill className="rounded-full object-cover" />
+                <Image
+                  src={selectedAvatarUrl}
+                  alt={selectedName}
+                  fill
+                  className="rounded-full object-cover"
+                />
               </div>
 
               <h2 className="ml-3 font-semibold text-gray-900 text-base md:text-lg truncate">
@@ -172,7 +208,28 @@ export default function ChatPane({
               </h2>
             </div>
 
-            <MoreVertical className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700 shrink-0 ml-2" />
+            {/* ✅ only logic changes here */}
+            <div className="relative" ref={menuRef}>
+              <MoreVertical
+                className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700"
+                onClick={() => setOpenMenu((v) => !v)}
+              />
+
+              {openMenu && (
+                <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg z-50 overflow-hidden">
+                  <button
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    onClick={() => {
+                      onClearConversation();
+                      setOpenMenu(false);
+                    }}
+                  >
+                    Clear chat
+                  </button>
+                </div>
+              )}
+
+            </div>
           </div>
 
           {/* Messages */}
@@ -182,7 +239,10 @@ export default function ChatPane({
                 <div className="max-w-md w-full bg-white border rounded-xl p-6 text-center shadow-sm">
                   <div className="text-sm text-gray-500">
                     Say hi to{" "}
-                    <span className="font-medium text-gray-900">{selectedName}</span> 👋
+                    <span className="font-medium text-gray-900">
+                      {selectedName}
+                    </span>{" "}
+                    👋
                   </div>
                   <div className="mt-1 text-xs text-gray-400">
                     Your messages are private between you two.
@@ -219,9 +279,12 @@ export default function ChatPane({
                   return (
                     <MessageBubble
                       m={m}
-                      isIncoming={!!selectedUserId && m.senderId === selectedUserId}
+                      isIncoming={
+                        !!selectedUserId && m.senderId === selectedUserId
+                      }
                       onRetry={onRetryMessage}
                       onDeleteLocal={onDeleteLocalMessage}
+                      onDeleteForEveryone={onDeleteForEveryone} // ✅ PASS DOWN
                     />
                   );
                 }}

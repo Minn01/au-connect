@@ -186,6 +186,30 @@ export function useMessaging() {
 
       const rows: InboxRow[] = json?.data || [];
       setInbox(rows);
+      // 🔥 Auto refresh active conversation if server state changed
+      const convId = selectedConvRef.current;
+      if (convId && !isDraftConvId(convId)) {
+        const serverRow = rows.find(r => r.conversationId === convId);
+        const serverLast = serverRow?.lastMessageAt ?? null;
+
+        const localMsgs = messagesByConvRef.current[convId] ?? [];
+        const localLastSent = [...localMsgs]
+          .reverse()
+          .find(m => m.status === "sent");
+
+        const localLast = localLastSent?.createdAt ?? null;
+
+        // Case 1: server changed lastMessageAt (delete happened)
+        if (serverLast !== localLast) {
+          fetchMessagesReplace(convId);
+        }
+
+        // Case 2: conversation cleared (server null but local still has messages)
+        if (!serverLast && localMsgs.length > 0) {
+          fetchMessagesReplace(convId);
+        }
+      }
+
 
       // keep your existing auto-select logic
       setSelectedUserId((prev) => {
@@ -686,6 +710,56 @@ export function useMessaging() {
     if (!isDraftConvId(convId)) safeRemovePending(convId, messageId);
   }, []);
 
+  const deleteMessageForEveryone = useCallback(async (messageId: string) => {
+    const convId = selectedConvRef.current;
+    if (!convId) return;
+
+    const res = await fetch(
+      `/api/connect/v1/messages/${convId}/message/${messageId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    if (!res.ok) return;
+
+    // Remove locally
+    setMessagesByConv((prev) => {
+      const cur = prev[convId] ?? [];
+      return {
+        ...prev,
+        [convId]: cur.filter((m) => m.id !== messageId),
+      };
+    });
+
+    // Refresh inbox preview
+    fetchInbox();
+  }, []);
+
+  const clearConversation = useCallback(async () => {
+    const convId = selectedConvRef.current;
+    if (!convId) return;
+
+    const res = await fetch(
+      `/api/connect/v1/messages/${convId}/clear`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    if (!res.ok) return;
+
+    // Clear local messages
+    setMessagesByConv((prev) => ({
+      ...prev,
+      [convId]: [],
+    }));
+
+    fetchInbox();
+  }, []);
+
   /** Inbox preview helper */
   const getRowPreview = useCallback((row: InboxRow) => {
     const convId = row.conversationId;
@@ -728,5 +802,7 @@ export function useMessaging() {
     deleteLocalMessage,
     getRowPreview,
     draftPeer,
+    deleteMessageForEveryone,
+    clearConversation,
   };
 }
