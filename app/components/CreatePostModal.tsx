@@ -52,6 +52,7 @@ const formatFileSize = (bytes: number): string => {
 const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
 const EMPTY_JOB_DRAFT: JobDraft = {
+  id: "",
   jobTitle: "",
   companyName: "",
   location: "",
@@ -80,7 +81,6 @@ export default function CreatePostModal({
   const [title, setTitle] = useState("");
   const [disableComments, setDisableComments] = useState(false);
 
-  const modalRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
@@ -137,24 +137,6 @@ export default function CreatePostModal({
   const handleClose = () => {
     setIsOpen(false);
   };
-
-  // close modal when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        handleClose();
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen]);
 
   // Load initial post data when in edit mode
   useEffect(() => {
@@ -465,9 +447,12 @@ export default function CreatePostModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 animate-in fade-in duration-200">
+      <div
+        onMouseDown={() => setIsOpen(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 animate-in fade-in duration-200"
+      >
         <div
-          ref={modalRef}
+          onMouseDown={(e) => e.stopPropagation()}
           className="w-full max-w-2xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-y-auto transform animate-in zoom-in-95 duration-300"
         >
           {/* Header */}

@@ -93,6 +93,7 @@ export async function createPost(req: NextRequest) {
           commentsDisabled: data.commentsDisabled,
 
           media: data.media ?? [],
+          mediaTypes: extractMediaTypes(data.media ?? []),
           links: data.links ?? [],
 
           // Poll handling
@@ -151,14 +152,14 @@ export async function createPost(req: NextRequest) {
 
           const thumbnailUrl = mediaItem.thumbnailBlobName
             ? `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.thumbnailBlobName}?${generateBlobSASQueryParameters(
-                {
-                  containerName: AZURE_STORAGE_CONTAINER_NAME,
-                  blobName: mediaItem.thumbnailBlobName,
-                  permissions: BlobSASPermissions.parse("r"),
-                  expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
-                },
-                sharedKeyCredential,
-              ).toString()}`
+              {
+                containerName: AZURE_STORAGE_CONTAINER_NAME,
+                blobName: mediaItem.thumbnailBlobName,
+                permissions: BlobSASPermissions.parse("r"),
+                expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+              },
+              sharedKeyCredential,
+            ).toString()}`
             : undefined;
 
           return {
@@ -453,9 +454,15 @@ export async function editPost(req: NextRequest) {
         where: { id: postId },
         data: {
           ...data,
+
+          ...(data.media !== undefined && {
+            mediaTypes: extractMediaTypes(data.media),
+          }),
+
           ...(pollDuration && {
             pollEndsAt: new Date(Date.now() + pollDuration * 86400000),
           }),
+
           updatedAt: new Date(),
         },
       });
@@ -536,14 +543,14 @@ export async function editPost(req: NextRequest) {
           // generate thumbnail url if exists
           const thumbnailUrl = mediaItem.thumbnailBlobName
             ? `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.thumbnailBlobName}?${generateBlobSASQueryParameters(
-                {
-                  containerName: AZURE_STORAGE_CONTAINER_NAME,
-                  blobName: mediaItem.thumbnailBlobName,
-                  permissions: BlobSASPermissions.parse("r"),
-                  expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
-                },
-                sharedKeyCredential,
-              ).toString()}`
+              {
+                containerName: AZURE_STORAGE_CONTAINER_NAME,
+                blobName: mediaItem.thumbnailBlobName,
+                permissions: BlobSASPermissions.parse("r"),
+                expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+              },
+              sharedKeyCredential,
+            ).toString()}`
             : undefined;
 
           return {
@@ -676,4 +683,15 @@ export async function deletePost(req: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function extractMediaTypes(media: unknown): string[] {
+  if (!Array.isArray(media)) return [];
+  const types = media
+    .map((m: any) => m?.type)
+    .filter((t: any) => typeof t === "string" && t.trim().length > 0)
+    .map((t: string) => t.trim().toLowerCase());
+
+  // unique
+  return Array.from(new Set(types));
 }

@@ -29,6 +29,9 @@ import { fetchProfilePosts } from "../utils/fetchProfilePosts";
 import ConnectionsModal from "./ConnectionsModal";
 import { useRouter } from "next/navigation";
 
+// ✅ ADDED (Option A)
+import { useInfiniteScroll } from "../[slug]/hook/useInfiniteScroll";
+
 export default function ProfileView({
   user,
   recommendedPeople,
@@ -97,6 +100,7 @@ export default function ProfileView({
     return () => clearTimeout(timer);
   }, []);
 
+  // ✅ CHANGED: queryKey includes tab + fetchProfilePosts receives tab
   const {
     data: postData,
     isLoading: profilePostLoading,
@@ -104,41 +108,26 @@ export default function ProfileView({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["profilePosts", user.id],
+    queryKey: ["profilePosts", user.id, tab],
     queryFn: ({ pageParam }) =>
-      fetchProfilePosts({ pageParam, userId: user.id }),
+      fetchProfilePosts({ pageParam, userId: user.id, tab }),
     enabled: !!user?.id,
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
   });
 
-  const posts: PostType[] =
+  // ✅ CHANGED: enable infinite scroll for ALL tabs (not only posts)
+  const { rootRef, sentinelRef } = useInfiniteScroll({
+    enabled: !!user?.id, // <-- key change
+    hasNextPage: !!hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
+
+  // ✅ CHANGED: server now returns correct posts for the selected tab
+  const tabPosts: PostType[] =
     postData?.pages.flatMap((page: { posts: PostType[] }) => page.posts) ?? [];
-  const imagePosts = posts.filter(
-    (p) => (p.media ?? []).some((m) => m.type === "image")
-  );
-
-  const videoPosts = posts.filter(
-    (p) => (p.media ?? []).some((m) => m.type === "video")
-  );
-
-  const documentPosts = posts.filter(
-    (p) => (p.media ?? []).some((m) => m.type === "file")
-  );
-
-  let tabPosts: PostType[] = [];
-  if (tab === "posts") {
-    tabPosts = posts;
-  } else if (tab === "images") {
-    tabPosts = imagePosts;
-  } else if (tab === "videos") {
-    tabPosts = videoPosts;
-  } else if (tab === "documents") {
-    tabPosts = documentPosts;
-  } else {
-    tabPosts = [];
-  }
-
 
   const isPostsLoading = loading || profilePostLoading;
   // On profile load: check connection status (connected or pending request)
@@ -175,7 +164,6 @@ export default function ProfileView({
         const outgoing = (requestsJson.data || []) as any[];
         const existingRequest = outgoing.find(
           (r) => r.toUserId === user.id || r.toUser?.id === user.id,
-
         );
 
         if (!ignore && existingRequest) {
@@ -247,7 +235,6 @@ export default function ProfileView({
       }
 
       // success => Requested & store the request ID
-
       setConnectSuccess(true);
       if (json.request?.id) {
         setRequestId(json.request.id);
@@ -302,13 +289,10 @@ export default function ProfileView({
       setConnectError(null);
       setConnectLoading(true);
 
-      const res = await fetch(
-        `/api/connect/v1/connect/${user.id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`/api/connect/v1/connect/${user.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       const json = await res.json();
 
@@ -327,284 +311,291 @@ export default function ProfileView({
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 py-6 overflow-y-auto">
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-8 space-y-4">
-            {/* PROFILE HEADER */}
-            <div className="bg-white rounded-lg border overflow-hidden">
-              <div className="relative w-full aspect-[3/1] bg-gray-200">
-                <Image
-                  src={resolvedCoverPhotoUrl}
-                  alt="cover photo"
-                  fill
-                  className="object-cover"
-                />
-                {isOwner && (
-                  <button
-                    onClick={() => setOpenCoverPhotoModal(true)}
-                    className="absolute top-3 right-3 bg-white/80 p-2 rounded-full shadow"
-                    type="button"
-                    aria-label="Edit cover photo"
-                  >
-                    <Camera size={18} className="text-gray-700" />
-                  </button>
-                )}
-              </div>
-
-              <div className="relative p-4">
-                {/* EDIT / CONNECT BUTTONS */}
-                <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
-                  <div className="flex items-center gap-3">
-                    {isOwner ? (
+      {/* ✅ ADDED: make this component a real scroll area under Header */}
+      <div className="flex flex-col flex-1 min-h-0">
+        <div ref={rootRef} className="flex-1 min-h-0 overflow-y-auto">
+          {/* ⬇️ YOUR ORIGINAL CONTENT STARTS (unchanged) */}
+          <div className="max-w-7xl mx-auto px-4 py-6 overflow-y-auto">
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 lg:col-span-8 space-y-4">
+                {/* PROFILE HEADER */}
+                <div className="bg-white rounded-lg border overflow-hidden">
+                  <div className="relative w-full aspect-[3/1] bg-gray-200">
+                    <Image
+                      src={resolvedCoverPhotoUrl}
+                      alt="cover photo"
+                      fill
+                      className="object-cover"
+                    />
+                    {isOwner && (
                       <button
-                        onClick={() => setOpenEditModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 shadow-sm bg-white"
+                        onClick={() => setOpenCoverPhotoModal(true)}
+                        className="absolute top-3 right-3 bg-white/80 p-2 rounded-full shadow"
+                        type="button"
+                        aria-label="Edit cover photo"
                       >
-                        <Pencil size={16} />
-                        Edit Profile
+                        <Camera size={18} className="text-gray-700" />
                       </button>
-                    ) : (
-                      <>
-                        {/* IMPROVED: Show different UI based on connection state */}
-                        {isConnected ? (
-                          // Connected state - Show Remove button
-                          <button
-                            onClick={handleRemoveConnection}
-                            disabled={connectLoading}
-                            className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-red-500 hover:bg-red-600 ${connectLoading ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                          >
-                            {connectLoading ? "Removing..." : "Remove"}
-                          </button>
-                        ) : connectSuccess ? (
-                          // Requested state - Show "Requested" with Cancel button
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300">
-                              <span className="text-sm font-medium text-gray-700">
-                                Requested
-                              </span>
-                            </div>
-                            <button
-                              onClick={handleCancelRequest}
-                              disabled={connectLoading}
-                              className={`px-3 py-2 rounded-lg border border-red-300 bg-white text-red-600 hover:bg-red-50 transition-colors text-sm font-medium ${connectLoading ? "opacity-50 cursor-not-allowed" : ""
-                                }`}
-                              title="Cancel request"
-                            >
-                              {connectLoading ? "Canceling..." : "Cancel"}
-                            </button>
-                          </div>
-                        ) : (
-                          // Not connected - Show Connect button
-                          <button
-                            onClick={handleConnect}
-                            disabled={connectLoading}
-                            className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-blue-600 hover:bg-blue-700 ${connectLoading ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                          >
-                            {connectLoading ? "Sending..." : "Connect"}
-                          </button>
-                        )}
-                        <button
-                          onClick={() => router.push(`/messages?userId=${user.id}`)}
-                          className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 shadow-sm bg-white"
-                        >
-                          Message
-                        </button>
-                      </>
                     )}
                   </div>
 
-                  {connectError && (
-                    <p className="text-sm text-red-600">{connectError}</p>
-                  )}
+                  <div className="relative p-4">
+                    {/* EDIT / CONNECT BUTTONS */}
+                    <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
+                      <div className="flex items-center gap-3">
+                        {isOwner ? (
+                          <button
+                            onClick={() => setOpenEditModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 shadow-sm bg-white"
+                          >
+                            <Pencil size={16} />
+                            Edit Profile
+                          </button>
+                        ) : (
+                          <>
+                            {/* IMPROVED: Show different UI based on connection state */}
+                            {isConnected ? (
+                              <button
+                                onClick={handleRemoveConnection}
+                                disabled={connectLoading}
+                                className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-red-500 hover:bg-red-600 ${
+                                  connectLoading ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                              >
+                                {connectLoading ? "Removing..." : "Remove"}
+                              </button>
+                            ) : connectSuccess ? (
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300">
+                                  <span className="text-sm font-medium text-gray-700">
+                                    Requested
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={handleCancelRequest}
+                                  disabled={connectLoading}
+                                  className={`px-3 py-2 rounded-lg border border-red-300 bg-white text-red-600 hover:bg-red-50 transition-colors text-sm font-medium ${
+                                    connectLoading ? "opacity-50 cursor-not-allowed" : ""
+                                  }`}
+                                  title="Cancel request"
+                                >
+                                  {connectLoading ? "Canceling..." : "Cancel"}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={handleConnect}
+                                disabled={connectLoading}
+                                className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-blue-600 hover:bg-blue-700 ${
+                                  connectLoading ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                              >
+                                {connectLoading ? "Sending..." : "Connect"}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => router.push(`/messages?userId=${user.id}`)}
+                              className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 shadow-sm bg-white"
+                            >
+                              Message
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {connectError && (
+                        <p className="text-sm text-red-600">{connectError}</p>
+                      )}
+                    </div>
+
+                    <div className="relative -mt-16 w-32 h-32">
+                      <button
+                        type="button"
+                        onClick={() => setOpenProfilePhotoModal(true)}
+                        className="relative w-32 h-32 block"
+                        aria-label="Open profile photo"
+                      >
+                        <Image
+                          src={resolvedProfilePicUrl}
+                          alt="avatar"
+                          fill
+                          className="rounded-full border-4 border-white object-cover"
+                        />
+
+                        {isOwner && (
+                          <span className="absolute bottom-1 right-1 bg-white/90 p-2 rounded-full shadow border">
+                            <Camera size={18} className="text-gray-700" />
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    <h1 className="text-2xl font-bold text-gray-900 mt-2">
+                      {userState.username}
+                    </h1>
+                    <p className="text-gray-700">{userState.title}</p>
+
+                    <p className="text-sm text-gray-600 mt-1">
+                      {userState.location} ·{" "}
+                      <button
+                        type="button"
+                        onClick={() => setOpenContactInfo(true)}
+                        className="underline cursor-pointer"
+                      >
+                        Contact info
+                      </button>
+                    </p>
+
+                    <button
+                      onClick={() => setOpenConnectionsModal(true)}
+                      className="text-sm text-gray-600 hover:underline"
+                    >
+                      {user.connections} connections
+                    </button>
+                  </div>
                 </div>
 
-                <div className="relative -mt-16 w-32 h-32">
-                  <button
-                    type="button"
-                    onClick={() => setOpenProfilePhotoModal(true)}
-                    className="relative w-32 h-32 block"
-                    aria-label="Open profile photo"
-                  >
-                    <Image
-                      src={resolvedProfilePicUrl}
-                      alt="avatar"
-                      fill
-                      className="rounded-full border-4 border-white object-cover"
-                    />
-
-                    {isOwner && (
-                      <span className="absolute bottom-1 right-1 bg-white/90 p-2 rounded-full shadow border">
-                        <Camera size={18} className="text-gray-700" />
-                      </span>
-                    )}
-                  </button>
-                </div>
-
-                <h1 className="text-2xl font-bold text-gray-900 mt-2">
-                  {userState.username}
-                </h1>
-                <p className="text-gray-700">{userState.title}</p>
-
-                <p className="text-sm text-gray-600 mt-1">
-                  {userState.location} ·{" "}
-                  <button
-                    type="button"
-                    onClick={() => setOpenContactInfo(true)}
-                    className="underline cursor-pointer"
-                  >
-                    Contact info
-                  </button>
-
-                </p>
-
-                <button
-                  onClick={() => setOpenConnectionsModal(true)}
-                  className="text-sm text-gray-600 hover:underline"
+                {/* EXPERIENCE */}
+                <SectionCard
+                  title="Experience"
+                  icon={
+                    isOwner && (
+                      <button
+                        onClick={() => setOpenExperienceModal(true)}
+                        className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                    )
+                  }
                 >
-                  {user.connections} connections
-                </button>
-              </div>
-            </div>
+                  {experience.length > 0 ? (
+                    experience.map((exp) => (
+                      <ExperienceItem key={exp.id} {...exp} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No experience added yet.
+                    </p>
+                  )}
+                </SectionCard>
 
-            {/* EXPERIENCE */}
-            <SectionCard
-              title="Experience"
-              icon={
-                isOwner && (
-                  <button
-                    onClick={() => setOpenExperienceModal(true)}
-                    className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                )
-              }
-            >
-              {experience.length > 0 ? (
-                experience.map((exp) => (
-                  <ExperienceItem key={exp.id} {...exp} />
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">
-                  No experience added yet.
-                </p>
-              )}
-            </SectionCard>
+                {/* EDUCATION */}
+                <SectionCard
+                  title="Education"
+                  icon={
+                    isOwner && (
+                      <button
+                        onClick={() => setOpenEducationModal(true)}
+                        className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                    )
+                  }
+                >
+                  {education.length > 0 ? (
+                    education.map((edu) => (
+                      <EducationItem key={edu.id} {...edu} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No education added yet.</p>
+                  )}
+                </SectionCard>
 
-            {/* EDUCATION */}
-            <SectionCard
-              title="Education"
-              icon={
-                isOwner && (
-                  <button
-                    onClick={() => setOpenEducationModal(true)}
-                    className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                )
-              }
-            >
-              {education.length > 0 ? (
-                education.map((edu) => <EducationItem key={edu.id} {...edu} />)
-              ) : (
-                <p className="text-sm text-gray-500">No education added yet.</p>
-              )}
-            </SectionCard>
+                {/* ABOUT */}
+                <SectionCard
+                  title="About"
+                  icon={
+                    isOwner && (
+                      <button
+                        onClick={() => setOpenAboutModal(true)}
+                        className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                    )
+                  }
+                >
+                  <p className="text-sm text-gray-700 whitespace-pre-line">
+                    {about || "This user has not added an about section yet."}
+                  </p>
+                </SectionCard>
 
-            {/* ABOUT */}
-            <SectionCard
-              title="About"
-              icon={
-                isOwner && (
-                  <button
-                    onClick={() => setOpenAboutModal(true)}
-                    className="p-2 rounded-full text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                )
-              }
-            >
-              <p className="text-sm text-gray-700 whitespace-pre-line">
-                {about || "This user has not added an about section yet."}
-              </p>
-            </SectionCard>
+                {/* ACTIVITY */}
+                <SectionCard title="Activity">
+                  <p className="text-sm text-gray-600 mb-3">
+                    {user.connections} connections
+                  </p>
 
-            {/* ACTIVITY */}
-            <SectionCard title="Activity">
-              <p className="text-sm text-gray-600 mb-3">
-                {user.connections} connections
-              </p>
-
-              <div className="flex gap-4 border-b pb-2">
-                {["posts", "videos", "images", "documents"].map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTab(t)}
-                    className={`pb-2 capitalize ${tab === t
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-600"
-                      }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {isPostsLoading ? (
-                  <>
-                    <Post isLoading={true} />
-                    <Post isLoading={true} />
-                  </>
-                ) : tabPosts.length > 0 ? (
-                  <>
-                    {tabPosts.map((p: PostType) => (
-                      <Post user={user} key={p.id} post={p} isLoading={false} />
+                  <div className="flex gap-4 border-b pb-2">
+                    {["posts", "videos", "images", "documents"].map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        className={`pb-2 capitalize ${
+                          tab === t
+                            ? "border-b-2 border-blue-600 text-blue-600"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {t}
+                      </button>
                     ))}
+                  </div>
 
-                    {hasNextPage && (
-                      <div className="flex justify-center pt-2">
-                        <button
-                          onClick={() => fetchNextPage()}
-                          disabled={isFetchingNextPage}
-                          className="text-sm text-blue-600 hover:underline disabled:opacity-50"
-                        >
-                          {isFetchingNextPage ? "Loading..." : "Load more"}
-                        </button>
+                  <div className="mt-4 space-y-4">
+                    {isPostsLoading ? (
+                      <>
+                        <Post isLoading={true} />
+                        <Post isLoading={true} />
+                      </>
+                    ) : tabPosts.length > 0 ? (
+                      <>
+                        {tabPosts.map((p: PostType) => (
+                          <Post user={user} key={p.id} post={p} isLoading={false} />
+                        ))}
+
+                        {/* ✅ CHANGED: sentinel works for ALL tabs */}
+                        {hasNextPage && <div ref={sentinelRef} className="h-1" />}
+
+                        {isFetchingNextPage && (
+                          <div className="text-center text-sm text-gray-500 pt-2">
+                            Loading...
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center text-gray-600 py-10">
+                        No {tab} yet
                       </div>
                     )}
-                  </>
-                ) : (
-                  <div className="text-center text-gray-600 py-10">No {tab} yet</div>
-                )}
+                  </div>
+                </SectionCard>
               </div>
-            </SectionCard>
-          </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div className="hidden lg:block col-span-4 space-y-4 sticky top-20">
-            <div className="bg-white rounded-lg border p-4">
-              <h2 className="font-semibold text-gray-900 mb-3">
-                People you may be interested in
-              </h2>
-              <RecommendedList users={recommendedPeople} limit={4} />
-              <button
-                onClick={() => setOpenModal(true)}
-                className="mt-4 text-sm text-blue-600 font-semibold"
-              >
-                Show more
-              </button>
+              {/* RIGHT SIDEBAR */}
+              <div className="hidden lg:block col-span-4 space-y-4 sticky top-20">
+                <div className="bg-white rounded-lg border p-4">
+                  <h2 className="font-semibold text-gray-900 mb-3">
+                    People you may be interested in
+                  </h2>
+                  <RecommendedList users={recommendedPeople} limit={4} />
+                  <button
+                    onClick={() => setOpenModal(true)}
+                    className="mt-4 text-sm text-blue-600 font-semibold"
+                  >
+                    Show more
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+          {/* ⬆️ YOUR ORIGINAL CONTENT ENDS */}
         </div>
       </div>
 
       {/* MODALS */}
-
       <ConnectionsModal
         open={openConnectionsModal}
         loading={connectionsLoading}
@@ -624,7 +615,6 @@ export default function ProfileView({
         user={userState}
         onUserUpdated={(u) => setUserState((prev) => ({ ...prev, ...u }))}
       />
-
 
       <ExperienceManagerModal
         open={openExperienceModal}
@@ -646,7 +636,6 @@ export default function ProfileView({
         user={userState}
         isOwner={isOwner}
       />
-
 
       <EditAboutModal
         open={openAboutModal}

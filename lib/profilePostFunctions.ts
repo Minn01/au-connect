@@ -30,10 +30,10 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
       );
     }
 
-     //  ADD: normalize again (double-safe)
+    // ✅ Normalize (double-safe)
     const normalizedProfileUserId = decodeURIComponent(profileUserId).trim();
 
-    //  ADD: temporary debug (remove later)
+    // (optional debug)
     console.log("PROFILE POSTS userId param:", {
       raw: profileUserId,
       normalized: normalizedProfileUserId,
@@ -41,6 +41,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
       isValid: isValidObjectId(normalizedProfileUserId),
     });
 
+    // ✅ Validate only ONCE (use normalized)
     if (!normalizedProfileUserId || !isValidObjectId(normalizedProfileUserId)) {
       return NextResponse.json(
         {
@@ -52,15 +53,26 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
       );
     }
 
-    // prevent weird inputs / injection attempts
-    if (!profileUserId || !isValidObjectId(profileUserId)) {
-      return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
-    }
-
     const cursor = req.nextUrl.searchParams.get("cursor");
 
+    // ✅ NEW: tab support
+    const tab = (req.nextUrl.searchParams.get("tab") ?? "posts").toLowerCase();
+
+    // Map UI tabs → stored media types
+    const mediaType =
+      tab === "images"
+        ? "image"
+        : tab === "videos"
+        ? "video"
+        : tab === "documents"
+        ? "file"
+        : null;
+
     const posts = await prisma.post.findMany({
-      where: { userId: profileUserId },
+      where: {
+        userId: normalizedProfileUserId, // ✅ important fix
+        ...(mediaType ? { mediaTypes: { has: mediaType } } : {}),
+      },
       take: POSTS_PER_FETCH,
       ...(cursor && {
         skip: 1,

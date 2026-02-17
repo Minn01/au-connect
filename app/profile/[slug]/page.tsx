@@ -83,8 +83,14 @@ export default async function ProfilePage(props: {
     //posts: user.posts,
   };
 
-  return (
-    //TODO:recommendedPeople type needs to be fixed
-    <ProfileView user={userData} recommendedPeople={new Array<number>()} isOwner={isOwner} />
+    return (
+    <div className="h-full min-h-0 flex flex-col">
+      <ProfileView
+        user={userData}
+        recommendedPeople={new Array<number>()}
+        isOwner={isOwner}
+      />
+    </div>
   );
+
 }
