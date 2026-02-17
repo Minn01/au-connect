@@ -16,6 +16,7 @@ import {
   SINGLE_POST_API_PATH,
   VOTE_POST_API_PATH,
   LINK_PREVIEW_API_PATH,
+  SAVE_POST_API_PATH,
 } from "@/lib/constants";
 import PostsPage from "@/types/PostsPage";
 import LinkEmbed from "@/types/LinkEmbeds";
@@ -485,3 +486,61 @@ export const useFetchLinkPreview = () => {
     },
   });
 };
+
+export function useToggleSave() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      console.log("Saving post:", postId);
+
+      const res = await fetch(SAVE_POST_API_PATH(postId), {
+        method: "POST",
+      });
+
+      if (!res.ok) throw new Error("Failed to toggle save");
+
+      return res.json();
+    },
+
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueryData(["posts"]);
+
+      queryClient.setQueryData(["posts"], (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts.map((post: any) =>
+              post.id === postId
+                ? {
+                    ...post,
+                    isSaved: !post.isSaved,
+                    savedCount: post.isSaved
+                      ? post.savedCount - 1
+                      : post.savedCount + 1,
+                  }
+                : post,
+            ),
+          })),
+        };
+      });
+
+      return { previousPosts };
+    },
+
+    onError: (_err, _postId, context) => {
+      if (context?.previousPosts) {
+        queryClient.setQueryData(["posts"], context.previousPosts);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+}

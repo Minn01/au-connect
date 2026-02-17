@@ -48,6 +48,7 @@ type PostType = {
 
   jobPost?: JobDraft;
   isLiked?: boolean;
+  isSaved?: boolean;
   likeCount?: number;
   commentCount?: number;
   shareCount?: number;

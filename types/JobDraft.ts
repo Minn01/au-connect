@@ -1,4 +1,5 @@
 type JobDraft = {
+  id: string;
   jobTitle: string;
   companyName?: string;
   location?: string;
@@ -12,6 +13,10 @@ type JobDraft = {
   jobRequirements?: string[];
   allowExternalApply: boolean;
   applyUrl?: string;
+
+  // application status
+  hasApplied?: boolean;
+  applicationStatus?: "APPLIED" | "SHORTLISTED" | "REJECTED";
 };
 
 export default JobDraft;
