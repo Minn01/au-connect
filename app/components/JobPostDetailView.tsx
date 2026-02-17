@@ -8,10 +8,10 @@ interface JobPostContentViewProps {
   jobData: JobDraft;
   applicantCount?: number;
   hasApplied?: boolean;
+  isSaved?: boolean;
   isOwner: boolean;
   onApply?: () => void;
   onSave?: () => void;
-  isSaved?: boolean;
 }
 
 const employmentTypeLabels = {
@@ -37,10 +37,10 @@ export default function JobPostDetailView({
   jobData,
   applicantCount = 0,
   hasApplied = false,
+  isSaved = false,
   isOwner,
   onApply,
   onSave,
-  isSaved = false,
 }: JobPostContentViewProps) {
   const formatSalary = () => {
     const currency = jobData.salaryCurrency || "USD";
@@ -152,7 +152,7 @@ export default function JobPostDetailView({
                 <h2 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">
                   About this Job
                 </h2>
-                <p className="min-w-0 break-words whitespace-pre-wrap text-neutral-700 leading-relaxed">
+                <p className="min-w-0 wrap-break-word whitespace-pre-wrap text-neutral-700 leading-relaxed">
                   {jobData.jobDetails}
                 </p>{" "}
               </div>
@@ -215,10 +215,11 @@ export default function JobPostDetailView({
               </button>
             ) : (
               <button
+                disabled={hasApplied}
                 onClick={onApply}
                 className="cursor-pointer rounded-lg bg-blue-600 py-2 px-4 text-white"
               >
-                Apply
+                {hasApplied ? "Applied" : "Apply"}
               </button>
             )}
           </div>

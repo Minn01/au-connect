@@ -1,15 +1,17 @@
 import { Ellipsis, Pencil, Trash2 } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PopupModal from "./PopupModal";
+import JobDraft from "@/types/JobDraft";
 
 type LocationType = "ONSITE" | "REMOTE" | "HYBRID";
 type EmploymentType = "FULL_TIME" | "PART_TIME" | "FREELANCE" | "INTERNSHIP";
 
 interface JobPostCardProps {
   post: any;
-  job: any;
+  job: JobDraft;
   isOwner: boolean;
   hasApplied: boolean;
+  applicationStatus: "APPLIED" | "SHORTLISTED" | "REJECTED";
   isSaved: boolean;
   postMenuDropDownOpen: boolean;
   setPostMenuDropDownOpen: (state: boolean) => void;
@@ -66,6 +68,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
 }) => {
   const salary = formatSalary(job);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [externalConfirm, setExternalConfirm] = useState(false);
 
   const handleEdit = () => {
     setPostMenuDropDownOpen(false);
@@ -186,7 +189,14 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
           </button>
         ) : (
           <button
-            onClick={onApply}
+            onClick={() => {
+              if (job.allowExternalApply && job.applyUrl) {
+                setExternalConfirm(true);
+                setPopupOpen(true);
+              } else {
+                onApply();
+              }
+            }}
             disabled={hasApplied}
             className={`cursor-pointer px-5 py-2 rounded-lg text-sm transition ${
               hasApplied
@@ -212,14 +222,27 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
 
       {popupOpen && (
         <PopupModal
-          title="Delete Post?"
-          titleText="Are you sure you want to delete this post?"
-          actionText="Delete"
+          title={
+            externalConfirm
+              ? "Are you sure you want to enter this link"
+              : "Delete Post?"
+          }
+          titleText={
+            externalConfirm
+              ? `You are about to enter to this external link: ${job.applyUrl}`
+              : "Are you sure you want to delete this post?"
+          }
+          actionText={externalConfirm ? "Enter" : "Delete"}
           open={popupOpen}
           onClose={() => setPopupOpen(false)}
           onConfirm={() => {
-            setPopupOpen(false);
-            onDelete?.(post.id);
+            if (externalConfirm) {
+              window.open(job.applyUrl, "_blank", "noopener,noreferrer");
+              setExternalConfirm(false);
+            } else {
+              setPopupOpen(false);
+              onDelete?.(post.id);
+            }
           }}
         />
       )}

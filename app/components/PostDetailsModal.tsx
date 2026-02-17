@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import CommentInput from "./CommentInput";
 import CommentItem from "./CommentItem";
@@ -9,12 +9,16 @@ import MediaCarousel from "./MediaCarousel";
 import PostContentSection from "./PostContentSection";
 import {
   createComment,
+  useToggleSave,
   useTopLevelComments,
 } from "../profile/utils/fetchfunctions";
 import parseDate from "../profile/utils/parseDate";
 import PostDetailsModalTypes from "@/types/PostDetailsModalTypes";
 import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 import JobPostDetailView from "./JobPostDetailView";
+import ApplyJobPostModal from "./ApplyJobModal";
+import { useApplyJob } from "../profile/utils/jobPostFetchFunctions";
+import { SINGLE_POST_API_PATH } from "@/lib/constants";
 
 export default function PostDetailsModal({
   currentUserId,
@@ -25,6 +29,23 @@ export default function PostDetailsModal({
   clickedIndex,
   onClose,
 }: PostDetailsModalTypes) {
+  const { data: post } = useQuery({
+    queryKey: ["post", postInfo.id],
+    queryFn: async () => {
+      const res = await fetch(SINGLE_POST_API_PATH(postInfo.id));
+      if (!res.ok) throw new Error("Failed to fetch post");
+      return res.json();
+    },
+    initialData: postInfo,
+  });
+
+  useEffect(() => {
+    console.log("fetched post:\n", post);
+  }, [post]);
+
+  const [applyJobModalOpen, setApplyJobModalOpen] = useState(false);
+  const saveMutation = useToggleSave();
+  const applyMutation = useApplyJob();
   const [mobileView, setMobileView] = useState<"content" | "comments">(
     "content",
   );
@@ -35,6 +56,8 @@ export default function PostDetailsModal({
   ) => {
     if (allowedExternalApply && externalApplyLink) {
       window.open(externalApplyLink, "_blank", "noopener,noreferrer");
+    } else {
+      setApplyJobModalOpen(true);
     }
   };
 
@@ -70,7 +93,7 @@ export default function PostDetailsModal({
         queryKey: ["comments", variables.postId],
       });
 
-      if (variables.parntCommentId) {
+      if (variables.parentCommentId) {
         queryClient.invalidateQueries({
           queryKey: ["replies", variables.parentCommentId],
         });
@@ -115,6 +138,8 @@ export default function PostDetailsModal({
               <JobPostDetailView
                 jobData={postInfo.jobPost}
                 isOwner={postInfo.userId === currentUserId}
+                hasApplied={post.jobPost.hasApplied}
+                isSaved={post.isSaved}
                 onApply={() =>
                   handleJobApply(
                     postInfo.jobPost?.allowExternalApply ?? false,
@@ -237,6 +262,32 @@ export default function PostDetailsModal({
             </div>
           )}
         </div>
+
+        <ApplyJobPostModal
+          isOpen={applyJobModalOpen}
+          onClose={() => setApplyJobModalOpen(false)}
+          jobTitle={postInfo.jobPost?.jobTitle || ""}
+          companyName={postInfo.jobPost?.companyName}
+          onSubmit={async (data) => {
+            console.log("Parent onSubmit called");
+            console.log("jobPostId:", postInfo.jobPost?.id);
+
+            if (!postInfo.jobPost?.id) {
+              console.log("No jobPostId, returning early");
+              return;
+            }
+
+            console.log("Calling mutation now");
+
+            await applyMutation.mutateAsync({
+                postId: post.id,
+              jobPostId: postInfo.jobPost.id,
+              ...data,
+            });
+
+            console.log("Mutation finished");
+          }}
+        />
       </div>
     </div>
   );

@@ -352,7 +352,9 @@ model JobApplication {
   applicant   User   @relation(fields: [applicantId], references: [id])
 
   resumeLetter   String?
-  resumeUrl String
+  expectedSalary Int?
+  availability String?
+  resumeBlobName String
 
   status ApplicationStatus @default(APPLIED)
 

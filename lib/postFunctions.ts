@@ -227,14 +227,20 @@ export async function getPosts(req: NextRequest) {
         interactions: {
           where: {
             userId: userId,
-            type: "LIKE",
+            type: {
+              in: ["LIKE", "SAVED"],
+            },
           },
-          select: { id: true },
+          select: {
+            id: true,
+            type: true,
+          },
         },
 
         // get job post related info
         jobPost: {
           select: {
+            id: true,
             jobTitle: true,
             companyName: true,
             location: true,
@@ -248,17 +254,45 @@ export async function getPosts(req: NextRequest) {
             jobRequirements: true,
             applyUrl: true,
             allowExternalApply: true,
+            applications: {
+              where: {
+                applicantId: userId,
+              },
+              select: {
+                id: true,
+                status: true,
+              },
+            },
           },
         },
       },
     });
 
     // adding comments count from _count
-    const postWithCommentCount = posts.map((post) => ({
-      ...post,
-      isLiked: post.interactions.length > 0,
-      numOfComments: post._count.comments,
-    }));
+    const postWithCommentCount = posts.map((post) => {
+      const isLiked = post.interactions.some(
+        (interaction) => interaction.type === "LIKE",
+      );
+
+      const isSaved = post.interactions.some(
+        (interaction) => interaction.type === "SAVED",
+      );
+
+      return {
+        ...post,
+        isLiked,
+        isSaved,
+        numOfComments: post._count.comments,
+
+        jobPost: post.jobPost
+          ? {
+              ...post.jobPost,
+              hasApplied: post.jobPost.applications.length > 0,
+              applicationStatus: post.jobPost.applications[0]?.status ?? null,
+            }
+          : null,
+      };
+    });
 
     // Azure credential (reuse for all media)
     const sharedKeyCredential = new StorageSharedKeyCredential(

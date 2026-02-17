@@ -7,7 +7,11 @@ import PostMediaGrid from "./PostMediaGrid";
 import PostProfile from "./PostProfile";
 import PostAttachments from "./PostAttachments";
 import PostText from "./PostText";
-import { useToggleLike, useDeletePost } from "../profile/utils/fetchfunctions";
+import {
+  useToggleLike,
+  useDeletePost,
+  useToggleSave,
+} from "../profile/utils/fetchfunctions";
 import CreatePostModal from "./CreatePostModal";
 import ShareModal from "../profile/components/ShareModal";
 import { POST_DETAIL_PAGE_PATH } from "@/lib/constants";
@@ -15,6 +19,8 @@ import PostPoll from "./PostPoll";
 import LinkEmbedPreview from "./Linkembedpreview";
 import { JobPostCard } from "./JobPostCard";
 import PostInteractionSection from "./PostInteractionSection";
+import ApplyJobModal from "./ApplyJobModal";
+import { useApplyJob } from "../profile/utils/jobPostFetchFunctions";
 
 export default function Post({
   user,
@@ -38,9 +44,12 @@ export default function Post({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [postMenuDropDownOpen, setPostMenuDropDownOpen] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
+  const [applyJobModalOpen, setApplyJobModalOpen] = useState(false);
 
   const toggleLike = useToggleLike();
   const deletePost = useDeletePost();
+  const applyMutation = useApplyJob();
+  const toggleSaveMutation = useToggleSave();
 
   // Skeleton UI
   if (isLoading) {
@@ -89,8 +98,9 @@ export default function Post({
             post={post}
             job={post.jobPost}
             isOwner={post.userId === user?.id}
-            hasApplied={false}
-            isSaved={false}
+            hasApplied={post.jobPost?.hasApplied ?? false}
+            applicationStatus={post.jobPost?.applicationStatus ?? "APPLIED"}
+            isSaved={post.isSaved ?? false}
             postMenuDropDownOpen={postMenuDropDownOpen}
             setPostMenuDropDownOpen={(state: boolean) =>
               setPostMenuDropDownOpen(state)
@@ -104,10 +114,8 @@ export default function Post({
             onDelete={(postId: string) => {
               deletePost.mutate(postId);
             }}
-            onApply={() => window.alert("onApply yet to be implemented")}
-            onSaveToggle={() =>
-              window.alert("onSaveToggle yet to be implemented")
-            }
+            onApply={() => setApplyJobModalOpen(true)}
+            onSaveToggle={() => toggleSaveMutation.mutate(post.id)}
             onViewApplicants={() => {
               window.alert("onViewApplicants yet to be implemented");
             }}
@@ -248,6 +256,32 @@ export default function Post({
           exisistingPost={post}
         />
       )}
+
+      <ApplyJobModal
+        isOpen={applyJobModalOpen}
+        onClose={() => setApplyJobModalOpen(false)}
+        jobTitle={post.jobPost?.jobTitle || ""}
+        companyName={post.jobPost?.companyName}
+        onSubmit={async (data) => {
+          console.log("Parent onSubmit called");
+          console.log("jobPostId:", post.jobPost?.id);
+
+          if (!post.jobPost?.id) {
+            console.log("No jobPostId, returning early");
+            return;
+          }
+
+          console.log("Calling mutation now");
+
+          await applyMutation.mutateAsync({
+            postId: post.id,
+            jobPostId: post.jobPost.id,
+            ...data,
+          });
+
+          console.log("Mutation finished");
+        }}
+      />
     </>
   );
 }
