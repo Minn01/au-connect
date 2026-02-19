@@ -9,6 +9,7 @@ export default function MessagePages() {
     inbox,
     selectedUserId,
     selectedConversationId,
+    selectedInitialUnreadCount,
     activeMessages,
     messageInput,
     setMessageInput,
@@ -59,6 +60,7 @@ export default function MessagePages() {
           selectedProfilePic={headerPic}
           selectedUserId={selectedUserId}
           selectedConversationId={selectedConversationId}
+          selectedUnreadCount={selectedInitialUnreadCount}
           messages={activeMessages}
           messageInput={messageInput}
           setMessageInput={setMessageInput}

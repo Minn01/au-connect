@@ -99,20 +99,35 @@ export default function PostDetailsModal({
     onSuccess: (newComment, variables) => {
       // ── TOP LEVEL COMMENT ──────────────────────────────────────────────────
       if (!variables.parentCommentId) {
-        queryClient.setQueryData(
-          ["comments", variables.postId],
-          (oldData: any) => {
-            if (!oldData) return oldData;
-            return {
-              ...oldData,
-              pages: oldData.pages.map((page: any, index: number) =>
-                index === 0
-                  ? { ...page, comments: [newComment, ...page.comments] }
-                  : page,
+        queryClient.setQueryData(["comments", variables.postId], (oldData: any) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any, index: number) =>
+              index === 0 ? { ...page, comments: [newComment, ...page.comments] } : page,
+            ),
+          };
+        });
+
+        const bumpPostCommentCount = (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              posts: page.posts.map((p: any) =>
+                p.id === variables.postId
+                  ? { ...p, numOfComments: (p.numOfComments ?? 0) + 1 }
+                  : p,
               ),
-            };
-          },
-        );
+            })),
+          };
+        };
+
+        queryClient.setQueryData(["posts"], bumpPostCommentCount);
+        queryClient.setQueriesData({ queryKey: ["profilePosts"] }, bumpPostCommentCount);
+        queryClient.setQueriesData({ queryKey: ["profileJobPosts"] }, bumpPostCommentCount);
+
         return;
       }
 
@@ -176,9 +191,8 @@ export default function PostDetailsModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white w-full ${
-          isJobPost ? "max-w-[1100px]" : hasMedia ? "max-w-6xl" : "max-w-xl"
-        } h-[90vh] rounded-lg flex overflow-hidden`}
+        className={`bg-white w-full ${isJobPost ? "max-w-[1100px]" : hasMedia ? "max-w-6xl" : "max-w-xl"
+          } h-[90vh] rounded-lg flex overflow-hidden`}
         style={{
           display: "flex",
           maxWidth: isJobPost ? "1300px" : hasMedia ? "1100px" : "576px",
@@ -294,21 +308,19 @@ export default function PostDetailsModal({
               <div className="flex border-b">
                 <button
                   onClick={() => setMobileView("content")}
-                  className={`flex-1 p-3 text-sm font-medium ${
-                    mobileView === "content"
+                  className={`flex-1 p-3 text-sm font-medium ${mobileView === "content"
                       ? "border-b-2 border-black text-black"
                       : "text-neutral-600"
-                  }`}
+                    }`}
                 >
                   Job
                 </button>
                 <button
                   onClick={() => setMobileView("comments")}
-                  className={`flex-1 p-3 text-sm font-medium ${
-                    mobileView === "comments"
+                  className={`flex-1 p-3 text-sm font-medium ${mobileView === "comments"
                       ? "border-b-2 border-black text-black"
                       : "text-neutral-600"
-                  }`}
+                    }`}
                 >
                   Comments
                 </button>

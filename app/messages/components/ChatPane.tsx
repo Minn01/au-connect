@@ -33,6 +33,7 @@ export default function ChatPane({
   selectedProfilePic,
   selectedUserId,
   selectedConversationId,
+  selectedUnreadCount,
   messages,
   messageInput,
   setMessageInput,
@@ -52,6 +53,7 @@ export default function ChatPane({
   selectedProfilePic: string | null;
   selectedUserId: string | null; // the OTHER user
   selectedConversationId: string | null;
+  selectedUnreadCount: number;
   messages: ChatMessage[];
   messageInput: string;
   setMessageInput: (v: string) => void;
@@ -88,8 +90,7 @@ export default function ChatPane({
   }, [openMenu]);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
-  const lastConvRef = useRef<string | null>(null);
-  const didInitialScrollRef = useRef(false);
+
 
   const timeline = useMemo<TimelineItem[]>(() => {
     if (!messages.length) return [];
@@ -112,45 +113,26 @@ export default function ChatPane({
 
     return out;
   }, [messages]);
+  const lastTimelineIndex = timeline.length > 0 ? timeline.length - 1 : 0;
+  const initialTimelineIndex = useMemo(() => {
+    if (!timeline.length) return 0;
+    if (!selectedUserId || selectedUnreadCount <= 0) return lastTimelineIndex;
 
-  useEffect(() => {
-    if (selectedConversationId !== lastConvRef.current) {
-      lastConvRef.current = selectedConversationId;
-      didInitialScrollRef.current = false;
-    }
-  }, [selectedConversationId]);
+    const incomingMsgIndexes = timeline
+      .map((item, index) =>
+        item.kind === "msg" && item.m.senderId === selectedUserId ? index : -1,
+      )
+      .filter((index) => index >= 0);
 
-  useEffect(() => {
-    if (!selectedConversationId) return;
-    if (!timeline.length) return;
+    if (!incomingMsgIndexes.length) return lastTimelineIndex;
 
-    if (!didInitialScrollRef.current) {
-      didInitialScrollRef.current = true;
-      requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({
-          index: "LAST",
-          behavior: "auto",
-          align: "end",
-        });
-      });
-    }
-  }, [selectedConversationId, timeline.length]);
+    // unread messages are the latest incoming ones (based on unreadCount snapshot at open time)
+    const unreadIncoming = incomingMsgIndexes.slice(-selectedUnreadCount);
+    if (!unreadIncoming.length) return lastTimelineIndex;
 
-  useEffect(() => {
-    if (!selectedConversationId) return;
-    if (!timeline.length) return;
-
-    if (isAtBottomRef.current) {
-      requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({
-          index: "LAST",
-          behavior: "smooth",
-          align: "end",
-        });
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeline.length]);
+    // latest unread incoming message
+    return unreadIncoming[unreadIncoming.length - 1];
+  }, [timeline, selectedUserId, selectedUnreadCount, lastTimelineIndex]);
 
   return (
     <div
@@ -251,9 +233,11 @@ export default function ChatPane({
               </div>
             ) : (
               <Virtuoso
+                key={selectedConversationId ?? "no-conversation"}
                 ref={virtuosoRef}
                 data={timeline}
-                alignToBottom
+                initialTopMostItemIndex={initialTimelineIndex}
+                followOutput={(atBottom) => (atBottom ? "smooth" : false)}
                 atBottomStateChange={(atBottom) => {
                   isAtBottomRef.current = atBottom;
                 }}

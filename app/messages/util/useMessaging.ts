@@ -9,7 +9,6 @@ const LS_LAST_CONV = "auconnect:lastConversationId";
 const LS_LAST_USER = "auconnect:lastUserId";
 const PAGE_SIZE = 50;
 
-
 function isDraftConvId(id: string | null) {
   return !!id && id.startsWith("draft:");
 }
@@ -64,7 +63,7 @@ function safeWritePending(convId: string, list: ChatMessage[]) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(pendingKey(convId), JSON.stringify(list));
-  } catch { }
+  } catch {}
 }
 
 function safeUpsertPending(convId: string, msg: ChatMessage) {
@@ -96,6 +95,7 @@ export function useMessaging() {
   const [messagesByConv, setMessagesByConv] = useState<Record<string, ChatMessage[]>>({});
   const [messageInput, setMessageInput] = useState("");
   const [showChatMobile, setShowChatMobile] = useState(false);
+  const [initialUnreadByConv, setInitialUnreadByConv] = useState<Record<string, number>>({});
 
   // Draft header fallback (when user not in inbox yet)
   const [draftPeer, setDraftPeer] = useState<{ id: string; username: string; profilePic: string | null } | null>(
@@ -113,6 +113,9 @@ export function useMessaging() {
   const selectedConvRef = useRef<string | null>(null);
   const selectedUserRef = useRef<string | null>(null);
   const messagesByConvRef = useRef<Record<string, ChatMessage[]>>({});
+
+  // ✅ NEW: track server conversation "version" (updatedAt)
+  const convVersionRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     inboxRef.current = inbox;
@@ -168,7 +171,7 @@ export function useMessaging() {
     await fetch(`/api/connect/v1/messages/${conversationId}/read`, {
       method: "POST",
       credentials: "include",
-    }).catch(() => { });
+    }).catch(() => {});
   };
 
   const shouldMarkRead = (conversationId: string) => {
@@ -186,30 +189,38 @@ export function useMessaging() {
 
       const rows: InboxRow[] = json?.data || [];
       setInbox(rows);
+
       // 🔥 Auto refresh active conversation if server state changed
       const convId = selectedConvRef.current;
       if (convId && !isDraftConvId(convId)) {
-        const serverRow = rows.find(r => r.conversationId === convId);
+        const serverRow = rows.find((r) => r.conversationId === convId);
+
         const serverLast = serverRow?.lastMessageAt ?? null;
 
-        const localMsgs = messagesByConvRef.current[convId] ?? [];
-        const localLastSent = [...localMsgs]
-          .reverse()
-          .find(m => m.status === "sent");
+        // ✅ NEW: version check (updatedAt) catches delete of older messages
+        const serverVer = serverRow?.conversationUpdatedAt ?? "";
+        const localVer = convVersionRef.current[convId] ?? "";
 
-        const localLast = localLastSent?.createdAt ?? null;
-
-        // Case 1: server changed lastMessageAt (delete happened)
-        if (serverLast !== localLast) {
+        if (serverVer && serverVer !== localVer) {
+          convVersionRef.current[convId] = serverVer;
           fetchMessagesReplace(convId);
-        }
+        } else {
+          // Keep your old fallback check (still useful)
+          const localMsgs = messagesByConvRef.current[convId] ?? [];
+          const localLastSent = [...localMsgs].reverse().find((m) => m.status === "sent");
+          const localLast = localLastSent?.createdAt ?? null;
 
-        // Case 2: conversation cleared (server null but local still has messages)
-        if (!serverLast && localMsgs.length > 0) {
-          fetchMessagesReplace(convId);
+          // Case 1: server changed lastMessageAt (delete latest / new last changed)
+          if (serverLast !== localLast) {
+            fetchMessagesReplace(convId);
+          }
+
+          // Case 2: conversation cleared (server null but local still has messages)
+          if (!serverLast && localMsgs.length > 0) {
+            fetchMessagesReplace(convId);
+          }
         }
       }
-
 
       // keep your existing auto-select logic
       setSelectedUserId((prev) => {
@@ -233,7 +244,6 @@ export function useMessaging() {
       setInboxLoaded(true);
     }
   };
-
 
   const ensureConversation = async (otherUserId: string) => {
     const res = await fetch(`/api/connect/v1/messages/conversation/with/${otherUserId}`, {
@@ -357,7 +367,7 @@ export function useMessaging() {
     const run = async () => {
       try {
         await fetchInbox();
-      } catch { }
+      } catch {}
     };
 
     run();
@@ -392,7 +402,17 @@ export function useMessaging() {
       setDraftPeer(null);
       setSelectedUserId(existing.user.id);
       setSelectedConversationId(existing.conversationId);
+      setInitialUnreadByConv((prev) => ({
+        ...prev,
+        [existing.conversationId]: existing.unreadCount ?? 0,
+      }));
       setShowChatMobile(true);
+
+      // ✅ store version
+      if (existing.conversationUpdatedAt) {
+        convVersionRef.current[existing.conversationId] = existing.conversationUpdatedAt;
+      }
+
       router.replace("/messages");
       lastHandledTargetRef.current = targetUserId;
       return;
@@ -429,9 +449,7 @@ export function useMessaging() {
     };
 
     fetchUser();
-  }, [targetUserId, inbox, router]);
-
-
+  }, [targetUserId, inbox, router, inboxLoaded]);
 
   // when selection changes: persist + fetch messages (only for real conv)
   useEffect(() => {
@@ -440,6 +458,21 @@ export function useMessaging() {
 
     localStorage.setItem(LS_LAST_CONV, selectedConversationId);
     localStorage.setItem(LS_LAST_USER, selectedUserId);
+
+    // ✅ store version if we have it in inbox
+    const row = inboxRef.current.find((r) => r.conversationId === selectedConversationId);
+    if (row?.conversationUpdatedAt) {
+      convVersionRef.current[selectedConversationId] = row.conversationUpdatedAt;
+    }
+    if (row) {
+      setInitialUnreadByConv((prev) => {
+        if (prev[selectedConversationId] !== undefined) return prev;
+        return {
+          ...prev,
+          [selectedConversationId]: row.unreadCount ?? 0,
+        };
+      });
+    }
 
     fetchMessagesReplace(selectedConversationId);
 
@@ -466,7 +499,9 @@ export function useMessaging() {
       if (isDraftConvId(convId)) return;
 
       const current = messagesByConvRef.current[convId] ?? [];
-      const lastSent = [...current].reverse().find((m) => m.status === "sent" && typeof m.createdAt === "string");
+      const lastSent = [...current]
+        .reverse()
+        .find((m) => m.status === "sent" && typeof m.createdAt === "string");
       const cursor = lastSent?.createdAt;
 
       const newMsgs = await fetchMessagesAppendSince(convId, cursor);
@@ -493,11 +528,13 @@ export function useMessaging() {
 
     if (row.conversationId) {
       setSelectedConversationId(row.conversationId);
+      setInitialUnreadByConv((prev) => ({
+        ...prev,
+        [row.conversationId!]: row.unreadCount ?? 0,
+      }));
 
-      if ((row.unreadCount ?? 0) > 0) {
-        markReadLocal(row.conversationId);
-        markReadServerSafe(row.conversationId);
-      }
+      // ✅ store version when opening
+      convVersionRef.current[row.conversationId] = row.conversationUpdatedAt ?? "";
       return;
     }
 
@@ -580,13 +617,19 @@ export function useMessaging() {
         // don't duplicate
         if (prev.some((r) => r.user.id === selectedUserId)) return prev;
 
+        const nowIso = new Date().toISOString();
+
         const newRow: InboxRow = {
           user: { id: selectedUserId, username, title: null, profilePic },
           conversationId: realConvId,
           lastMessageAt: optimistic.createdAt,
           lastMessageText: `You: ${text}`,
           unreadCount: 0,
+          conversationUpdatedAt: nowIso, // ✅ required by new type
         };
+
+        // also set version ref
+        convVersionRef.current[realConvId] = nowIso;
 
         return [newRow, ...prev];
       });
@@ -635,7 +678,13 @@ export function useMessaging() {
     setInbox((prev) =>
       prev.map((x) =>
         x.conversationId === realConvId
-          ? { ...x, lastMessageText: `You: ${sent.text ?? ""}`, lastMessageAt: sent.createdAt, unreadCount: 0 }
+          ? {
+              ...x,
+              lastMessageText: `You: ${sent.text ?? ""}`,
+              lastMessageAt: sent.createdAt,
+              unreadCount: 0,
+              // conversationUpdatedAt will come from server on next poll (fine)
+            }
           : x
       )
     );
@@ -714,13 +763,10 @@ export function useMessaging() {
     const convId = selectedConvRef.current;
     if (!convId) return;
 
-    const res = await fetch(
-      `/api/connect/v1/messages/${convId}/message/${messageId}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-      }
-    );
+    const res = await fetch(`/api/connect/v1/messages/${convId}/message/${messageId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
     if (!res.ok) return;
 
@@ -741,13 +787,10 @@ export function useMessaging() {
     const convId = selectedConvRef.current;
     if (!convId) return;
 
-    const res = await fetch(
-      `/api/connect/v1/messages/${convId}/clear`,
-      {
-        method: "DELETE",
-        credentials: "include",
-      }
-    );
+    const res = await fetch(`/api/connect/v1/messages/${convId}/clear`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
     if (!res.ok) return;
 
@@ -763,13 +806,16 @@ export function useMessaging() {
   /** Inbox preview helper */
   const getRowPreview = useCallback((row: InboxRow) => {
     const convId = row.conversationId;
-    if (!convId) return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
+    if (!convId)
+      return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
 
     const msgs = messagesByConvRef.current[convId] ?? [];
-    if (!msgs.length) return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
+    if (!msgs.length)
+      return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
 
     const last = msgs[msgs.length - 1];
-    if (!last) return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
+    if (!last)
+      return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
 
     const isMine = last.senderId === "__me__" || last.senderId !== row.user.id;
 
@@ -783,10 +829,16 @@ export function useMessaging() {
     return { text: row.lastMessageText ?? null, time: row.lastMessageAt ?? null, isFailed: false };
   }, []);
 
+  const selectedInitialUnreadCount = useMemo(() => {
+    if (!selectedConversationId) return 0;
+    return initialUnreadByConv[selectedConversationId] ?? 0;
+  }, [initialUnreadByConv, selectedConversationId]);
+
   return {
     inbox,
     selectedUserId,
     selectedConversationId,
+    selectedInitialUnreadCount,
     activeMessages,
     messageInput,
     setMessageInput,

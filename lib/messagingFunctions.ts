@@ -37,6 +37,7 @@ export async function getMyInbox(req: NextRequest) {
 
         userAUnreadCount: true,
         userBUnreadCount: true,
+        updatedAt: true,
       },
     });
 
@@ -78,6 +79,7 @@ export async function getMyInbox(req: NextRequest) {
           lastMessageAt: c.lastMessageAt,
           lastMessageText,
           unreadCount: unreadCount ?? 0,
+          conversationUpdatedAt: c.updatedAt ? c.updatedAt.toISOString() : null,
         };
       })
       .filter(Boolean);

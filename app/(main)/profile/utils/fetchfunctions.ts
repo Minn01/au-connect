@@ -219,7 +219,11 @@ export function useEditPost() {
           pages: oldData.pages.map((page: any) => ({
             ...page,
             posts: page.posts.map((post: any) =>
-              post.id === updatedPost.id ? updatedPost : post
+              post.id === updatedPost.id ? {
+                ...post,        // keeps isLiked/isSaved/counts
+                ...updatedPost, // applies edited content/media/title/etc
+              }
+                : post
             ),
           })),
         };
@@ -236,7 +240,11 @@ export function useEditPost() {
             pages: oldData.pages.map((page: any) => ({
               ...page,
               posts: page.posts.map((post: any) =>
-                post.id === updatedPost.id ? updatedPost : post
+                post.id === updatedPost.id ? {
+                  ...post,        // keeps isLiked/isSaved/counts
+                  ...updatedPost, // applies edited content/media/title/etc
+                }
+                  : post
               ),
             })),
           };
@@ -253,7 +261,10 @@ export function useEditPost() {
             pages: oldData.pages.map((page: any) => ({
               ...page,
               posts: page.posts.map((post: any) =>
-                post.id === updatedPost.id ? updatedPost : post
+                post.id === updatedPost.id ? {
+                  ...post,
+                  ...updatedPost,
+                } : post
               ),
             })),
           };
@@ -337,11 +348,11 @@ export function useToggleLike() {
             posts: page.posts.map((post) =>
               post.id === postId
                 ? {
-                    ...post,
-                    likeCount:
-                      post.likeCount && post.likeCount + (isLiked ? -1 : 1),
-                    isLiked: !isLiked, // 🔥 important
-                  }
+                  ...post,
+                  likeCount:
+                    post.likeCount && post.likeCount + (isLiked ? -1 : 1),
+                  isLiked: !isLiked, // 🔥 important
+                }
                 : post,
             ),
           })),
@@ -406,10 +417,14 @@ export function useVoteInPoll(postId: string, currentUserId: string) {
 
     onMutate: async (optionIndex) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["profilePosts"] });
 
       const previousPosts = queryClient.getQueryData<any>(["posts"]);
+      const previousProfilePosts = queryClient.getQueriesData({
+        queryKey: ["profilePosts"],
+      });
 
-      queryClient.setQueryData(["posts"], (old: any) => {
+      const applyOptimisticVote = (old: any) => {
         if (!old?.pages) return old;
 
         return {
@@ -421,14 +436,12 @@ export function useVoteInPoll(postId: string, currentUserId: string) {
 
               const updatedVotes = { ...(post.pollVotes || {}) };
 
-              // remove user from all options
               Object.keys(updatedVotes).forEach((key) => {
                 updatedVotes[key] = updatedVotes[key].filter(
                   (id: string) => id !== currentUserId,
                 );
               });
 
-              // add user to selected option
               updatedVotes[optionIndex] = [
                 ...(updatedVotes[optionIndex] || []),
                 currentUserId,
@@ -441,20 +454,36 @@ export function useVoteInPoll(postId: string, currentUserId: string) {
             }),
           })),
         };
-      });
+      };
 
-      return { previousPosts };
+      queryClient.setQueryData(["posts"], applyOptimisticVote);
+      queryClient.setQueriesData({ queryKey: ["profilePosts"] }, applyOptimisticVote);
+
+      return { previousPosts, previousProfilePosts };
     },
 
     onError: (_err, _vars, ctx) => {
       if (ctx?.previousPosts) {
         queryClient.setQueryData(["posts"], ctx.previousPosts);
-        queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
-        queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
       }
+
+      if (ctx?.previousProfilePosts) {
+        ctx.previousProfilePosts.forEach(([key, data]: [any, any]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
+      queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
     },
   });
 }
+
 
 type LinkPreviewResponse = {
   title?: string;
@@ -486,7 +515,7 @@ export const useFetchLinkPreview = () => {
 
 export function useToggleSave() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (postId: string) => {
       console.log("Saving post:", postId);
@@ -496,16 +525,16 @@ export function useToggleSave() {
       if (!res.ok) throw new Error("Failed to toggle save");
       return res.json();
     },
-    
+
     onMutate: async (postId: string) => {
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: ["posts"] });
       await queryClient.cancelQueries({ queryKey: ["post", postId] });
-      
+
       // Snapshot previous values
       const previousPosts = queryClient.getQueryData(["posts"]);
       const previousPost = queryClient.getQueryData(["post", postId]);
-      
+
       // Optimistically update feed cache
       queryClient.setQueryData(["posts"], (oldData: any) => {
         if (!oldData?.pages) return oldData;
@@ -516,18 +545,18 @@ export function useToggleSave() {
             posts: page.posts.map((post: any) =>
               post.id === postId
                 ? {
-                    ...post,
-                    isSaved: !post.isSaved,
-                    savedCount: post.isSaved
-                      ? post.savedCount - 1
-                      : post.savedCount + 1,
-                  }
+                  ...post,
+                  isSaved: !post.isSaved,
+                  savedCount: post.isSaved
+                    ? post.savedCount - 1
+                    : post.savedCount + 1,
+                }
                 : post,
             ),
           })),
         };
       });
-      
+
       // Optimistically update single post cache
       queryClient.setQueryData(["post", postId], (oldPost: any) => {
         if (!oldPost) return oldPost;
@@ -539,10 +568,10 @@ export function useToggleSave() {
             : oldPost.savedCount + 1,
         };
       });
-      
+
       return { previousPosts, previousPost };
     },
-    
+
     onError: (_err, postId, context) => {
       // Rollback on error
       if (context?.previousPosts) {
@@ -552,7 +581,7 @@ export function useToggleSave() {
         queryClient.setQueryData(["post", postId], context.previousPost);
       }
     },
-    
+
     onSettled: (_data, _error, postId) => {
       // Refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["posts"] });
