@@ -175,6 +175,7 @@ export function useDeletePost() {
         };
       });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
+      queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     },
   });
 }
@@ -227,6 +228,23 @@ export function useEditPost() {
       // 2️⃣ Update ALL profile tabs
       queryClient.setQueriesData(
         { queryKey: ["profilePosts"], exact: false },
+        (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              posts: page.posts.map((post: any) =>
+                post.id === updatedPost.id ? updatedPost : post
+              ),
+            })),
+          };
+        }
+      );
+
+      queryClient.setQueriesData(
+        { queryKey: ["profileJobPosts"], exact: false },
         (oldData: any) => {
           if (!oldData?.pages) return oldData;
 
@@ -388,6 +406,7 @@ export function useToggleLike() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
+      queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     },
   });
 }
@@ -477,6 +496,7 @@ export function useVoteInPoll(postId: string, currentUserId: string) {
       if (ctx?.previousPosts) {
         queryClient.setQueryData(["posts"], ctx.previousPosts);
         queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
+        queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
       }
     },
   });
@@ -565,6 +585,7 @@ export function useToggleSave() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
+      queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     },
   });
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { use, useEffect, useState } from "react";
-import { Pencil, Camera, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Pencil, Camera } from "lucide-react";
 
 import SectionCard from "./SectionCard";
 import ExperienceItem from "./ExperienceItem";
@@ -23,14 +23,14 @@ import Education from "@/types/Education";
 import PostType from "@/types/Post";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchProfilePosts } from "../utils/fetchProfilePosts";
+import { fetchProfileJobPosts } from "../utils/fetchProfileJobPosts";
 
 import ConnectionsModal from "./ConnectionsModal";
 import { useRouter } from "next/navigation";
 
 import { useInfiniteScroll } from "../[slug]/hook/useInfiniteScroll";
-import { useQueryClient } from "@tanstack/react-query";
 import { setInvalidateProfilePosts } from "@/lib/services/uploadService";
 
 export default function ProfileView({
@@ -46,11 +46,12 @@ export default function ProfileView({
   sessionUserId: string | null;
   sessionUser: Pick<User, "id" | "username" | "slug" | "profilePic"> | null;
 }) {
-
   const queryClient = useQueryClient();
   const [userState, setUserState] = useState<User>(user);
   const [openContactInfo, setOpenContactInfo] = useState(false);
-  const [tab, setTab] = useState<"all" | "article" | "poll" | "videos" | "images" | "documents" | "links">("all");
+  const [tab, setTab] = useState<
+    "all" | "article" | "poll" | "videos" | "images" | "documents" | "links"
+  >("all");
 
   const TABS: Array<{ key: typeof tab; label: string }> = [
     { key: "all", label: "All" },
@@ -60,6 +61,19 @@ export default function ProfileView({
     { key: "images", label: "Images" },
     { key: "documents", label: "Documents" },
     { key: "links", label: "Links" },
+  ];
+
+  // ✅ NEW: Activity vs Job Activity (UI-only)
+  type MainSection = "activity" | "jobActivity";
+  type JobTab = "hiring" | "saved" | "applied";
+
+  const [mainSection, setMainSection] = useState<MainSection>("activity");
+  const [jobTab, setJobTab] = useState<JobTab>("hiring");
+
+  const JOB_TABS: Array<{ key: JobTab; label: string; ownerOnly?: boolean }> = [
+    { key: "hiring", label: "Hiring Posts" }, // public
+    { key: "saved", label: "Saved Jobs", ownerOnly: true }, // private
+    { key: "applied", label: "Applied Jobs", ownerOnly: true }, // private
   ];
 
   const [openModal, setOpenModal] = useState(false);
@@ -85,7 +99,7 @@ export default function ProfileView({
 
   //  local cover value so UI updates after upload/delete without refresh
   const [coverPhotoValue, setCoverPhotoValue] = useState<string>(
-    user.coverPhoto || "/default_cover.jpg"
+    user.coverPhoto || "/default_cover.jpg",
   );
 
   //  resolve URLs using hook (cached)
@@ -96,7 +110,7 @@ export default function ProfileView({
 
   const resolvedCoverPhotoUrl = useResolvedMediaUrl(
     coverPhotoValue,
-    "/default_cover.jpg"
+    "/default_cover.jpg",
   );
 
   // Connect button states
@@ -118,13 +132,12 @@ export default function ProfileView({
     console.log("Session user ID:", sessionUserId);
   }, [user, sessionUserId]);
 
-
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // ✅ CHANGED: queryKey includes tab + fetchProfilePosts receives tab
+  // ✅ OLD: profile posts (unchanged)
   const {
     data: postData,
     isLoading: profilePostLoading,
@@ -136,39 +149,79 @@ export default function ProfileView({
     queryFn: ({ pageParam }) =>
       fetchProfilePosts({ pageParam, userId: user.id, tab }),
     enabled: !!user?.id,
-
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
   });
 
+  // ✅ NEW: profile job posts (ONLY for Job Activity -> Hiring)
+  const {
+    data: jobPostData,
+    isLoading: jobPostLoading,
+    fetchNextPage: fetchNextJobPage,
+    hasNextPage: hasNextJobPage,
+    isFetchingNextPage: isFetchingNextJobPage,
+  } = useInfiniteQuery({
+    queryKey: ["profileJobPosts", user.id, jobTab],
+    queryFn: ({ pageParam }) =>
+      fetchProfileJobPosts({
+        pageParam,
+        userId: user.id,
+        jobTab,
+      }),
+    enabled: !!user?.id && mainSection === "jobActivity",
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
+  });
+
+
+  // ✅ keep your invalidate logic unchanged (it still invalidates old posts; that's ok)
   useEffect(() => {
-    // This lets uploadService.ts trigger a profile refresh after edit-with-media
     setInvalidateProfilePosts(() => {
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
+      queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     });
 
     return () => {
-      // optional cleanup: prevents stale callback if you navigate away
       setInvalidateProfilePosts(() => { });
     };
   }, [queryClient]);
 
+  // ✅ Decide which infinite-scroll pagination is ACTIVE (posts vs hiring posts)
+  const usingJobSection = mainSection === "jobActivity";
 
-  // ✅ CHANGED: enable infinite scroll for ALL tabs (not only posts)
+  const activeHasNextPage = usingJobSection
+    ? !!hasNextJobPage
+    : !!hasNextPage;
+
+  const activeIsFetchingNextPage = usingJobSection
+    ? !!isFetchingNextJobPage
+    : !!isFetchingNextPage;
+
+  const activeFetchNextPage = usingJobSection
+    ? fetchNextJobPage
+    : fetchNextPage;
+
+
+  // ✅ infinite scroll uses ACTIVE pagination
   const { rootRef, sentinelRef } = useInfiniteScroll({
-    enabled: !!user?.id, // <-- key change
-    hasNextPage: !!hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
+    enabled: !!user?.id,
+    hasNextPage: activeHasNextPage,
+    isFetchingNextPage: activeIsFetchingNextPage,
+    fetchNextPage: activeFetchNextPage,
   });
 
-  // ✅ CHANGED: server now returns correct posts for the selected tab
+  // ✅ OLD: profile posts list (unchanged)
   const tabPosts: PostType[] =
     postData?.pages.flatMap((page: { posts: PostType[] }) => page.posts) ?? [];
 
-  const isPostsLoading = loading || profilePostLoading;
-  // On profile load: check connection status (connected or pending request)
+  // ✅ NEW: hiring posts list
+  const hiringPosts: PostType[] =
+    jobPostData?.pages.flatMap((page: { posts: PostType[] }) => page.posts) ?? [];
 
+  const isPostsLoading = loading || profilePostLoading;
+  const isHiringLoading = loading || jobPostLoading;
+
+  // On profile load: check connection status (connected or pending request)
   useEffect(() => {
     if (isOwner) return;
 
@@ -179,7 +232,7 @@ export default function ProfileView({
         // Check if already connected
         const connectionsRes = await fetch(
           "/api/connect/v1/connect/status?otherUserId=" + user.id,
-          { credentials: "include" }
+          { credentials: "include" },
         );
 
         if (connectionsRes.ok) {
@@ -298,7 +351,7 @@ export default function ProfileView({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
 
       const json = await res.json();
@@ -395,7 +448,9 @@ export default function ProfileView({
                               <button
                                 onClick={handleRemoveConnection}
                                 disabled={connectLoading}
-                                className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-red-500 hover:bg-red-600 ${connectLoading ? "opacity-50 cursor-not-allowed" : ""
+                                className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-red-500 hover:bg-red-600 ${connectLoading
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
                                   }`}
                               >
                                 {connectLoading ? "Removing..." : "Remove"}
@@ -410,7 +465,9 @@ export default function ProfileView({
                                 <button
                                   onClick={handleCancelRequest}
                                   disabled={connectLoading}
-                                  className={`px-3 py-2 rounded-lg border border-red-300 bg-white text-red-600 hover:bg-red-50 transition-colors text-sm font-medium ${connectLoading ? "opacity-50 cursor-not-allowed" : ""
+                                  className={`px-3 py-2 rounded-lg border border-red-300 bg-white text-red-600 hover:bg-red-50 transition-colors text-sm font-medium ${connectLoading
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                     }`}
                                   title="Cancel request"
                                 >
@@ -421,14 +478,18 @@ export default function ProfileView({
                               <button
                                 onClick={handleConnect}
                                 disabled={connectLoading}
-                                className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-blue-600 hover:bg-blue-700 ${connectLoading ? "opacity-50 cursor-not-allowed" : ""
+                                className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-blue-600 hover:bg-blue-700 ${connectLoading
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
                                   }`}
                               >
                                 {connectLoading ? "Sending..." : "Connect"}
                               </button>
                             )}
                             <button
-                              onClick={() => router.push(`/messages?userId=${user.id}`)}
+                              onClick={() =>
+                                router.push(`/messages?userId=${user.id}`)
+                              }
                               className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 shadow-sm bg-white"
                             >
                               Message
@@ -533,7 +594,9 @@ export default function ProfileView({
                       <EducationItem key={edu.id} {...edu} />
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">No education added yet.</p>
+                    <p className="text-sm text-gray-500">
+                      No education added yet.
+                    </p>
                   )}
                 </SectionCard>
 
@@ -557,58 +620,165 @@ export default function ProfileView({
                 </SectionCard>
 
                 {/* ACTIVITY */}
-                <SectionCard title="Activity">
+                <SectionCard title="Activities">
                   <p className="text-sm text-gray-600 mb-3">
                     {user.connections} connections
                   </p>
 
+                  {/* ✅ NEW: Activity vs Job Activity switch */}
                   <div className="flex gap-4 border-b pb-2">
-                    {TABS.map((t) => (
-                      <button
-                        key={t.key}
-                        onClick={() => setTab(t.key)}
-                        className={`pb-2 ${tab === t.key
-                          ? "border-b-2 border-blue-600 text-blue-600"
-                          : "text-gray-600"
-                          }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
+                    <button
+                      onClick={() => {
+                        setMainSection("activity");
+                      }}
+                      className={`pb-2 ${mainSection === "activity"
+                        ? "border-b-2 border-blue-600 text-blue-600"
+                        : "text-gray-600"
+                        }`}
+                    >
+                      Social Activity
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setMainSection("jobActivity");
+                        setJobTab("hiring"); // nicer UX default
+                      }}
+                      className={`pb-2 ${mainSection === "jobActivity"
+                        ? "border-b-2 border-blue-600 text-blue-600"
+                        : "text-gray-600"
+                        }`}
+                    >
+                      Job Activity
+                    </button>
                   </div>
 
+                  {/* ✅ Tabs row changes based on mainSection */}
+                  {mainSection === "activity" ? (
+                    <div className="flex gap-4 border-b pb-2 mt-2">
+                      {TABS.map((t) => (
+                        <button
+                          key={t.key}
+                          onClick={() => setTab(t.key)}
+                          className={`pb-2 ${tab === t.key
+                            ? "border-b-2 border-blue-600 text-blue-600"
+                            : "text-gray-600"
+                            }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex gap-4 border-b pb-2 mt-2">
+                      {JOB_TABS.filter((t) => !t.ownerOnly || isOwner).map(
+                        (t) => (
+                          <button
+                            key={t.key}
+                            onClick={() => setJobTab(t.key)}
+                            className={`pb-2 ${jobTab === t.key
+                              ? "border-b-2 border-blue-600 text-blue-600"
+                              : "text-gray-600"
+                              }`}
+                          >
+                            {t.label}
+                            {t.ownerOnly && (
+                              <span
+                                className="ml-1 text-xs text-gray-400 cursor-help"
+                                title="Only you can see this Section"
+                                aria-label="Only you can see this Section"
+                              >
+                                🔒
+                              </span>
+                            )}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  )}
 
+                  {/* ✅ Content changes based on mainSection */}
                   <div className="mt-4 space-y-4">
-                    {isPostsLoading ? (
+                    {mainSection === "activity" ? (
                       <>
-                        <Post isLoading={true} />
-                        <Post isLoading={true} />
-                      </>
-                    ) : tabPosts.length > 0 ? (
-                      <>
-                        {tabPosts.map((p: PostType) => (
-                          <Post
-                            key={p.id}
-                            post={p}
-                            isLoading={false}
-                            user={sessionUser ?? undefined}
-                          />
-                        ))}
+                        {isPostsLoading ? (
+                          <>
+                            <Post isLoading={true} />
+                            <Post isLoading={true} />
+                          </>
+                        ) : tabPosts.length > 0 ? (
+                          <>
+                            {tabPosts.map((p: PostType) => (
+                              <Post
+                                key={p.id}
+                                post={p}
+                                isLoading={false}
+                                user={sessionUser ?? undefined}
+                              />
+                            ))}
 
+                            {hasNextPage && (
+                              <div ref={sentinelRef} className="h-1" />
+                            )}
 
-                        {/* ✅ CHANGED: sentinel works for ALL tabs */}
-                        {hasNextPage && <div ref={sentinelRef} className="h-1" />}
-
-                        {isFetchingNextPage && (
-                          <div className="text-center text-sm text-gray-500 pt-2">
-                            Loading...
+                            {isFetchingNextPage && (
+                              <div className="text-center text-sm text-gray-500 pt-2">
+                                Loading...
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-center text-gray-600 py-10">
+                            No {tab === "all" ? "posts" : tab} yet
                           </div>
                         )}
                       </>
                     ) : (
-                      <div className="text-center text-gray-600 py-10">
-                        No {tab === "all" ? "posts" : tab} yet
-                      </div>
+                      <>
+                        {!isOwner && (jobTab === "saved" || jobTab === "applied") ? (
+                          <div className="text-center text-sm text-gray-600 py-10">
+                            This section is private.
+                          </div>
+                        ) : (
+                          <>
+                            {isHiringLoading ? (
+                              <>
+                                <Post isLoading={true} />
+                                <Post isLoading={true} />
+                              </>
+                            ) : hiringPosts.length > 0 ? (
+                              <>
+                                {hiringPosts.map((p: PostType) => (
+                                  <Post
+                                    key={p.id}
+                                    post={p}
+                                    isLoading={false}
+                                    user={sessionUser ?? undefined}
+                                  />
+                                ))}
+
+                                {hasNextJobPage && (
+                                  <div ref={sentinelRef} className="h-1" />
+                                )}
+
+                                {isFetchingNextJobPage && (
+                                  <div className="text-center text-sm text-gray-500 pt-2">
+                                    Loading...
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="text-center text-gray-600 py-10">
+                                {jobTab === "hiring"
+                                  ? "No hiring posts yet"
+                                  : jobTab === "saved"
+                                    ? "No saved jobs yet"
+                                    : "No applied jobs yet"}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
                 </SectionCard>
