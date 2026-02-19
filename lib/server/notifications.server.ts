@@ -4,7 +4,7 @@ import prisma from "../prisma";
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
 import { NotificationType } from "@/lib/generated/prisma";
-import { buildSlug } from "@/app/profile/utils/buildSlug";
+import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
