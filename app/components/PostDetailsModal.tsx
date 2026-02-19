@@ -23,6 +23,26 @@ import {
   SINGLE_POST_API_PATH,
 } from "@/lib/constants";
 
+type CommentsPage = {
+  comments: CommentType[];
+  nextCursor: string | null;
+};
+
+type CommentsInfiniteData = {
+  pages: CommentsPage[];
+  pageParams: unknown[];
+};
+
+type RepliesPage = {
+  replies: CommentType[];
+  nextCursor: string | null;
+};
+
+type RepliesInfiniteData = {
+  pages: RepliesPage[];
+  pageParams: unknown[];
+};
+
 export default function PostDetailsModal({
   currentUserId,
   postInfo,
@@ -99,13 +119,13 @@ export default function PostDetailsModal({
     onSuccess: (newComment, variables) => {
       // ── TOP LEVEL COMMENT ──────────────────────────────────────────────────
       if (!variables.parentCommentId) {
-        queryClient.setQueryData(
+        queryClient.setQueryData<CommentsInfiniteData>(
           ["comments", variables.postId],
-          (oldData: any) => {
+          (oldData: CommentsInfiniteData | undefined) => {
             if (!oldData) return oldData;
             return {
               ...oldData,
-              pages: oldData.pages.map((page: any, index: number) =>
+              pages: oldData.pages.map((page, index: number) =>
                 index === 0
                   ? { ...page, comments: [newComment, ...page.comments] }
                   : page,
@@ -118,9 +138,9 @@ export default function PostDetailsModal({
 
       // ── REPLY ──────────────────────────────────────────────────────────────
       // 1. Append the new reply into the replies cache for this parent comment
-      queryClient.setQueryData(
+      queryClient.setQueryData<RepliesInfiniteData>(
         ["replies", variables.postId, variables.parentCommentId],
-        (oldData: any) => {
+        (oldData) => {
           if (!oldData) {
             // Replies were never fetched yet — seed the cache from scratch
             // so the panel can open and show the new reply immediately
@@ -131,7 +151,7 @@ export default function PostDetailsModal({
           }
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any, index: number) =>
+            pages: oldData.pages.map((page, index: number) =>
               index === 0
                 ? { ...page, replies: [...page.replies, newComment] }
                 : page,
@@ -142,15 +162,15 @@ export default function PostDetailsModal({
 
       // 2. Bump replyCount on the parent comment in the top-level comments cache
       //    so the "View replies (n)" button appears / shows the correct number.
-      queryClient.setQueryData(
+      queryClient.setQueryData<CommentsInfiniteData>(
         ["comments", variables.postId],
-        (oldData: any) => {
+        (oldData) => {
           if (!oldData) return oldData;
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => ({
+            pages: oldData.pages.map((page) => ({
               ...page,
-              comments: page.comments.map((comment: any) =>
+              comments: page.comments.map((comment) =>
                 comment.id === variables.parentCommentId
                   ? { ...comment, replyCount: (comment.replyCount ?? 0) + 1 }
                   : comment,
@@ -227,7 +247,7 @@ export default function PostDetailsModal({
                   postType={postInfo.postType}
                   pollOptions={postInfo.pollOptions ?? []}
                   pollVotes={postInfo.pollVotes}
-                  pollEndsAt={postInfo.pollEndsAt}
+                  pollEndsAt={postInfo.pollEndsAt ?? new Date()}
                   mediaList={mediaList}
                   clickedIndex={clickedIndex}
                   onClose={onClose}
@@ -337,7 +357,7 @@ export default function PostDetailsModal({
                   postType={postInfo.postType}
                   pollOptions={postInfo.pollOptions ?? []}
                   pollVotes={postInfo.pollVotes}
-                  pollEndsAt={postInfo.pollEndsAt}
+                  pollEndsAt={postInfo.pollEndsAt || new Date()}
                   mediaList={mediaList}
                   clickedIndex={clickedIndex}
                   onClose={onClose}
@@ -366,7 +386,7 @@ export default function PostDetailsModal({
           isOpen={applyJobModalOpen}
           onClose={() => setApplyJobModalOpen(false)}
           jobTitle={postInfo.jobPost?.jobTitle || ""}
-          companyName={postInfo.jobPost?.companyName}
+          companyName={postInfo.jobPost?.companyName || ""}
           onSubmit={async (data) => {
             console.log("Parent onSubmit called");
             console.log("jobPostId:", postInfo.jobPost?.id);

@@ -1,20 +1,20 @@
 type JobDraft = {
   id?: string;
   jobTitle: string;
-  companyName?: string;
-  location?: string;
-  locationType?: "ONSITE" | "REMOTE" | "HYBRID" | "";
+  companyName?: string | null;
+  location?: string | null;
+  locationType?: "ONSITE" | "REMOTE" | "HYBRID" | "" | null;
   employmentType: "FULL_TIME" | "PART_TIME" | "FREELANCE" | "INTERNSHIP" | "";
-  salaryMin?: number;
-  salaryMax?: number;
-  salaryCurrency?: string;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  salaryCurrency?: string | null;
   status: "OPEN" | "CLOSED" | "FILLED";
   positionsAvailable?: number;
-  deadline?: string;
-  jobDetails?: string;
+deadline?: string;
+  jobDetails?: string | null;
   jobRequirements?: string[];
   allowExternalApply: boolean;
-  applyUrl?: string;
+  applyUrl?: string | null;
 
   // application status
   hasApplied?: boolean;

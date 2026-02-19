@@ -1,5 +1,7 @@
 import JobDraft from "./JobDraft";
 import LinkEmbed from "./LinkEmbeds";
+import { PostMedia } from "./PostMedia";
+import { PostMediaResolved } from "./PostMediaResolved";
 
 type PostType = {
   // ---------- core ----------
@@ -25,28 +27,18 @@ type PostType = {
 
   commentsDisabled?: boolean;
 
-  media?:
-    | {
-        blobName: string;
-        thumbnailBlobName?: string;
-        url: string;
-        type: string;
-        name?: string;
-        mimetype?: string;
-        size?: number;
-      }[]
-    | null;
+  media?: PostMediaResolved[] | null;
 
   links?: LinkEmbed[] | null;
 
   pollOptions: string[] | null;
-  pollEndsAt: Date | undefined;
+  pollEndsAt?: Date | null;
   pollVotes?: Record<string, string[]>;
   // pollSettings?: {
   //   multipleChoice?: boolean;
   // } | null;
 
-  jobPost?: JobDraft;
+  jobPost?: JobDraft | null;
   isLiked?: boolean;
   isSaved?: boolean;
   likeCount?: number;

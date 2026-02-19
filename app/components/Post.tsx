@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import PostType from "@/types/Post";
@@ -169,7 +169,7 @@ export default function Post({
             postId={post.id}
             options={post.pollOptions}
             votes={post.pollVotes}
-            endsAt={post.pollEndsAt}
+            endsAt={post.pollEndsAt || new Date()}
             currentUserId={user?.id}
           />
         )}
@@ -258,7 +258,7 @@ export default function Post({
         isOpen={applyJobModalOpen}
         onClose={() => setApplyJobModalOpen(false)}
         jobTitle={post.jobPost?.jobTitle || ""}
-        companyName={post.jobPost?.companyName}
+        companyName={post.jobPost?.companyName || ""}
         onSubmit={async (data) => {
           if (!post.jobPost?.id) {
             console.log("No jobPostId, returning early");
@@ -274,3 +274,5 @@ export default function Post({
     </>
   );
 }
+
+

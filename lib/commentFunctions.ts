@@ -16,10 +16,7 @@ export async function createComments(
     const [userEmail, userId] = getHeaderUserInfo(req);
 
     if (!userEmail || !userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { postId } = params;
@@ -28,10 +25,7 @@ export async function createComments(
     const parsed = CreateCommentSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Validation failed" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Validation failed" }, { status: 400 });
     }
 
     const { content, parentCommentId } = parsed.data;
@@ -43,10 +37,7 @@ export async function createComments(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // 🔥 DEPTH CHECK
@@ -62,7 +53,7 @@ export async function createComments(
       if (!parent) break;
 
       depth++;
-      currentParentId = parent.parentId;
+      currentParentId = parent.parentId ?? undefined;
 
       if (depth > MAX_COMMENT_DEPTH) {
         return NextResponse.json(
@@ -75,7 +66,7 @@ export async function createComments(
     const comment = await prisma.comment.create({
       data: {
         postId,
-        parentId: parentCommentId ?? null,
+        parentId: parentCommentId ?? undefined,
         content: content.trim(),
 
         userId: user.id,
@@ -95,7 +86,6 @@ export async function createComments(
       ...comment,
       replyCount: 0,
     });
-
   } catch (err) {
     console.error(err);
     return NextResponse.json(

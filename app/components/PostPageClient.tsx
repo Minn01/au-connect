@@ -47,9 +47,16 @@ export default function PostPageClient({
 
   return (
     <PostDetailsModal
-      currentUserId={user?.id}
+      currentUserId={user.id}
       postInfo={post}
-      media={post.media}
+      media={
+        post.media
+          ?.filter((m) => m.url)
+          .map((m) => ({
+            url: m.url!, // safe after filter
+            type: m.type,
+          })) ?? null
+      }
       title={post.title}
       content={post.content}
       clickedIndex={initialIndex}

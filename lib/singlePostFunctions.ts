@@ -14,6 +14,8 @@ import {
 } from "./env";
 import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia } from "@/types/PostMedia";
+import mapJson from "@/app/profile/utils/mediaMap";
+import LinkEmbed from "@/types/LinkEmbeds";
 
 export async function getSinglePost(
   req: NextRequest,
@@ -115,10 +117,11 @@ export async function getSinglePost(
       AZURE_STORAGE_ACCOUNT_KEY,
     );
 
-    let mediaWithUrls = post.media;
+    let mediaWithUrls: PostMedia[] | null =
+      mapJson<PostMedia[]>(post.media) ?? null;
 
-    if (post.media && Array.isArray(post.media)) {
-      mediaWithUrls = (post.media as PostMedia[]).map((mediaItem) => {
+    if (mediaWithUrls) {
+      mediaWithUrls = mediaWithUrls.map((mediaItem) => {
         const sasToken = generateBlobSASQueryParameters(
           {
             containerName: AZURE_STORAGE_CONTAINER_NAME,
@@ -129,8 +132,10 @@ export async function getSinglePost(
           sharedKeyCredential,
         ).toString();
 
+        const { file, previewUrl, ...safeMedia } = mediaItem;
+
         return {
-          ...mediaItem,
+          ...safeMedia,
           url: `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${mediaItem.blobName}?${sasToken}`,
         };
       });
@@ -160,13 +165,19 @@ export async function getSinglePost(
 
     return NextResponse.json({
       ...post,
+
       media: mediaWithUrls,
+
+      links: mapJson<LinkEmbed[]>(post.links) ?? null,
+
+      pollVotes: mapJson<Record<string, string[]>>(post.pollVotes),
 
       username: post.user.username,
       profilePic: post.user.profilePic,
 
       isLiked,
       isSaved,
+
       numOfComments: post._count.comments,
 
       jobPost: jobPostWithStatus,

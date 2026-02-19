@@ -2,12 +2,13 @@ import { Ellipsis, Pencil, Trash2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import PopupModal from "./PopupModal";
 import JobDraft from "@/types/JobDraft";
+import PostType from "@/types/Post";
 
 type LocationType = "ONSITE" | "REMOTE" | "HYBRID";
 type EmploymentType = "FULL_TIME" | "PART_TIME" | "FREELANCE" | "INTERNSHIP";
 
 interface JobPostCardProps {
-  post: any;
+  post: PostType;
   job: JobDraft;
   isOwner: boolean;
   hasApplied: boolean;
@@ -31,10 +32,13 @@ const formatEmployment = (type?: EmploymentType) =>
     .toLowerCase()
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
-const formatLocationType = (type?: LocationType) =>
-  type?.charAt(0) + type?.slice(1).toLowerCase();
+const formatLocationType = (type?: LocationType) => {
+  if (type) {
+    return type?.charAt(0) + type?.slice(1).toLowerCase();
+  }
+};
 
-const formatSalary = (job: any) => {
+const formatSalary = (job: JobDraft) => {
   if (!job.salaryMin && !job.salaryMax) return null;
   const currency = job.salaryCurrency || "USD";
 
@@ -172,7 +176,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
 
       {/* Meta */}
       <p className="text-gray-600 text-sm mt-1">
-        {[job.location, formatLocationType(job.locationType)]
+        {[job.location, formatLocationType(job.locationType || "HYBRID")]
           .filter(Boolean)
           .join(" · ")}
         {job.employmentType && <> · {formatEmployment(job.employmentType)}</>}
@@ -194,7 +198,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
       </div>
 
       {/* Positions Available (Owner View) */}
-      {isOwner && job.positionsAvailable && (
+      { job.positionsAvailable && (
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-700">
           <span>
             {job.positionsFilled || 0} / {job.positionsAvailable} positions
@@ -274,7 +278,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
           onClose={() => setPopupOpen(false)}
           onConfirm={() => {
             if (externalConfirm) {
-              window.open(job.applyUrl, "_blank", "noopener,noreferrer");
+              window.open(job.applyUrl || "", "_blank", "noopener,noreferrer");
               setExternalConfirm(false);
             } else {
               setPopupOpen(false);

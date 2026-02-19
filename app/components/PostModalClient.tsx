@@ -17,7 +17,7 @@ export default function PostModalClient({
   const router = useRouter();
 
   // USER
-  const { data: user, isLoading: userLoading } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
   });
@@ -26,7 +26,14 @@ export default function PostModalClient({
     <PostDetailsModal
       currentUserId={user.id}
       postInfo={post}
-      media={post.media}
+      media={
+        post.media
+          ?.filter((m) => m.url)
+          .map((m) => ({
+            url: m.url!, // safe after filter
+            type: m.type,
+          })) ?? null
+      }
       title={post.title}
       content={post.content}
       clickedIndex={initialIndex}

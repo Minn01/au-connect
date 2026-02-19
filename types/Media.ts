@@ -1,9 +1,9 @@
 export type MediaType = "image" | "video" | "file";
 
 export type MediaItem = {
-  id: string;
-  file: File | null;
-  previewUrl: string | undefined;
+  id?: string;
+  file?: File | null;
+  previewUrl?: string | undefined;
   type: MediaType | string;
   blobName?: string;
   thumbnailBlobName?: string;
@@ -17,4 +17,6 @@ export type MediaItem = {
     duration: number;
     quality: string; // e.g., "720p", "1080p", "4K"
   };
+  size?: number;
+  mimeType?: number;
 };

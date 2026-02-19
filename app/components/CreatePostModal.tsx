@@ -14,12 +14,12 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 
-import { useUploadStore } from "@/lib/stores/uploadStore";
+import { UploadJob, useUploadStore } from "@/lib/stores/uploadStore";
 import { processUpload } from "@/lib/services/uploadService";
 import { useResolvedMediaUrl } from "@/app/profile/utils/useResolvedMediaUrl";
 import { useDraftStore } from "@/lib/stores/draftStore";
 import { useEditPost } from "@/app/profile/utils/fetchfunctions";
-import { PostMediaWithUrl } from "@/types/PostMedia";
+import { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
 import { processEdit } from "@/lib/services/uploadService";
 import VideoPlayer from "./VideoPlayer";
 import JobPostCreationSection from "./JobPostCreationSection";
@@ -301,7 +301,21 @@ export default function CreatePostModal({
 
         if (hasNewMedia) {
           // EDIT VIA BACKGROUND JOB
-          const jobData: any = {
+          const jobData: {
+            isEdit: boolean;
+            postId: string;
+            postType: string;
+            title: string;
+            content: string;
+            visibility: string;
+            disableComments: boolean;
+            media: MediaItem[];
+            existingMedia: PostMediaWithUrl[];
+            links: LinkEmbed[];
+            job?: JobDraft;
+            pollOptions?: string[];
+            pollDuration?: number;
+          } = {
             isEdit: true,
             postId: exisistingPost.id,
             postType,
@@ -327,7 +341,18 @@ export default function CreatePostModal({
           processEdit(jobId);
         } else {
           // EDIT WITHOUT UPLOAD
-          const editData: any = {
+          const editData: {
+            postType: string;
+            title: string;
+            content: string;
+            commentsDisabled: boolean;
+            visibility: string;
+            media: MediaItem[];
+            links: LinkEmbed[];
+            job?: JobDraft;
+            pollOptions?: string[];
+            pollDuration?: number;
+          } = {
             postType,
             title,
             content: postContent,
@@ -361,7 +386,19 @@ export default function CreatePostModal({
         }
       } else {
         // CREATE POST (ALWAYS JOB)
-        const jobData: any = {
+        const jobData: {
+          postType: string;
+          title: string;
+          content: string;
+          visibility: string;
+          disableComments: boolean;
+          media: MediaItem[];
+          links: LinkEmbed[];
+          job: JobDraft;
+
+          pollOptions?: string[];
+          pollDuration?: number;
+        } = {
           postType,
           title,
           content: postContent,

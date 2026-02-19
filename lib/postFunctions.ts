@@ -6,6 +6,7 @@ import {
   StorageSharedKeyCredential,
 } from "@azure/storage-blob";
 
+import { JobPostAPI } from "@/types/JobPostAPI";
 import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
 import { CreatePostSchema, EditPostSchema } from "@/zod/PostSchema";
@@ -16,6 +17,14 @@ import {
 } from "./env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
+import { PostMediaSafe } from "@/types/PostMediaSafe";
+
+type PollData = {
+  pollOptions?: string[];
+  pollVotes?: Record<string, string[]>;
+  pollEndsAt?: Date;
+};
+
 
 export async function createPost(req: NextRequest) {
   try {
@@ -62,7 +71,7 @@ export async function createPost(req: NextRequest) {
     }
 
     // handle post duration
-    const pollData: any = {};
+    const pollData: PollData = {};
     if (data.postType === "poll") {
       pollData.pollOptions = data.pollOptions || [];
       pollData.pollVotes = {}; // Initialize empty votes
@@ -298,17 +307,19 @@ export async function getPosts(req: NextRequest) {
         numOfComments: post._count.comments,
 
         jobPost: post.jobPost
-          ? {
+          ? ({
               ...post.jobPost,
 
               positionsFilled: post.jobPost._count.applications,
+
               remainingPositions:
                 post.jobPost.positionsAvailable -
                 post.jobPost._count.applications,
 
               hasApplied: post.jobPost.applications.length > 0,
+
               applicationStatus: post.jobPost.applications[0]?.status ?? null,
-            }
+            } satisfies JobPostAPI)
           : null,
       };
     });
@@ -542,7 +553,6 @@ export async function editPost(req: NextRequest) {
             locationType: job.locationType,
             employmentType: job.employmentType,
             positionsAvailable: job.positionsAvailable ?? 1,
-            positionsFilled: job.positionsFilled ?? 0,
             status: job.status ?? "OPEN",
             salaryMin: job.salaryMin,
             salaryMax: job.salaryMax,
@@ -556,7 +566,7 @@ export async function editPost(req: NextRequest) {
         });
       }
 
-      // 🔥 FETCH AGAIN AFTER UPSERT
+      // FETCH AGAIN AFTER UPSERT
       return tx.post.findUnique({
         where: { id: postId },
         include: {
@@ -636,16 +646,18 @@ export async function editPost(req: NextRequest) {
   }
 }
 
-function assertCompleteMedia(media: any[]) {
+function assertCompleteMedia(media: unknown[]): asserts media is PostMedia[] {
   for (const m of media) {
     if (
-      !m.blobName ||
-      !m.type ||
-      !m.name ||
-      !m.mimetype ||
-      typeof m.size !== "number"
+      typeof m !== "object" ||
+      m === null ||
+      !("blobName" in m) ||
+      !("type" in m) ||
+      !("name" in m) ||
+      !("mimetype" in m) ||
+      !("size" in m)
     ) {
-      throw new Error(`Invalid media object: ${JSON.stringify(m)}`);
+      throw new Error(`Invalid media object`);
     }
   }
 }
@@ -693,10 +705,7 @@ export async function deletePost(req: NextRequest) {
       );
     }
 
-    // -------------------------
     // Delete Azure blobs first
-    // -------------------------
-
     if (post.media && Array.isArray(post.media)) {
       const media = post.media as PostMedia[];
 
@@ -729,10 +738,7 @@ export async function deletePost(req: NextRequest) {
       );
     }
 
-    // -------------------------
     // DATABASE DELETE TRANSACTION
-    // -------------------------
-
     await prisma.$transaction(async (tx) => {
       // delete job applications
       if (post.jobPost) {
