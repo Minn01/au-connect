@@ -48,9 +48,9 @@ export default function JobPostDetailView({
   onSave,
   onViewApplicants,
 }: JobPostContentViewProps) {
-useEffect(() => {
-  console.log("jobData:\n", jobData);
-}, [jobData])
+  useEffect(() => {
+    console.log("jobData:\n", jobData);
+  }, [jobData])
   const formatSalary = () => {
     const currency = jobData.salaryCurrency || "USD";
     if (jobData.salaryMin && jobData.salaryMax) {
@@ -90,9 +90,8 @@ useEffect(() => {
               </div>
 
               <span
-                className={`shrink-0 px-3 py-1 text-xs font-semibold rounded-full border ${
-                  statusColors[displayStatus]
-                }`}
+                className={`shrink-0 px-3 py-1 text-xs font-semibold rounded-full border ${statusColors[displayStatus]
+                  }`}
               >
                 {displayStatus}
               </span>
@@ -252,7 +251,7 @@ useEffect(() => {
               </button>
             ) : (
               <button
-                disabled={hasApplied}
+                disabled={hasApplied || displayStatus === "CLOSED"}
                 onClick={onApply}
                 className="cursor-pointer rounded-lg bg-blue-600 py-2 px-4 text-white disabled:bg-neutral-400"
               >
@@ -262,7 +261,7 @@ useEffect(() => {
                     ? "Rejected"
                     : applicationStatus === "APPLIED"
                       ? "Applied"
-                      : "Apply"}
+                      : (displayStatus === "CLOSED" ? "Closed" : "Apply")}
               </button>
             )}
           </div>

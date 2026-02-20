@@ -51,6 +51,35 @@ export async function POST(
       return NextResponse.json({ error: "File too large" }, { status: 400 });
     }
 
+    const job_post = await prisma.jobPost.findUnique({
+      where: { id: jobPostId },
+      select: {
+        status: true,
+        post: { select: { userId: true } },
+      },
+    });
+
+    if (!job_post) {
+      return NextResponse.json(
+        { error: "Job post not found" },
+        { status: 404 },
+      );
+    }
+
+    if (job_post.status === "CLOSED") {
+      return NextResponse.json(
+        { error: "Job Already Closed" },
+        { status: 400 },
+      );
+    }
+
+    if (job_post.status === "FILLED") {
+      return NextResponse.json(
+        { error: "Number of Job Positions Already Filled" },
+        { status: 400 },
+      );
+    }
+
     // Check duplicate
     const existing = await prisma.jobApplication.findUnique({
       where: {
@@ -112,11 +141,13 @@ export async function POST(
 
     if (jobPost?.post?.userId && jobPost.post.userId !== applicantId) {
       await createNotification({
-        userId: jobPost.post.userId,   // post owner receives notification
-        fromUserId: applicantId,       // applicant is the sender
+        userId: jobPost.post.userId, // post owner receives notification
+        fromUserId: applicantId, // applicant is the sender
         type: "JOB_APPLICATION",
         entityId: jobPostId,
-      }).catch((err) => console.error("❌ Job application notification failed:", err));
+      }).catch((err) =>
+        console.error("❌ Job application notification failed:", err),
+      );
     }
 
     return NextResponse.json({

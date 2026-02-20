@@ -247,7 +247,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
                 : "bg-black text-white hover:opacity-90"
             }`}
           >
-            {isClosed ? (hasApplied && "Applied") : (hasApplied ? "Applied" : "Apply")}
+            {isClosed ? (hasApplied ? "Applied" : "Closed") : (hasApplied ? "Applied" : "Apply")}
           </button>
         )}
 
