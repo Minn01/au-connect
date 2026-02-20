@@ -84,7 +84,15 @@ export default function Home() {
           </div>
 
           <div className="hidden lg:block col-span-3">
-            <RightEvents events={mockEvents} loading={false} />
+            <div className="bg-white border-l-4 border-red-600 rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-serif italic text-neutral-900">
+                Labor Omnia Vincit
+              </h3>
+
+              <p className="text-sm text-neutral-600 mt-2">
+                Work conquers all things
+              </p>
+            </div>
           </div>
         </div>
       </div>

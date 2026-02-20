@@ -378,6 +378,7 @@ export async function editPost(req: NextRequest) {
         { status: 401 },
       );
     }
+    
 
     const postId = req.nextUrl.searchParams.get("postId");
     const body = await req.json();
@@ -414,8 +415,14 @@ export async function editPost(req: NextRequest) {
         userId: true,
         media: true,
         pollVotes: true,
+        postType: true,
       },
     });
+
+    const exsistingPostType = existingPost?.postType
+    if (exsistingPostType !== data.postType) {
+      return NextResponse.json({ error: "Cannot edit to different post type" }, { status: 403 });
+    }
 
     if (!existingPost) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
