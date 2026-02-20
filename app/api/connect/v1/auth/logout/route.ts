@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
-import { JWT_COOKIE, SIGNIN_PAGE_PATH } from "@/lib/constants";
-import { NEXT_PUBLIC_BASE_URL } from "@/lib/env";
+import { JWT_COOKIE } from "@/lib/constants";
 
 export async function DELETE() {
   try {
-    // Create the redirect response
-    const response = NextResponse.redirect(
-        NEXT_PUBLIC_BASE_URL + SIGNIN_PAGE_PATH
+    const response = NextResponse.json(
+      { message: "Logged out successfully" },
+      { status: 200 },
     );
 
-    // Delete the cookie properly
+    // Keep cookie attributes aligned with login cookie settings.
     response.cookies.set(JWT_COOKIE, "", {
       httpOnly: true,
-      secure: process.env.ALLOW_HTTPS === "true",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 0,
-      path: "/", // IMPORTANT
+      expires: new Date(0),
+      path: "/",
     });
 
     return response;
