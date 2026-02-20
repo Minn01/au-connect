@@ -20,7 +20,37 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(notifications);
+    const legacyJobApplicationEntityIds = notifications
+      .filter((n) => n.type === "JOB_APPLICATION" && !!n.entityId)
+      .map((n) => n.entityId as string);
+
+    if (legacyJobApplicationEntityIds.length === 0) {
+      return NextResponse.json(notifications);
+    }
+
+    const jobPosts = await prisma.jobPost.findMany({
+      where: { id: { in: legacyJobApplicationEntityIds } },
+      select: { id: true, postId: true },
+    });
+
+    const jobPostIdToPostId = new Map(jobPosts.map((j) => [j.id, j.postId]));
+
+    const normalizedNotifications = notifications.map((notification) => {
+      if (notification.type !== "JOB_APPLICATION" || !notification.entityId) {
+        return notification;
+      }
+
+      const postId = jobPostIdToPostId.get(notification.entityId);
+
+      if (!postId) return notification;
+
+      return {
+        ...notification,
+        entityId: postId,
+      };
+    });
+
+    return NextResponse.json(normalizedNotifications);
   } catch (err) {
     return NextResponse.json(
       { error: "Failed to fetch notifications" },

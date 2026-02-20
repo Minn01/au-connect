@@ -10,6 +10,7 @@ export const POST_DETAIL_PAGE_PATH = (
   postId: string,
   index?: number,
   ref?: string,
+  by?: string,
 ) => {
   const params = new URLSearchParams();
 
@@ -19,6 +20,10 @@ export const POST_DETAIL_PAGE_PATH = (
 
   if (ref) {
     params.set("ref", ref);
+  }
+
+  if (by) {
+    params.set("by", by);
   }
 
   const queryString = params.toString();

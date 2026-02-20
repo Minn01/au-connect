@@ -63,6 +63,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
   job,
   isOwner,
   hasApplied,
+  applicationStatus,
   isSaved,
   postMenuDropDownOpen,
   setPostMenuDropDownOpen,
@@ -86,6 +87,12 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
   const displayStatus =
     job.status === "OPEN" && isDeadlinePassed ? "CLOSED" : job.status;
   const isClosed = displayStatus !== "OPEN";
+  const appliedLabel =
+    applicationStatus === "SHORTLISTED"
+      ? "Shortlisted"
+      : applicationStatus === "REJECTED"
+        ? "Rejected"
+        : "Applied";
 
   const handleEdit = () => {
     setPostMenuDropDownOpen(false);
@@ -247,7 +254,13 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
                 : "bg-black text-white hover:opacity-90"
             }`}
           >
-            {isClosed ? (hasApplied ? "Applied" : "Closed") : (hasApplied ? "Applied" : "Apply")}
+            {isClosed
+              ? hasApplied
+                ? appliedLabel
+                : "Closed"
+              : hasApplied
+                ? appliedLabel
+                : "Apply"}
           </button>
         )}
 

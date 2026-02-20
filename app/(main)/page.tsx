@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import LeftProfile from "../components/Feed_LeftProfile";
 import MainFeed from "../components/Feed_MainFeed";
 import RightEvents from "../components/Feed_RightEvents";
+import Image from "next/image";
 import { fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
 import PostType from "@/types/Post";
 import {
@@ -84,14 +85,29 @@ export default function Home() {
           </div>
 
           <div className="hidden lg:block col-span-3">
-            <div className="bg-white border-l-4 border-red-600 rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-serif italic text-neutral-900">
-                Labor Omnia Vincit
-              </h3>
+            <div className="bg-white border-l-4 border-red-600 rounded-xl p-6 shadow-sm flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="text-lg font-serif italic text-neutral-900">
+                  Labor Omnia Vincit
+                </h3>
+                <p className="text-sm text-neutral-600 mt-2">
+                  Work conquers all things
+                </p>
+              </div>
 
-              <p className="text-sm text-neutral-600 mt-2">
-                Work conquers all things
-              </p>
+              {/* AU Logo */}
+              <div className="shrink-0">
+                <div className="h-16 w-16 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="/au-logo.png"
+                    alt="Assumption University of Thailand"
+                    width={64}
+                    height={64}
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

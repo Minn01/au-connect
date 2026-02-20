@@ -235,7 +235,6 @@ export default function JobPostDetailView({
 
           <div className="flex flex-row mt-6 mb-5">
             <button
-              disabled={isSaved}
               onClick={onSave}
               className="mr-3 cursor-pointer hover:bg-gray-800 bg-black rounded-lg ml-5 py-2 px-6 text-white"
             >

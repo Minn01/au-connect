@@ -26,7 +26,30 @@ export async function POST(
       );
     }
 
+    let sharedByUserId: string | undefined;
+    try {
+      const body = await req.json();
+      if (typeof body?.sharedByUserId === "string") {
+        sharedByUserId = body.sharedByUserId;
+      }
+    } catch {
+      // Allow empty body for backward compatibility.
+    }
+
     const result = await prisma.$transaction(async (tx) => {
+      let actorUserId = userId;
+
+      if (sharedByUserId && sharedByUserId !== userId) {
+        const sharer = await tx.user.findUnique({
+          where: { id: sharedByUserId },
+          select: { id: true },
+        });
+
+        if (sharer?.id) {
+          actorUserId = sharer.id;
+        }
+      }
+
       const post = await tx.post.update({
         where: { id: postId },
         data: {
@@ -39,10 +62,10 @@ export async function POST(
       });
 
       //  Create notification (if not sharing own post)
-      if (post.userId !== userId) {
+      if (post.userId !== actorUserId) {
         await createNotification({
           userId: post.userId,   // post owner
-          fromUserId: userId,    // who shared
+          fromUserId: actorUserId, // shared-link owner
           type: "POST_SHARED",
           entityId: postId,
         });

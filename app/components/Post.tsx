@@ -277,7 +277,12 @@ export default function Post({
       <ShareModal
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
-        shareUrl={`${window.location.origin}${POST_DETAIL_PAGE_PATH(post.id, 0, "share")}`}
+        shareUrl={`${window.location.origin}${POST_DETAIL_PAGE_PATH(
+          post.id,
+          0,
+          "share",
+          user?.id,
+        )}`}
       />
     </>
   );

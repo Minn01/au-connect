@@ -55,6 +55,7 @@ export async function POST(
       where: { id: jobPostId },
       select: {
         status: true,
+        postId: true,
         post: { select: { userId: true } },
       },
     });
@@ -134,17 +135,12 @@ export async function POST(
     });
 
     // 🔔 Notify the job post owner
-    const jobPost = await prisma.jobPost.findUnique({
-      where: { id: jobPostId },
-      select: { post: { select: { userId: true } } },
-    });
-
-    if (jobPost?.post?.userId && jobPost.post.userId !== applicantId) {
+    if (job_post.post?.userId && job_post.post.userId !== applicantId) {
       await createNotification({
-        userId: jobPost.post.userId, // post owner receives notification
+        userId: job_post.post.userId, // post owner receives notification
         fromUserId: applicantId, // applicant is the sender
         type: "JOB_APPLICATION",
-        entityId: jobPostId,
+        entityId: job_post.postId,
       }).catch((err) =>
         console.error("❌ Job application notification failed:", err),
       );

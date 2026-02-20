@@ -15,11 +15,13 @@ export default function PostPageClient({
   postId,
   initialIndex,
   hasRefShare,
+  sharedByUserId,
 }: {
   post: PostArg;
   postId: string;
   initialIndex: number;
   hasRefShare: boolean;
+  sharedByUserId?: string | null;
 }) {
   const router = useRouter();
 
@@ -35,6 +37,10 @@ export default function PostPageClient({
       // Call API to increment share count
       fetch(SHARE_POST_API_PATH(postId), {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sharedByUserId: sharedByUserId ?? undefined,
+        }),
       }).catch((err) => console.error("Failed to track share:", err));
 
       // Clean up URL
@@ -42,7 +48,7 @@ export default function PostPageClient({
         scroll: false,
       });
     }
-  }, [hasRefShare, postId, initialIndex, router]);
+  }, [hasRefShare, postId, initialIndex, router, sharedByUserId]);
 
   if (userLoading || !user) return null;
   const postAsPostType = post as unknown as PostType;

@@ -114,8 +114,9 @@ export default function NotificationsPage() {
     }
 
     if (notification.entityId) {
-      router.push(`/posts/${notification.entityId}`);
+      router.push(`/posts/${notification.entityId}?media=0`);
     }
+
   };
 
   return (
