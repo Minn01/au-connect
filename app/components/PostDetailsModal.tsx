@@ -121,21 +121,34 @@ export default function PostDetailsModal({
       };
       // ── TOP LEVEL COMMENT ──────────────────────────────────────────────────
       if (!variables.parentCommentId) {
-        queryClient.setQueryData(["comments", variables.postId], (oldData: any) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page: any, index: number) =>
-              index === 0 ? { ...page, comments: [newComment, ...page.comments] } : page,
-            ),
-          };
-        });
+        queryClient.setQueryData(
+          ["comments", variables.postId],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page: any, index: number) =>
+                index === 0
+                  ? { ...page, comments: [newComment, ...page.comments] }
+                  : page,
+              ),
+            };
+          },
+        );
 
         queryClient.setQueryData(["posts"], bumpPostCommentCount);
-        queryClient.setQueriesData({ queryKey: ["profilePosts"] }, bumpPostCommentCount);
-        queryClient.setQueriesData({ queryKey: ["profileJobPosts"] }, bumpPostCommentCount);
-        queryClient.setQueryData(["post", variables.postId], bumpSinglePostCommentCount);
-
+        queryClient.setQueriesData(
+          { queryKey: ["profilePosts"] },
+          bumpPostCommentCount,
+        );
+        queryClient.setQueriesData(
+          { queryKey: ["profileJobPosts"] },
+          bumpPostCommentCount,
+        );
+        queryClient.setQueryData(
+          ["post", variables.postId],
+          bumpSinglePostCommentCount,
+        );
 
         return;
       }
@@ -185,9 +198,18 @@ export default function PostDetailsModal({
       );
 
       queryClient.setQueryData(["posts"], bumpPostCommentCount);
-      queryClient.setQueriesData({ queryKey: ["profilePosts"] }, bumpPostCommentCount);
-      queryClient.setQueriesData({ queryKey: ["profileJobPosts"] }, bumpPostCommentCount);
-      queryClient.setQueryData(["post", variables.postId], bumpSinglePostCommentCount);
+      queryClient.setQueriesData(
+        { queryKey: ["profilePosts"] },
+        bumpPostCommentCount,
+      );
+      queryClient.setQueriesData(
+        { queryKey: ["profileJobPosts"] },
+        bumpPostCommentCount,
+      );
+      queryClient.setQueryData(
+        ["post", variables.postId],
+        bumpSinglePostCommentCount,
+      );
     },
   });
 
@@ -205,8 +227,9 @@ export default function PostDetailsModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white w-full ${isJobPost ? "max-w-[1100px]" : hasMedia ? "max-w-6xl" : "max-w-xl"
-          } h-[90vh] rounded-lg flex overflow-hidden`}
+        className={`bg-white w-full ${
+          isJobPost ? "max-w-[1100px]" : hasMedia ? "max-w-6xl" : "max-w-xl"
+        } h-[90vh] rounded-lg flex overflow-hidden`}
         style={{
           display: "flex",
           maxWidth: isJobPost ? "1300px" : hasMedia ? "1100px" : "576px",
@@ -322,19 +345,21 @@ export default function PostDetailsModal({
               <div className="flex border-b">
                 <button
                   onClick={() => setMobileView("content")}
-                  className={`flex-1 p-3 text-sm font-medium ${mobileView === "content"
-                    ? "border-b-2 border-black text-black"
-                    : "text-neutral-600"
-                    }`}
+                  className={`flex-1 p-3 text-sm font-medium ${
+                    mobileView === "content"
+                      ? "border-b-2 border-black text-black"
+                      : "text-neutral-600"
+                  }`}
                 >
                   Job
                 </button>
                 <button
                   onClick={() => setMobileView("comments")}
-                  className={`flex-1 p-3 text-sm font-medium ${mobileView === "comments"
-                    ? "border-b-2 border-black text-black"
-                    : "text-neutral-600"
-                    }`}
+                  className={`flex-1 p-3 text-sm font-medium ${
+                    mobileView === "comments"
+                      ? "border-b-2 border-black text-black"
+                      : "text-neutral-600"
+                  }`}
                 >
                   Comments
                 </button>
@@ -345,6 +370,19 @@ export default function PostDetailsModal({
                   <JobPostDetailView
                     jobData={postInfo.jobPost!}
                     isOwner={postInfo.userId === currentUserId}
+                    hasApplied={post.jobPost?.hasApplied}
+                    applicationStatus={post.jobPost?.applicationStatus}
+                    isSaved={post.isSaved}
+                    onApply={() =>
+                      handleJobApply(
+                        postInfo.jobPost?.allowExternalApply ?? false,
+                        postInfo.jobPost?.applyUrl ?? "",
+                      )
+                    }
+                    onSave={() => saveMutation.mutate(post.id)}
+                    onViewApplicants={() => {
+                      router.push(JOB_APPLICANTS_PAGE_PATH(post.id));
+                    }}
                   />
                 </div>
               ) : (

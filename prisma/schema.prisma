@@ -112,12 +112,12 @@ model Post {
   postType   String
   visibility String?
 
-  title   String?
-  content String
-  media   Json? // [{ url, type, name, mimetype, size }]
+  title      String?
+  content    String
+  media      Json? // [{ url, type, name, mimetype, size }]
   mediaTypes String[] @default([])
-  hasLinks  Boolean @default(false)
-  links   Json?
+  hasLinks   Boolean  @default(false)
+  links      Json?
 
   commentsDisabled Boolean @default(false)
   commentCount     Int     @default(0)
@@ -245,7 +245,7 @@ model Notification {
 
   type     NotificationType
   entityId String?
-  isRead   Boolean @default(false)
+  isRead   Boolean          @default(false)
 
   createdAt DateTime @default(now())
 
@@ -261,7 +261,7 @@ model Conversation {
 
   lastMessageAt       DateTime?
   lastMessageText     String?
-  lastMessageSenderId String? @db.ObjectId
+  lastMessageSenderId String?   @db.ObjectId
 
   userALastReadAt DateTime?
   userBLastReadAt DateTime?
@@ -278,7 +278,6 @@ model Conversation {
   @@index([userAId, lastMessageAt])
   @@index([userBId, lastMessageAt])
 }
-
 
 model Message {
   id String @id @default(auto()) @map("_id") @db.ObjectId
