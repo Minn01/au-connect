@@ -1,10 +1,19 @@
 services:
   au-connect:
     image: minn01/au-connect:latest
+    container_name: au-connect-app
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_started
+      mongo-init:
+        condition: service_completed_successfully
+
     ports:
       - "3000:3000"
+
     environment:
-      - DATABASE_URL=
+      - DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
       - GOOGLE_CLIENT_ID=
       - GOOGLE_CLIENT_SECRET=
       - LINKEDIN_CLIENT_ID=
@@ -15,10 +24,57 @@ services:
       - AZURE_STORAGE_ACCOUNT_NAME=
       - AZURE_STORAGE_CONNECTION_STRING=
       - AZURE_STORAGE_CONTAINER_NAME=
-      - NEXT_PUBLIC_BASE_URL=
-      - NEXT_PUBLIC_APP_URL=
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
       - GMAIL_USER=
       - GMAIL_APP_PASSWORD=
-      - NODE_ENV=
+      - NODE_ENV=development
       - JWT_SECRET=
+
+    networks:
+      - au-network
+
+  mongo:
+    image: mongo:7
+    container_name: au-connect-mongo
     restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - au-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  # One-time replica set initialization
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - au-network
+    restart: "no"
+    entrypoint: |
+      bash -c '
+        echo "Waiting for Mongo...";
+        sleep 5;
+        mongosh --host mongo:27017 --eval "
+          rs.initiate({
+            _id: \"rs0\",
+            members: [{ _id: 0, host: \"mongo:27017\" }]
+          })
+        ";
+        echo "Replica set initialized";
+      '
+
+networks:
+  au-network:
+
+volumes:
+  mongo-data:
