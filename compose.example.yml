@@ -42,7 +42,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db
+      - ac-mongo-data:/data/db
     networks:
       - au-network
     healthcheck:
@@ -77,4 +77,4 @@ networks:
   au-network:
 
 volumes:
-  mongo-data:
+  ac-mongo-data:
