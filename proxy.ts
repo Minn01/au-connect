@@ -51,19 +51,19 @@ export default function middleware(req: NextRequest) {
   );
 
   if (!sessionToken) {
-    // if (isProtectedRoute || pathname.startsWith(BASE_API_PATH)) {
-    //   // API calls → 401
-    //   if (pathname.startsWith(BASE_API_PATH)) {
-    //     return NextResponse.json(
-    //       { error: "Unauthorized access to application api" },
-    //       { status: 401 },
-    //     );
-    //   }
-    //
-    //   // Pages → redirect
-    //   return NextResponse.redirect(new URL(SIGNIN_PAGE_PATH, req.url));
-    // }
-    //
+    if (isProtectedRoute || pathname.startsWith(BASE_API_PATH)) {
+      // API calls → 401
+      if (pathname.startsWith(BASE_API_PATH)) {
+        return NextResponse.json(
+          { error: "Unauthorized access to application api" },
+          { status: 401 },
+        );
+      }
+
+      // Pages → redirect
+      return NextResponse.redirect(new URL(SIGNIN_PAGE_PATH, req.url));
+    }
+
     return NextResponse.next();
   }
 
