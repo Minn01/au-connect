@@ -11,7 +11,7 @@ import {
   X,
   MessageCircleMore,
   LogOut,
-  UserRound,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +25,7 @@ import {
   ONBOARD_PAGE_PATH,
   MESSAGES_PAGE_PATH,
   PROFILE_PAGE_PATH,
+  JOBS_PAGE_PATH,
 } from "@/lib/constants";
 import {
   fetchUser,
@@ -119,6 +120,7 @@ export default function Header() {
   const navBarIndicatedPages = [
     MAIN_PAGE_PATH,
     CONNECT_PAGE_PATH,
+    JOBS_PAGE_PATH,
     MESSAGES_PAGE_PATH,
     NOTIFICATION_PAGE_PATH,
     PROFILE_PAGE_PATH,
@@ -209,6 +211,11 @@ export default function Header() {
               { href: MAIN_PAGE_PATH, icon: <Home />, label: "Home" },
               { href: CONNECT_PAGE_PATH, icon: <UserPlus />, label: "Connect" },
               {
+                href: JOBS_PAGE_PATH,
+                icon: <BriefcaseBusiness />,
+                label: "Jobs",
+              },
+              {
                 href: MESSAGES_PAGE_PATH,
                 label: "Messaging",
                 icon: (
@@ -245,8 +252,9 @@ export default function Header() {
                     refetchUnread();
                   }
                 }}
-                className={`flex flex-col items-center gap-1 hover:text-red-500 rounded-lg ${currentPage === item.href ? "text-red-500" : "text-gray-600"
-                  }`}
+                className={`flex flex-col items-center gap-1 hover:text-red-500 rounded-lg ${
+                  currentPage === item.href ? "text-red-500" : "text-gray-600"
+                }`}
                 title={item.label}
               >
                 {item.icon}
@@ -313,7 +321,9 @@ export default function Header() {
               {openResults && query.length >= 2 && (
                 <div className="absolute top-full mt-2 w-full bg-white border rounded-lg shadow-lg z-50">
                   {isFetching ? (
-                    <div className="p-3 text-sm text-gray-500">Searching...</div>
+                    <div className="p-3 text-sm text-gray-500">
+                      Searching...
+                    </div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map((u: any) => {
                       const userSlug = u.slug || buildSlug(u.username, u.id);
@@ -372,10 +382,11 @@ export default function Header() {
                     setMobileMenuOpen(false);
                     if (item.href === NOTIFICATION_PAGE_PATH) refetchUnread();
                   }}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${currentPage === item.href
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${
+                    currentPage === item.href
                       ? "bg-red-50 text-red-500"
                       : "text-gray-600"
-                    } hover:bg-red-50 hover:text-red-600`}
+                  } hover:bg-red-50 hover:text-red-600`}
                 >
                   {item.icon}
                   <span className="font-medium">{item.label}</span>

@@ -44,34 +44,34 @@ function validateExperience(body: any) {
 /* =========================
    GET MY EXPERIENCE
 ========================= */
-export async function getMyExperience(req: NextRequest) {
-  try {
-    const [userEmail, userId] = getHeaderUserInfo(req);
+// export async function getMyExperience(req: NextRequest) {
+//   try {
+//     const [userEmail, userId] = getHeaderUserInfo(req);
 
-    if (!userEmail || !userId) {
-      return NextResponse.json(
-        { error: "Unauthorized action please sign in again" },
-        { status: 401 }
-      );
-    }
+//     if (!userEmail || !userId) {
+//       return NextResponse.json(
+//         { error: "Unauthorized action please sign in again" },
+//         { status: 401 }
+//       );
+//     }
 
-    const experience = await prisma.experience.findMany({
-      where: { userId },
-      orderBy: [
-        { startYear: "desc" },
-        { startMonth: "desc" },
-      ],
-    });
+//     const experience = await prisma.experience.findMany({
+//       where: { userId },
+//       orderBy: [
+//         { startYear: "desc" },
+//         { startMonth: "desc" },
+//       ],
+//     });
 
-    return NextResponse.json(experience, { status: 200 });
-  } catch (err) {
-    console.error("Get experience error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(experience, { status: 200 });
+//   } catch (err) {
+//     console.error("Get experience error:", err);
+//     return NextResponse.json(
+//       { error: "Internal server error" },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 /* =========================
    ADD EXPERIENCE

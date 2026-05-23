@@ -55,6 +55,7 @@ export default function ConnectPage() {
         setError(null);
 
         const res = await fetch(
+          // TODO: all api paths should be in the constants file
           "/api/connect/v1/connect/requests?type=incoming",
           { credentials: "include" },
         );
@@ -84,6 +85,7 @@ export default function ConnectPage() {
       setActingId(requestId);
 
       const res = await fetch(
+          // TODO: all api paths should be in the constants file
         `/api/connect/v1/connect/request/${requestId}/decline`,
         { method: "POST", credentials: "include" },
       );
@@ -105,6 +107,7 @@ export default function ConnectPage() {
       setActingId(requestId);
 
       const res = await fetch(
+          // TODO: all api paths should be in the constants file
         `/api/connect/v1/connect/request/${requestId}/accept`,
         { method: "POST", credentials: "include" },
       );
@@ -234,8 +237,3 @@ export default function ConnectPage() {
     </div>
   );
 }
-
-
-
-
-

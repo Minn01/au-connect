@@ -1,3 +1,5 @@
+// TODO: file to be deleted api route is unused
+
 import prisma from "@/lib/prisma";
 import { safeUserSelect } from "@/lib/safeUserCall";
 import { NextRequest, NextResponse } from "next/server";

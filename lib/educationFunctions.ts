@@ -5,6 +5,7 @@ import { getHeaderUserInfo } from "./authFunctions";
 /* =========================
    VALIDATION
 ========================= */
+// TODO: body needs type
 function validateEducation(body: any) {
   const {
     school,
@@ -39,34 +40,34 @@ function validateEducation(body: any) {
 /* =========================
    GET MY EDUCATION (for later use)
 ========================= */
-export async function getMyEducation(req: NextRequest) {
-  try {
-    const [userEmail, userId] = getHeaderUserInfo(req);
+// export async function getMyEducation(req: NextRequest) {
+//   try {
+//     const [userEmail, userId] = getHeaderUserInfo(req);
 
-    if (!userEmail || !userId) {
-      return NextResponse.json(
-        { error: "Unauthorized action please sign in again" },
-        { status: 401 }
-      );
-    }
+//     if (!userEmail || !userId) {
+//       return NextResponse.json(
+//         { error: "Unauthorized action please sign in again" },
+//         { status: 401 }
+//       );
+//     }
 
-    const education = await prisma.education.findMany({
-      where: { userId },
-      orderBy: [
-        { startYear: "desc" },
-        { startMonth: "desc" },
-      ],
-    });
+//     const education = await prisma.education.findMany({
+//       where: { userId },
+//       orderBy: [
+//         { startYear: "desc" },
+//         { startMonth: "desc" },
+//       ],
+//     });
 
-    return NextResponse.json(education, { status: 200 });
-  } catch (err) {
-    console.error("Get education error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(education, { status: 200 });
+//   } catch (err) {
+//     console.error("Get education error:", err);
+//     return NextResponse.json(
+//       { error: "Internal server error" },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 /* =========================
    ADD EDUCATION

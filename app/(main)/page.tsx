@@ -50,7 +50,7 @@ export default function Home() {
     <div className="h-full">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="md:grid md:grid-cols-12 md:gap-6">
-          <div className="border border-grey-300 lg:col-span-3 md:col-span-4 hidden md:block">
+          <div className="lg:col-span-3 md:col-span-4 hidden md:block">
             <LeftProfile user={user} loading={userLoading} />
           </div>
 

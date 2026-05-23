@@ -40,7 +40,10 @@ const JOBPOST_SELECT = {
   allowExternalApply: true,
 };
 
-export async function getProfileJobPosts(req: NextRequest, profileUserId: string) {
+export async function getProfileJobPosts(
+  req: NextRequest,
+  profileUserId: string,
+) {
   try {
     const [userEmail, viewerUserId] = getHeaderUserInfo(req);
 
@@ -58,10 +61,12 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
       return NextResponse.json({ error: "Invalid cursor" }, { status: 400 });
     }
 
-    const rawJobTab = (req.nextUrl.searchParams.get("jobTab") || "hiring").toLowerCase();
-    const jobTab: JobTab = (["hiring", "saved", "applied"].includes(rawJobTab)
-      ? rawJobTab
-      : "hiring") as JobTab;
+    const rawJobTab = (
+      req.nextUrl.searchParams.get("jobTab") || "hiring"
+    ).toLowerCase();
+    const jobTab: JobTab = (
+      ["hiring", "saved", "applied"].includes(rawJobTab) ? rawJobTab : "hiring"
+    ) as JobTab;
 
     // 🔒 Owner-only backend enforcement
     const isOwner = normalizedProfileUserId === viewerUserId;
@@ -120,8 +125,10 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
     });
 
     const postsEnriched = posts.map((post) => {
-      const isLiked = post.interactions?.some((i) => i.type === "LIKE") ?? false;
-      const isSaved = post.interactions?.some((i) => i.type === "SAVED") ?? false;
+      const isLiked =
+        post.interactions?.some((i) => i.type === "LIKE") ?? false;
+      const isSaved =
+        post.interactions?.some((i) => i.type === "SAVED") ?? false;
 
       const hasApplied = (post.jobPost?.applications?.length ?? 0) > 0;
       const applicationStatus = post.jobPost?.applications?.[0]?.status;
@@ -136,7 +143,8 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
               jobPost: {
                 ...post.jobPost,
                 remainingPositions:
-                  post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
+                  post.jobPost.positionsAvailable -
+                  post.jobPost.positionsFilled,
                 hasApplied,
                 applicationStatus,
                 applications: undefined,
@@ -149,7 +157,7 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
     // ✅ Media SAS URLs (unchanged)
     const sharedKeyCredential = new StorageSharedKeyCredential(
       AZURE_STORAGE_ACCOUNT_NAME,
-      AZURE_STORAGE_ACCOUNT_KEY
+      AZURE_STORAGE_ACCOUNT_KEY,
     );
 
     const postsWithMedia = postsEnriched.map((post) => {
@@ -164,7 +172,7 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
             permissions: BlobSASPermissions.parse("r"),
             expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
           },
-          sharedKeyCredential
+          sharedKeyCredential,
         ).toString();
 
         const thumbnailUrl = m.thumbnailBlobName
@@ -175,7 +183,7 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
                 permissions: BlobSASPermissions.parse("r"),
                 expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
               },
-              sharedKeyCredential
+              sharedKeyCredential,
             ).toString()}`
           : undefined;
 
@@ -195,6 +203,9 @@ export async function getProfileJobPosts(req: NextRequest, profileUserId: string
     });
   } catch (err) {
     console.error("Error fetching profile job posts:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

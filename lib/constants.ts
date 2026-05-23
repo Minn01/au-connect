@@ -31,10 +31,13 @@ export const POST_DETAIL_PAGE_PATH = (
 };
 export const JOB_APPLICANTS_PAGE_PATH = (postId: string) =>
   `/applicants/${postId}`;
-export const JOB_APPLICATION_DETAIL_PAGE_PATH = (postId: string, applicationId: string) => 
-  `/applications/${postId}/${applicationId}`
+export const JOB_APPLICATION_DETAIL_PAGE_PATH = (
+  postId: string,
+  applicationId: string,
+) => `/applications/${postId}/${applicationId}`;
 export const SIGNIN_PAGE_PATH = "/auth/register";
 export const ONBOARD_PAGE_PATH = "/auth/onboarding";
+export const JOBS_PAGE_PATH = "/jobs";
 export const CONNECT_PAGE_PATH = "/connect";
 export const MESSAGES_PAGE_PATH = "/messages";
 
@@ -61,18 +64,20 @@ export const REPLIES_API_PATH = (postId: string, commentId: string) =>
   BASE_API_PATH + `/posts/${postId}/comments/${commentId}/replies`;
 export const JOB_APPLICATION_API_PATH = (jobPostId: string) =>
   BASE_API_PATH + `/jobs/${jobPostId}/apply`;
-export const VIEW_JOB_APPLICATIONS_API_PATH = (postId: string) => 
-  BASE_API_PATH + `/posts/${postId}/applicants`
-export const JOB_APPLICATION_DETAIL_API_PATH = (postId: string, applicationId: string) =>
-  BASE_API_PATH + `/posts/${postId}/applications/${applicationId}` 
+export const VIEW_JOB_APPLICATIONS_API_PATH = (postId: string) =>
+  BASE_API_PATH + `/posts/${postId}/applicants`;
+export const JOB_APPLICATION_DETAIL_API_PATH = (
+  postId: string,
+  applicationId: string,
+) => BASE_API_PATH + `/posts/${postId}/applications/${applicationId}`;
 export const SAVE_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/posts/${postId}/save`;
-export const JOB_POST_API_PATH = (postId: string) => 
-  BASE_API_PATH + `/job-posts/${postId}`
+export const JOB_POST_API_PATH = (postId: string) =>
+  BASE_API_PATH + `/job-posts/${postId}`;
 export const CLOSE_JOB_POST_API_PATH = (postId: string) =>
-  BASE_API_PATH + `/job-posts/${postId}/close`
+  BASE_API_PATH + `/job-posts/${postId}/close`;
 export const REOPEN_JOB_POST_API_PATH = (postId: string) =>
-  BASE_API_PATH + `/job-posts/${postId}/reopen`
+  BASE_API_PATH + `/job-posts/${postId}/reopen`;
 
 export const LIKE_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/posts/${postId}/like`;
