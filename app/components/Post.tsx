@@ -166,7 +166,6 @@ export default function Post({
             }}
             onCommentClicked={() => openPostModal(post.id, 0)}
             onShareClicked={() => {
-              // console.log("Share clicked", shareModalOpen);
               setShareModalOpen(true);
             }}
           />

@@ -1,11 +1,13 @@
 import {
   CLOSE_JOB_POST_API_PATH,
+  JOB_API_PATH,
   JOB_APPLICATION_API_PATH,
   JOB_APPLICATION_DETAIL_API_PATH,
   JOB_POST_API_PATH,
   REOPEN_JOB_POST_API_PATH,
   VIEW_JOB_APPLICATIONS_API_PATH,
 } from "@/lib/constants";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 
 export function useApplyJob() {
@@ -276,6 +278,82 @@ export function useReopenJobPost() {
       queryClient.invalidateQueries({
         queryKey: ["posts"],
       });
+    },
+  });
+}
+
+// this is for the jobs page section
+type FetchJobPostsParams = {
+  pageParam?: string | null;
+
+  keyword?: string;
+  empType?: string;
+  locType?: string;
+  salaryRange?: string;
+};
+
+// TODO: move to types file
+export async function fetchJobPosts({
+  pageParam = null,
+  keyword,
+  empType,
+  locType,
+  salaryRange,
+}: FetchJobPostsParams) {
+  const params = new URLSearchParams();
+
+  if (pageParam) params.set("cursor", pageParam);
+
+  if (keyword) params.set("keyword", keyword);
+
+  if (empType) params.set("empType", empType);
+
+  if (locType) params.set("locType", locType);
+
+  if (salaryRange) params.set("salaryRange", salaryRange);
+
+  const res = await fetch(`${JOB_API_PATH}?${params.toString()}`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch job posts");
+  }
+
+  return res.json();
+}
+
+// TODO: move to types file
+type UseJobPostsParams = {
+  keyword?: string;
+  empType?: string;
+  locType?: string;
+  salaryRange?: string;
+};
+
+export function useJobPosts({
+  keyword,
+  empType,
+  locType,
+  salaryRange,
+}: UseJobPostsParams) {
+  return useInfiniteQuery({
+    queryKey: ["job-posts", keyword, empType, locType, salaryRange],
+
+    queryFn: ({ pageParam }) =>
+      fetchJobPosts({
+        pageParam,
+        keyword,
+        empType,
+        locType,
+        salaryRange,
+      }),
+
+    initialPageParam: null,
+
+    getNextPageParam: (lastPage) => {
+      return lastPage.nextCursor ?? undefined;
     },
   });
 }

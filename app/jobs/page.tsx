@@ -1,109 +1,34 @@
 "use client";
 
-import JobDraft from "@/types/JobDraft";
+import { useEffect, useRef, useState } from "react";
+import { JobPostCard } from "../components/JobPostCard";
+import { useJobPosts } from "../(main)/profile/utils/jobPostFetchFunctions";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
+import { useFeedStore } from "@/lib/stores/feedStore";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUser } from "../(main)/profile/utils/fetchfunctions";
+import ApplyJobModal from "@/app/components/ApplyJobModal";
+import { useRouter } from "next/navigation";
+import { POST_DETAIL_PAGE_PATH } from "@/lib/constants";
+import CreatePostModal from "../components/CreatePostModal";
+import Post from "../components/Post";
 
-// Assuming this mimics the shape of the 'post' objects in your jobPosts array
-type SampleJobPost = {
-  post: {
-    id: string;
-    content: string;
-  };
-  job: JobDraft;
-  isSaved: boolean;
-};
-
-// Sample data shaped for JobPostCard. The card reads post.id, post.content,
-// and the JobDraft fields inside job.
-const sampleJobPosts: SampleJobPost[] = [
+const sampleJobsRecs = [
   {
-    post: {
-      id: "sample-job-post-1",
-      content:
-        "Join a product team building student and alumni networking features for AU Connect. You will work closely with design and backend engineers to ship polished web experiences.",
-    },
-    job: {
-      id: "sample-job-1",
-      jobTitle: "Frontend Engineer Intern",
-      companyName: "AU Connect",
-      location: "Bangkok, Thailand",
-      locationType: "HYBRID",
-      employmentType: "INTERNSHIP",
-      salaryMin: 900,
-      salaryMax: 1400,
-      salaryCurrency: "USD",
-      status: "OPEN",
-      positionsAvailable: 3,
-      positionsFilled: 1,
-      remainingPositions: 2,
-      deadline: "2026-07-15",
-      jobDetails:
-        "Build responsive React interfaces, improve shared UI components, and collaborate on product experiments.",
-      jobRequirements: ["React", "TypeScript", "Tailwind CSS"],
-      allowExternalApply: false,
-      hasApplied: false,
-      applicationStatus: null,
-    },
-    isSaved: true,
+    title: "Senior Front End Engineer",
+    company: "Google",
+    location: "Bangkok, Thailand",
+    type: "Remote",
+    status: "Open",
+    skills: ["React", "CSS", "TypeScript", "Figma"],
   },
   {
-    post: {
-      id: "sample-job-post-2",
-      content:
-        "We are looking for a backend developer to help improve job search, matching, and notification services for students and employers.",
-    },
-    job: {
-      id: "sample-job-2",
-      jobTitle: "Backend Developer",
-      companyName: "Siam Digital Labs",
-      location: "Remote",
-      locationType: "REMOTE",
-      employmentType: "FULL_TIME",
-      salaryMin: 2500,
-      salaryMax: 3800,
-      salaryCurrency: "USD",
-      status: "OPEN",
-      positionsAvailable: 2,
-      positionsFilled: 0,
-      remainingPositions: 2,
-      deadline: "2026-08-01",
-      jobDetails:
-        "Own API endpoints, database queries, and service integrations for a fast-moving education platform.",
-      jobRequirements: ["Node.js", "PostgreSQL", "REST APIs"],
-      allowExternalApply: false,
-      hasApplied: true,
-      applicationStatus: "APPLIED",
-    },
-    isSaved: false,
-  },
-  {
-    post: {
-      id: "sample-job-post-3",
-      content:
-        "Design dashboards and workflows that help employers review applicants and manage hiring pipelines with less manual work.",
-    },
-    job: {
-      id: "sample-job-3",
-      jobTitle: "Product Designer",
-      companyName: "Campus Careers",
-      location: "Bangkok, Thailand",
-      locationType: "ONSITE",
-      employmentType: "PART_TIME",
-      salaryMin: 1200,
-      salaryMax: 1800,
-      salaryCurrency: "USD",
-      status: "OPEN",
-      positionsAvailable: 1,
-      positionsFilled: 0,
-      remainingPositions: 1,
-      deadline: "2026-06-30",
-      jobDetails:
-        "Create user flows, wireframes, and high-fidelity designs for employer-facing hiring tools.",
-      jobRequirements: ["Figma", "User Research", "Design Systems"],
-      allowExternalApply: false,
-      hasApplied: false,
-      applicationStatus: null,
-    },
-    isSaved: false,
+    title: "UI/UX Designer",
+    company: "Au Connect",
+    location: "Bangkok, Thailand",
+    type: "Onsite",
+    status: "Open",
+    skills: ["Figma", "Design Systems"],
   },
 ];
 
@@ -113,33 +38,143 @@ enum JobTabFilters {
   APPLIED = "Applied",
 }
 
-import { useState } from "react";
-import { JobPostCard } from "../components/JobPostCard";
+export default function JobsPage() {
+  const router = useRouter();
 
-export default function JobBoardUI() {
-  const jobs = [
-    {
-      title: "Senior Front End Engineer",
-      company: "Google",
-      location: "Bangkok, Thailand",
-      type: "Remote",
-      status: "Open",
-      skills: ["React", "CSS", "TypeScript", "Figma"],
-    },
-    {
-      title: "UI/UX Designer",
-      company: "Au Connect",
-      location: "Bangkok, Thailand",
-      type: "Onsite",
-      status: "Open",
-      skills: ["Figma", "Design Systems"],
-    },
-  ];
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useJobPosts({});
+
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+  });
+
+  const [isSaved, setIsSaved] = useState(false);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null!);
+  const setVirtuosoRef = useFeedStore((s) => s.setVirtuosoRef);
+  const [postMenuDropDownOpen, setPostMenuDropDownOpen] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [applyJobModalOpen, setApplyJobModalOpen] = useState(false);
+
+  const openPostModal = (postId: string, index: number) => {
+    router.push(POST_DETAIL_PAGE_PATH(postId, index));
+  };
+
+  const loadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  // flatten pages
+  const jobs = data?.pages.flatMap((page) => page.jobs);
 
   const [selectedFilters, setSelectedFilters] = useState(true);
   const [jobTabFilter, setJobTabFilter] = useState<JobTabFilters>(
     JobTabFilters.SAVED,
   );
+
+  const JobRecommendationCard = () => {
+    return (
+      <>
+        {/* Recommendations */}
+        <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-sm text-red-600 mb-1">
+                ✨ Recommended for you
+              </p>
+              <h2 className="text-2xl font-semibold">Top matches</h2>
+            </div>
+
+            <button className="border border-zinc-200 px-4 py-2 rounded-2xl hover:bg-zinc-100 transition cursor-pointer">
+              See all
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 cursor-pointer">
+            {sampleJobsRecs.map((job, i) => (
+              <div
+                key={i}
+                className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 hover:border-red-400/40 transition"
+              >
+                <div className="mb-4">
+                  <p className="text-zinc-500 text-sm">{job.company}</p>
+                  <h3 className="text-xl font-semibold leading-tight mt-1">
+                    {job.title}
+                  </h3>
+                </div>
+
+                <div className="space-y-1 text-sm text-zinc-500 mb-4">
+                  <p>{job.location}</p>
+                  <p>{job.type}</p>
+                </div>
+
+                <div className="inline-flex px-3 py-1 rounded-full bg-green-50 text-green-500 border border-green-400 text-sm">
+                  95% match
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-5" />
+
+        {/* Tabs */}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-3">
+            {Object.values(JobTabFilters).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setJobTabFilter(filter)}
+                className={`px-5 py-3 rounded-2xl border transition cursor-pointer ${
+                  jobTabFilter === filter
+                    ? "bg-red-100 border-red-500 text-red-500"
+                    : "bg-white border-zinc-200 text-gray-600"
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className={`px-5 py-3 rounded-2xl border transition bg-white border-zinc-200 text-gray-600`}
+          >
+            Most recent
+          </button>
+        </div>
+
+        <div className="h-5" />
+      </>
+    );
+  };
+
+  // TODO: handle errors and loading more gracefully
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>{(error as Error).message}</div>;
+  }
+
+  if (!data) {
+    return <div>loading error...</div>;
+  }
+
+  if (!jobs) {
+    return <div>loading error...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f5f4] text-zinc-900 p-6">
@@ -166,7 +201,7 @@ export default function JobBoardUI() {
                   Employment type
                 </h3>
                 <div className="space-y-3 text-zinc-500">
-                  {["Full-time", "Part-time", "Internship", "Contract"].map(
+                  {["Full-time", "Part-time", "Freelance", "Internship"].map(
                     (item, i) => (
                       <label
                         key={i}
@@ -251,98 +286,34 @@ export default function JobBoardUI() {
 
         {/* Main Content */}
         <main className="col-span-6 space-y-6">
-          {/* Recommendations */}
-          <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <p className="text-sm text-red-600 mb-1">
-                  ✨ Recommended for you
-                </p>
-                <h2 className="text-2xl font-semibold">Top matches</h2>
-              </div>
-
-              <button className="border border-zinc-200 px-4 py-2 rounded-2xl hover:bg-zinc-100 transition cursor-pointer">
-                See all
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 cursor-pointer">
-              {jobs.map((job, i) => (
-                <div
-                  key={i}
-                  className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 hover:border-red-400/40 transition"
-                >
-                  <div className="mb-4">
-                    <p className="text-zinc-500 text-sm">{job.company}</p>
-                    <h3 className="text-xl font-semibold leading-tight mt-1">
-                      {job.title}
-                    </h3>
-                  </div>
-
-                  <div className="space-y-1 text-sm text-zinc-500 mb-4">
-                    <p>{job.location}</p>
-                    <p>{job.type}</p>
-                  </div>
-
-                  <div className="inline-flex px-3 py-1 rounded-full bg-green-50 text-green-500 border border-green-400 text-sm">
-                    95% match
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex items-center justify-between">
-            <div className="flex gap-3">
-              {Object.values(JobTabFilters).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setJobTabFilter(filter)}
-                  className={`px-5 py-3 rounded-2xl border transition cursor-pointer ${
-                    jobTabFilter === filter
-                      ? "bg-red-100 border-red-500 text-red-500"
-                      : "bg-white border-zinc-200 text-gray-600"
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-
-            <button
-              className={`px-5 py-3 rounded-2xl border transition bg-white border-zinc-200 text-gray-600`}
-            >
-              Most recent
-            </button>
-          </div>
-
           {/* Job Cards */}
+          <div style={{ height: "calc(100vh - 97px)" }}>
+            <Virtuoso
+              ref={(ref) => {
+                if (ref) {
+                  virtuosoRef.current = ref;
+                  setVirtuosoRef(virtuosoRef);
+                }
+              }}
+              data={jobs}
+              endReached={loadMore}
+              overscan={200}
+              components={{
+                Header: JobRecommendationCard,
+              }}
+              itemContent={(_, post) => (
+                <>
+                  <Post
+                    key={post.id}
+                    user={user}
+                    post={post}
+                    isLoading={false}
+                  />
 
-          {/* TODO: job posts here */}
-          <div className="space-y-4">
-            {sampleJobPosts.map(({ post, job, isSaved }) => (
-              <div
-                key={post.id}
-                className="bg-white border border-zinc-200 rounded-3xl shadow-xl"
-              >
-                <JobPostCard
-                  post={post}
-                  job={job}
-                  isOwner={false}
-                  hasApplied={job.hasApplied ?? false}
-                  applicationStatus={job.applicationStatus ?? "APPLIED"}
-                  isSaved={isSaved}
-                  postMenuDropDownOpen={false}
-                  setPostMenuDropDownOpen={() => {}}
-                  popupOpen={false}
-                  setPopupOpen={() => {}}
-                  onTitleClick={() => {}}
-                  onApply={() => {}}
-                  onSaveToggle={() => {}}
-                />
-              </div>
-            ))}
+                  <div className="h-5" />
+                </>
+              )}
+            />
           </div>
         </main>
 

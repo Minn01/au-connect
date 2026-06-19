@@ -489,7 +489,7 @@ export default function PostDetailsModal({
 
           <button
             onClick={onClose}
-            className="text-gray-900 hover:text-gray-500"
+            className="text-gray-900 hover:text-gray-500 cursor-pointer"
           >
             ✕
           </button>

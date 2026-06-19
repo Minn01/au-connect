@@ -76,6 +76,7 @@ export const JOB_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/job-posts/${postId}`;
 export const CLOSE_JOB_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/job-posts/${postId}/close`;
+export const JOB_API_PATH = BASE_API_PATH + `/jobs`;
 export const REOPEN_JOB_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/job-posts/${postId}/reopen`;
 

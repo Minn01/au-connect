@@ -123,7 +123,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
   }, [postMenuDropDownOpen]);
 
   return (
-    <div className="p-6 pl-9">
+    <div className="p-6 pl-9 bg-white rounded-xl">
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <span className="font-semibold bg-gray-100 text-black px-2 py-1 rounded">

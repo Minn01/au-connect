@@ -218,6 +218,7 @@ export async function getPosts(req: NextRequest) {
         skip: 1,
         cursor: { id: cursor },
       }),
+
       orderBy: { createdAt: "desc" },
       // get comment count
       include: {
@@ -239,47 +240,10 @@ export async function getPosts(req: NextRequest) {
             type: true,
           },
         },
-
-        // get job post related info
+      },
+      where: {
         jobPost: {
-          select: {
-            id: true,
-            jobTitle: true,
-            companyName: true,
-            location: true,
-            locationType: true,
-            employmentType: true,
-
-            positionsAvailable: true,
-            positionsFilled: true,
-            status: true,
-
-            salaryMin: true,
-            salaryMax: true,
-            salaryCurrency: true,
-            deadline: true,
-
-            jobDetails: true,
-            jobRequirements: true,
-            applyUrl: true,
-            allowExternalApply: true,
-
-            applications: {
-              where: {
-                applicantId: userId,
-              },
-              select: {
-                id: true,
-                status: true,
-              },
-            },
-
-            _count: {
-              select: {
-                applications: true,
-              },
-            },
-          },
+          is: null,
         },
       },
     });
@@ -299,20 +263,6 @@ export async function getPosts(req: NextRequest) {
         isLiked,
         isSaved,
         numOfComments: post._count.comments,
-
-        jobPost: post.jobPost
-          ? {
-              ...post.jobPost,
-
-              positionsFilled: post.jobPost.positionsFilled,
-
-              remainingPositions:
-                post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
-
-              hasApplied: post.jobPost.applications.length > 0,
-              applicationStatus: post.jobPost.applications[0]?.status ?? null,
-            }
-          : null,
       };
     });
 
@@ -378,7 +328,6 @@ export async function editPost(req: NextRequest) {
         { status: 401 },
       );
     }
-    
 
     const postId = req.nextUrl.searchParams.get("postId");
     const body = await req.json();
@@ -419,9 +368,12 @@ export async function editPost(req: NextRequest) {
       },
     });
 
-    const exsistingPostType = existingPost?.postType
+    const exsistingPostType = existingPost?.postType;
     if (exsistingPostType !== data.postType) {
-      return NextResponse.json({ error: "Cannot edit to different post type" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Cannot edit to different post type" },
+        { status: 403 },
+      );
     }
 
     if (!existingPost) {
@@ -827,3 +779,58 @@ function computeHasLinks(links: unknown): boolean {
 
   return false;
 }
+
+// jobPost: {
+//   select: {
+//     id: true,
+//     jobTitle: true,
+//     companyName: true,
+//     location: true,
+//     locationType: true,
+//     employmentType: true,
+//
+//     positionsAvailable: true,
+//     positionsFilled: true,
+//     status: true,
+//
+//     salaryMin: true,
+//     salaryMax: true,
+//     salaryCurrency: true,
+//     deadline: true,
+//
+//     jobDetails: true,
+//     jobRequirements: true,
+//     applyUrl: true,
+//     allowExternalApply: true,
+//
+//     applications: {
+//       where: {
+//         applicantId: userId,
+//       },
+//       select: {
+//         id: true,
+//         status: true,
+//       },
+//     },
+//
+//     _count: {
+//       select: {
+//         applications: true,
+//       },
+//     },
+//   },
+// },
+//
+// jobPost: post.jobPost
+//   ? {
+//       ...post.jobPost,
+//
+//       positionsFilled: post.jobPost.positionsFilled,
+//
+//       remainingPositions:
+//         post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
+//
+//       hasApplied: post.jobPost.applications.length > 0,
+//       applicationStatus: post.jobPost.applications[0]?.status ?? null,
+//     }
+//   : null,
