@@ -7,7 +7,6 @@ import {
   ArrowBigRight,
   Image as ImageIcon,
   Paperclip,
-  UserPlus,
   Video,
   X,
   Eraser,
@@ -30,6 +29,8 @@ import CreatePostModalPropTypes from "@/types/CreatePostModalPropTypes";
 import { MediaType, MediaItem } from "@/types/Media";
 import JobDraft from "@/types/JobDraft";
 import { validateJobDraft } from "../(main)/profile/utils/validateJobPosts";
+import { useRouter } from "next/navigation";
+import { JOBS_PAGE_PATH } from "@/lib/constants";
 
 const getMediaType = (file: File): MediaType => {
   if (file.type.startsWith("image/")) return "image";
@@ -102,6 +103,7 @@ export default function CreatePostModal({
   // Job post states
   const [jobDraft, setJobDraft] = useState<JobDraft>(EMPTY_JOB_DRAFT);
   const [jobErrors, setJobErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
 
   const editPostMutation = useEditPost();
 
@@ -385,6 +387,7 @@ export default function CreatePostModal({
       console.error("❌ Submit failed:", err);
     } finally {
       setIsSubmitting(false);
+      if (postType === "job_post") router.push(JOBS_PAGE_PATH);
     }
   };
 
@@ -447,7 +450,11 @@ export default function CreatePostModal({
               {/*  visibility option button */}
               <div className="relative mt-2">
                 <div className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-neutral-50 px-3 py-2 text-xs font-semibold text-neutral-700">
-                  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                     <path
                       fillRule="evenodd"
