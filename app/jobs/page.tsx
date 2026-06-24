@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { JobPostCard } from "../components/JobPostCard";
+import { useRef, useState } from "react";
 import { useJobPosts } from "../(main)/profile/utils/jobPostFetchFunctions";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useFeedStore } from "@/lib/stores/feedStore";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUser } from "../(main)/profile/utils/fetchfunctions";
-import ApplyJobModal from "@/app/components/ApplyJobModal";
-import { useRouter } from "next/navigation";
-import { POST_DETAIL_PAGE_PATH } from "@/lib/constants";
-import CreatePostModal from "../components/CreatePostModal";
 import Post from "../components/Post";
+import { MyApplicationSection } from "../components/MyApplicationSection";
 
 const sampleJobsRecs = [
   {
@@ -38,36 +34,82 @@ enum JobTabFilters {
   APPLIED = "Applied",
 }
 
-export default function JobsPage() {
-  const router = useRouter();
+const EMPLOYMENT_FILTERS = [
+  { value: "FULL_TIME", label: "Full-time" },
+  { value: "PART_TIME", label: "Part-time" },
+  { value: "FREELANCE", label: "Freelance" },
+  { value: "INTERNSHIP", label: "Internship" },
+];
 
+const LOCATION_FILTERS = [
+  { value: "REMOTE", label: "Remote" },
+  { value: "ONSITE", label: "Onsite" },
+  { value: "HYBRID", label: "Hybrid" },
+];
+
+const SALARY_SLIDER_MIN = 0;
+const SALARY_SLIDER_MAX = 20000;
+const SALARY_STEP = 250;
+
+export default function JobsPage() {
+  // job filters
+  const [keyword, setKeyword] = useState("");
+  const [employmentTypes, setEmploymentTypes] = useState<string[]>([]);
+  const [locationTypes, setLocationTypes] = useState<string[]>([]);
+  const [salaryMin, setSalaryMin] = useState<number | "">("");
+  const [salaryMax, setSalaryMax] = useState<number | "">("");
+  const [jobTabFilter, setJobTabFilter] = useState<JobTabFilters>(
+    JobTabFilters.ALL,
+  );
+
+  const salaryMinValue = salaryMin === "" ? undefined : salaryMin;
+  const salaryMaxValue = salaryMax === "" ? undefined : salaryMax;
+  const salaryRangeParam =
+    salaryMinValue !== undefined || salaryMaxValue !== undefined
+      ? `${salaryMinValue ?? ""},${salaryMaxValue ?? ""}`
+      : undefined;
+  const sliderMinValue = Math.min(
+    salaryMinValue ?? SALARY_SLIDER_MIN,
+    SALARY_SLIDER_MAX,
+  );
+  const sliderMaxValue = Math.min(
+    salaryMaxValue ?? SALARY_SLIDER_MAX,
+    SALARY_SLIDER_MAX,
+  );
+  const salaryTrackLeft =
+    ((sliderMinValue - SALARY_SLIDER_MIN) /
+      (SALARY_SLIDER_MAX - SALARY_SLIDER_MIN)) *
+    100;
+  const salaryTrackRight =
+    100 -
+    ((sliderMaxValue - SALARY_SLIDER_MIN) /
+      (SALARY_SLIDER_MAX - SALARY_SLIDER_MIN)) *
+      100;
+
+  // query to fetch job posts
   const {
     data,
     isLoading,
     isError,
     error,
+    isFetching,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useJobPosts({});
+  } = useJobPosts({
+    keyword: keyword.trim() || undefined,
+    empType: employmentTypes.length ? employmentTypes : undefined,
+    locType: locationTypes.length ? locationTypes : undefined,
+    salaryRange: salaryRangeParam,
+  });
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
   });
 
-  const [isSaved, setIsSaved] = useState(false);
-
   const virtuosoRef = useRef<VirtuosoHandle>(null!);
   const setVirtuosoRef = useFeedStore((s) => s.setVirtuosoRef);
-  const [postMenuDropDownOpen, setPostMenuDropDownOpen] = useState(false);
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [applyJobModalOpen, setApplyJobModalOpen] = useState(false);
-
-  const openPostModal = (postId: string, index: number) => {
-    router.push(POST_DETAIL_PAGE_PATH(postId, index));
-  };
 
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -78,10 +120,59 @@ export default function JobsPage() {
   // flatten pages
   const jobs = data?.pages.flatMap((page) => page.jobs);
 
-  const [selectedFilters, setSelectedFilters] = useState(true);
-  const [jobTabFilter, setJobTabFilter] = useState<JobTabFilters>(
-    JobTabFilters.SAVED,
-  );
+  // TODO: add skills filter
+  const hasSelectedFilters =
+    keyword.trim().length > 0 ||
+    employmentTypes.length > 0 ||
+    locationTypes.length > 0 ||
+    salaryMinValue !== undefined ||
+    salaryMaxValue !== undefined;
+
+  const toggleFilter = (
+    value: string,
+    selectedValues: string[],
+    setSelectedValues: (values: string[]) => void,
+  ) => {
+    setSelectedValues(
+      selectedValues.includes(value)
+        ? selectedValues.filter((selected) => selected !== value)
+        : [...selectedValues, value],
+    );
+  };
+
+  const clearFilters = () => {
+    setKeyword("");
+    setEmploymentTypes([]);
+    setLocationTypes([]);
+    setSalaryMin("");
+    setSalaryMax("");
+  };
+
+  const updateSalaryMin = (value: number | "") => {
+    if (value === "") {
+      setSalaryMin("");
+      return;
+    }
+
+    const nextValue = Math.max(0, value);
+    setSalaryMin(nextValue);
+    if (salaryMax !== "" && nextValue > salaryMax) {
+      setSalaryMax(nextValue);
+    }
+  };
+
+  const updateSalaryMax = (value: number | "") => {
+    if (value === "") {
+      setSalaryMax("");
+      return;
+    }
+
+    const nextValue = Math.max(0, value);
+    setSalaryMax(nextValue);
+    if (salaryMin !== "" && nextValue < salaryMin) {
+      setSalaryMin(nextValue);
+    }
+  };
 
   const JobRecommendationCard = () => {
     return (
@@ -154,13 +245,23 @@ export default function JobsPage() {
           </button>
         </div>
 
+        {/* the little updating loading circle*/}
+        {isFetching && !isFetchingNextPage && data && (
+          <div className="w-full flex justify-center items-center">
+            <div className="mt-4 flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-500 shadow-sm w-fit">
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-200 border-t-red-500" />
+              Updating
+            </div>
+          </div>
+        )}
+
         <div className="h-5" />
       </>
     );
   };
 
   // TODO: handle errors and loading more gracefully
-  if (isLoading) {
+  if (isLoading && !data) {
     return <div>Loading...</div>;
   }
 
@@ -189,6 +290,8 @@ export default function JobsPage() {
             <div className="mb-6">
               <div className="flex items-center bg-zinc-100 border border-zinc-200 rounded-2xl px-4 py-3">
                 <input
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Keyword, skill, role..."
                   className="bg-transparent outline-none w-full text-sm placeholder:text-zinc-500"
                 />
@@ -201,21 +304,26 @@ export default function JobsPage() {
                   Employment type
                 </h3>
                 <div className="space-y-3 text-zinc-500">
-                  {["Full-time", "Part-time", "Freelance", "Internship"].map(
-                    (item, i) => (
-                      <label
-                        key={i}
-                        className="flex items-center gap-3 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          className="accent-red-400"
-                          defaultChecked={i === 0}
-                        />
-                        <span>{item}</span>
-                      </label>
-                    ),
-                  )}
+                  {EMPLOYMENT_FILTERS.map((item) => (
+                    <label
+                      key={item.value}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-red-400"
+                        checked={employmentTypes.includes(item.value)}
+                        onChange={() =>
+                          toggleFilter(
+                            item.value,
+                            employmentTypes,
+                            setEmploymentTypes,
+                          )
+                        }
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
@@ -224,17 +332,24 @@ export default function JobsPage() {
                   Location type
                 </h3>
                 <div className="space-y-3 text-zinc-500">
-                  {["Remote", "Onsite", "Hybrid"].map((item, i) => (
+                  {LOCATION_FILTERS.map((item) => (
                     <label
-                      key={i}
+                      key={item.value}
                       className="flex items-center gap-3 cursor-pointer"
                     >
                       <input
                         type="checkbox"
                         className="accent-red-400"
-                        defaultChecked={i !== 2}
+                        checked={locationTypes.includes(item.value)}
+                        onChange={() =>
+                          toggleFilter(
+                            item.value,
+                            locationTypes,
+                            setLocationTypes,
+                          )
+                        }
                       />
-                      <span>{item}</span>
+                      <span>{item.label}</span>
                     </label>
                   ))}
                 </div>
@@ -243,9 +358,79 @@ export default function JobsPage() {
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-medium text-zinc-700">Salary (USD/mo)</h3>
-                  <span className="text-sm text-zinc-500">$3500</span>
+                  <span className="text-sm text-zinc-500">
+                    {salaryMinValue !== undefined ||
+                    salaryMaxValue !== undefined
+                      ? `$${salaryMinValue ?? 0} - ${
+                          salaryMaxValue !== undefined
+                            ? `$${salaryMaxValue}`
+                            : "Any"
+                        }`
+                      : "Any"}
+                  </span>
                 </div>
-                <input type="range" className="w-full accent-red-400" />
+                <div className="space-y-4">
+                  <div className="relative h-6">
+                    <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-zinc-200" />
+                    <div
+                      className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-red-400"
+                      style={{
+                        left: `${salaryTrackLeft}%`,
+                        right: `${salaryTrackRight}%`,
+                      }}
+                    />
+                    <input
+                      type="range"
+                      min={SALARY_SLIDER_MIN}
+                      max={SALARY_SLIDER_MAX}
+                      step={SALARY_STEP}
+                      value={sliderMinValue}
+                      onChange={(e) => updateSalaryMin(Number(e.target.value))}
+                      className="pointer-events-none absolute inset-x-0 top-0 h-6 w-full appearance-none bg-transparent accent-red-500 [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
+                    />
+                    <input
+                      type="range"
+                      min={SALARY_SLIDER_MIN}
+                      max={SALARY_SLIDER_MAX}
+                      step={SALARY_STEP}
+                      value={sliderMaxValue}
+                      onChange={(e) => updateSalaryMax(Number(e.target.value))}
+                      className="pointer-events-none absolute inset-x-0 top-0 h-6 w-full appearance-none bg-transparent accent-red-500 [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-xs font-medium text-zinc-500">
+                      Min
+                      <input
+                        type="number"
+                        min={0}
+                        value={salaryMin}
+                        onChange={(e) =>
+                          updateSalaryMin(
+                            e.target.value === "" ? "" : Number(e.target.value),
+                          )
+                        }
+                        placeholder="No min"
+                        className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 outline-none focus:border-red-400"
+                      />
+                    </label>
+                    <label className="text-xs font-medium text-zinc-500">
+                      Max
+                      <input
+                        type="number"
+                        min={0}
+                        value={salaryMax}
+                        onChange={(e) =>
+                          updateSalaryMax(
+                            e.target.value === "" ? "" : Number(e.target.value),
+                          )
+                        }
+                        placeholder="No max"
+                        className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 outline-none focus:border-red-400"
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -275,8 +460,11 @@ export default function JobsPage() {
                 </div>
               </div>
 
-              {selectedFilters && (
-                <button className="w-full mt-4 border border-zinc-200 rounded-2xl py-3 bg-white hover:bg-gray-100 transition">
+              {hasSelectedFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="w-full mt-4 border cursor-pointer border-zinc-200 rounded-2xl py-3 bg-white hover:bg-gray-100 transition"
+                >
                   Clear all filters
                 </button>
               )}
@@ -319,41 +507,7 @@ export default function JobsPage() {
 
         {/* Right Sidebar */}
         <aside className="col-span-3 space-y-6">
-          <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
-            <h2 className="font-semibold text-lg mb-5">Your applications</h2>
-
-            <div className="space-y-4">
-              {[
-                {
-                  role: "Sr. Front End Eng.",
-                  company: "Google",
-                  status: "Reviewed",
-                },
-                {
-                  role: "Backend Dev",
-                  company: "Au Connect",
-                  status: "Pending",
-                },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{item.role}</h3>
-                    <p className="text-sm text-zinc-500">{item.company}</p>
-                  </div>
-
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm border ${
-                      item.status === "Reviewed"
-                        ? "bg-green-50 border-green-400 text-green-500"
-                        : "bg-yellow-50 border-yellow-400 text-yellow-500"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MyApplicationSection user={user} userLoading={userLoading} />
 
           <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
             <h2 className="font-semibold text-lg mb-6">Trending skills</h2>

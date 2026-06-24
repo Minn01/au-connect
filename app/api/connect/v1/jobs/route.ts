@@ -9,9 +9,10 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const [userEmail, userId] = getHeaderUserInfo(req);
+  // verify user
+    const [email, userId] = getHeaderUserInfo(req);
 
-  if (!userEmail || !userId) {
+  if (!email || !userId) {
     return NextResponse.json(
       { error: "Unauthorized action please sign in again" },
       { status: 401 },
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
 
   // Base conditions inside the jobPost relation
   const jobPostConditions: Prisma.JobPostWhereInput = {};
+  const jobPostAndConditions: Prisma.JobPostWhereInput[] = [];
 
   if (keyword) {
     jobPostConditions.OR = [
@@ -38,17 +40,41 @@ export async function GET(req: NextRequest) {
   }
 
   if (empType) {
-    jobPostConditions.employmentType = empType as EmploymentType;
+    jobPostConditions.employmentType = {
+      in: empType.split(",").filter(Boolean) as EmploymentType[],
+    };
   }
 
   if (locType) {
-    jobPostConditions.locationType = locType as JobLocationType;
+    jobPostConditions.locationType = {
+      in: locType.split(",").filter(Boolean) as JobLocationType[],
+    };
   }
 
   if (salaryRange) {
-    jobPostConditions.salaryMin = {
-      gte: Number(salaryRange),
-    };
+    const [rawMin, rawMax] = salaryRange.split(",");
+    const salaryMin = rawMin ? Number(rawMin) : undefined;
+    const salaryMax = rawMax ? Number(rawMax) : undefined;
+
+    if (salaryMin !== undefined && !Number.isNaN(salaryMin)) {
+      jobPostAndConditions.push({
+        OR: [
+          { salaryMax: null },
+          { salaryMax: { gte: salaryMin } },
+          { salaryMin: { gte: salaryMin } },
+        ],
+      });
+    }
+
+    if (salaryMax !== undefined && !Number.isNaN(salaryMax)) {
+      jobPostAndConditions.push({
+        OR: [{ salaryMin: null }, { salaryMin: { lte: salaryMax } }],
+      });
+    }
+  }
+
+  if (jobPostAndConditions.length > 0) {
+    jobPostConditions.AND = jobPostAndConditions;
   }
 
   // Building the final dynamic query
@@ -137,8 +163,6 @@ export async function GET(req: NextRequest) {
         : null,
     };
   });
-
-  console.log("JOBS: \n", formattedData);
 
   return NextResponse.json({
     jobs: formattedData,

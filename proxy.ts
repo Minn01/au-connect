@@ -1,6 +1,6 @@
 // proxy.ts
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import type { NextProxy, NextRequest } from "next/server";
 
 import {
   BASE_API_PATH,
@@ -28,7 +28,7 @@ const protectedRoutes = [
 
 const PUBLIC_API_ROUTES = [BASE_API_PATH + "/auth"];
 
-export default function middleware(req: NextRequest) {
+export const proxy: NextProxy = (req: NextRequest) => {
   const sessionToken = req.cookies.get(JWT_COOKIE)?.value;
   const pathname = req.nextUrl.pathname;
 

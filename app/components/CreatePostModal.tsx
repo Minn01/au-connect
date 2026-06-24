@@ -13,7 +13,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 
-import { useUploadStore } from "@/lib/stores/uploadStore";
+import { type UploadJob, useUploadStore } from "@/lib/stores/uploadStore";
 import { processUpload } from "@/lib/services/uploadService";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 import { useDraftStore } from "@/lib/stores/draftStore";
@@ -31,6 +31,48 @@ import JobDraft from "@/types/JobDraft";
 import { validateJobDraft } from "../(main)/profile/utils/validateJobPosts";
 import { useRouter } from "next/navigation";
 import { JOBS_PAGE_PATH } from "@/lib/constants";
+import { useQueryClient } from "@tanstack/react-query";
+import PostType from "@/types/Post";
+
+type JobsPagePost = Omit<PostType, "jobPost"> & {
+  jobPost?: JobDraft & {
+    positionsAvailable: number;
+    positionsFilled: number;
+    remainingPositions: number;
+    hasApplied: boolean;
+    applicationStatus: string | null;
+    applications: [];
+  };
+};
+
+type JobsPageCache = {
+  pages: Array<{
+    jobs?: JobsPagePost[];
+    nextCursor?: string | null;
+  }>;
+  pageParams?: unknown[];
+};
+
+type UploadJobPayload = Omit<UploadJob, "id" | "status" | "progress">;
+type EditPostPayload = {
+  postType: string;
+  title: string;
+  content: string;
+  visibility: string;
+  commentsDisabled: boolean;
+  media: Array<{
+    blobName: string;
+    thumbnailBlobName?: string;
+    type: string;
+    name: string;
+    mimetype: string;
+    size: number;
+  }>;
+  links?: LinkEmbed[];
+  job?: JobDraft;
+  pollOptions?: string[];
+  pollDuration?: number;
+};
 
 const getMediaType = (file: File): MediaType => {
   if (file.type.startsWith("image/")) return "image";
@@ -104,8 +146,61 @@ export default function CreatePostModal({
   const [jobDraft, setJobDraft] = useState<JobDraft>(EMPTY_JOB_DRAFT);
   const [jobErrors, setJobErrors] = useState<Record<string, string>>({});
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const editPostMutation = useEditPost();
+
+  const updateJobsCacheAfterCreate = (
+    createdPost: PostType | undefined,
+    job: JobDraft,
+  ) => {
+    if (!createdPost) return;
+
+    const optimisticJobPost: JobsPagePost = {
+      ...createdPost,
+      jobPost: {
+        ...job,
+        positionsAvailable: job.positionsAvailable ?? 1,
+        positionsFilled: 0,
+        remainingPositions: job.positionsAvailable ?? 1,
+        hasApplied: false,
+        applicationStatus: null,
+        applications: [],
+      },
+      isSaved: false,
+    };
+
+    queryClient.setQueryData(
+      ["job-posts", undefined, undefined, undefined, undefined],
+      (oldData: JobsPageCache | undefined) => {
+        if (!oldData?.pages?.length) return oldData;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page, index) =>
+            index === 0
+              ? {
+                  ...page,
+                  jobs: [
+                    optimisticJobPost,
+                    ...(page.jobs ?? []).filter(
+                      (post) => post.id !== createdPost.id,
+                    ),
+                  ],
+                }
+              : {
+                  ...page,
+                  jobs: (page.jobs ?? []).filter(
+                    (post) => post.id !== createdPost.id,
+                  ),
+                },
+          ),
+        };
+      },
+    );
+
+    queryClient.invalidateQueries({ queryKey: ["job-posts"] });
+  };
 
   const resolvedProfilePicUrl = useResolvedMediaUrl(
     user?.profilePic,
@@ -302,7 +397,7 @@ export default function CreatePostModal({
 
         if (hasNewMedia) {
           // EDIT VIA BACKGROUND JOB
-          const jobData: any = {
+          const jobData: UploadJobPayload = {
             isEdit: true,
             postId: exisistingPost.id,
             postType,
@@ -325,10 +420,12 @@ export default function CreatePostModal({
 
           const jobId = useUploadStore.getState().addJob(jobData);
           setIsOpen(false);
-          processEdit(jobId);
+          void processEdit(jobId).then(() => {
+            queryClient.invalidateQueries({ queryKey: ["job-posts"] });
+          });
         } else {
           // EDIT WITHOUT UPLOAD
-          const editData: any = {
+          const editData: EditPostPayload = {
             postType,
             title,
             content: postContent,
@@ -359,10 +456,11 @@ export default function CreatePostModal({
           });
 
           setIsOpen(false);
+          queryClient.invalidateQueries({ queryKey: ["job-posts"] });
         }
       } else {
         // CREATE POST (ALWAYS JOB)
-        const jobData: any = {
+        const jobData: UploadJobPayload = {
           postType,
           title,
           content: postContent,
@@ -380,7 +478,13 @@ export default function CreatePostModal({
 
         const jobId = useUploadStore.getState().addJob(jobData);
         setIsOpen(false);
-        processUpload(jobId);
+        void processUpload(jobId).then((createdPost) => {
+          if (postType === "job_post") {
+            updateJobsCacheAfterCreate(createdPost, jobDraft);
+          } else {
+            queryClient.invalidateQueries({ queryKey: ["job-posts"] });
+          }
+        });
         clearDraft();
       }
     } catch (err) {

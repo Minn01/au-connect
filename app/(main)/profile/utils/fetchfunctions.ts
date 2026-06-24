@@ -19,6 +19,7 @@ import {
   SAVE_POST_API_PATH,
 } from "@/lib/constants";
 import PostsPage from "@/types/PostsPage";
+import PostType from "@/types/Post";
 import LinkEmbed from "@/types/LinkEmbeds";
 import JobDraft from "@/types/JobDraft";
 import CommentType from "@/types/CommentType";
@@ -270,6 +271,34 @@ export function useEditPost() {
           };
         }
       );
+
+      queryClient.setQueriesData(
+        { queryKey: ["job-posts"], exact: false },
+        (
+          oldData:
+            | InfiniteData<{ jobs: PostType[]; nextCursor: string | null }>
+            | undefined,
+        ) => {
+          if (!oldData?.pages) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              jobs: page.jobs.map((post) =>
+                post.id === updatedPost.id
+                  ? {
+                      ...post,
+                      ...updatedPost,
+                    }
+                  : post
+              ),
+            })),
+          };
+        }
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["job-posts"] });
     },
   });
 }

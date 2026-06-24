@@ -7,8 +7,14 @@ import {
   REOPEN_JOB_POST_API_PATH,
   VIEW_JOB_APPLICATIONS_API_PATH,
 } from "@/lib/constants";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  useQuery,
+} from "@tanstack/react-query";
+import PostType from "@/types/Post";
 
 export function useApplyJob() {
   const queryClient = useQueryClient();
@@ -282,33 +288,38 @@ export function useReopenJobPost() {
   });
 }
 
+// TODO: move to types file
 // this is for the jobs page section
 type FetchJobPostsParams = {
   pageParam?: string | null;
 
   keyword?: string;
-  empType?: string;
-  locType?: string;
+  empType?: string[];
+  locType?: string[];
   salaryRange?: string;
 };
 
-// TODO: move to types file
+type JobPostsPage = {
+  jobs: PostType[];
+  nextCursor: string | null;
+};
+
 export async function fetchJobPosts({
   pageParam = null,
   keyword,
   empType,
   locType,
   salaryRange,
-}: FetchJobPostsParams) {
+}: FetchJobPostsParams): Promise<JobPostsPage> {
   const params = new URLSearchParams();
 
   if (pageParam) params.set("cursor", pageParam);
 
   if (keyword) params.set("keyword", keyword);
 
-  if (empType) params.set("empType", empType);
+  if (empType?.length) params.set("empType", empType.join(","));
 
-  if (locType) params.set("locType", locType);
+  if (locType?.length) params.set("locType", locType.join(","));
 
   if (salaryRange) params.set("salaryRange", salaryRange);
 
@@ -327,8 +338,8 @@ export async function fetchJobPosts({
 // TODO: move to types file
 type UseJobPostsParams = {
   keyword?: string;
-  empType?: string;
-  locType?: string;
+  empType?: string[];
+  locType?: string[];
   salaryRange?: string;
 };
 
@@ -338,8 +349,15 @@ export function useJobPosts({
   locType,
   salaryRange,
 }: UseJobPostsParams) {
-  return useInfiniteQuery({
+  return useInfiniteQuery<
+    JobPostsPage,
+    Error,
+    InfiniteData<JobPostsPage>,
+    (string | string[] | undefined)[],
+    string | null
+  >({
     queryKey: ["job-posts", keyword, empType, locType, salaryRange],
+    placeholderData: (previousData) => previousData,
 
     queryFn: ({ pageParam }) =>
       fetchJobPosts({

@@ -2,7 +2,28 @@ import { useUploadStore } from "@/lib/stores/uploadStore";
 import { uploadFile } from "@/app/(main)/profile/utils/uploadMedia";
 import { handleCreatePost } from "@/app/(main)/profile/utils/fetchfunctions";
 import { editPost } from "@/app/(main)/profile/utils/fetchfunctions";
-import PostType from "@/types/Post";
+import JobDraft from "@/types/JobDraft";
+import LinkEmbed from "@/types/LinkEmbeds";
+
+type EditPostPayload = {
+  postType: string;
+  title: string;
+  content: string;
+  visibility: string;
+  commentsDisabled: boolean;
+  links?: LinkEmbed[];
+  media: Array<{
+    blobName: string;
+    thumbnailBlobName?: string | null;
+    type: string;
+    name: string;
+    mimetype: string;
+    size: number;
+  }>;
+  job?: JobDraft;
+  pollOptions?: string[];
+  pollDuration?: number;
+};
 
 let invalidatePostsFn: (() => void) | null = null;
 
@@ -108,6 +129,7 @@ export async function processUpload(jobId: string) {
     invalidateProfilePostsSafe();
 
     setTimeout(() => store.removeJob(jobId), 3000);
+    return createdPost;
   } catch (error) {
     console.error("❌ Upload failed:", error);
     store.setJobError(
@@ -164,7 +186,7 @@ export async function processEdit(jobId: string) {
       ...uploadedNewMedia.filter(Boolean),
     ];
 
-    const payload: any = {
+    const payload: EditPostPayload = {
       postType: job.postType,
       title: job.title,
       content: job.content,
@@ -186,7 +208,7 @@ export async function processEdit(jobId: string) {
     }
 
     // call the front end api call function linked with react query
-    await editPost({
+    const updatedPost = await editPost({
       postId: job.postId,
       data: payload,
     });
@@ -198,6 +220,7 @@ export async function processEdit(jobId: string) {
     invalidateProfilePostsSafe();
 
     setTimeout(() => store.removeJob(jobId), 3000);
+    return updatedPost;
   } catch (err) {
     store.setJobError(jobId, "Edit failed");
   }
