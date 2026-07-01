@@ -30,6 +30,8 @@ type User = {
   createdAt?: string;
 
   connections?: number;
+  accountVerificationStatus?: "UNSUBMITTED" | "PENDING" | "APPROVED" | "REJECTED";
+  accountVerificationRole?: "STUDENT" | "ALUMNI" | "STAFF" | "LECTURER" | null;
 
   experience?: Experience[];
   education?: Education[];

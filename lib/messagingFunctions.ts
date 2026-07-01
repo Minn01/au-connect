@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 function normalizePair(a: string, b: string) {
   return a < b ? { userAId: a, userBId: b } : { userAId: b, userBId: a };
@@ -101,6 +102,8 @@ export async function getOrCreateConversation(
 ) {
   try {
     const authUserId = getAuthUserIdFromReq(req);
+    const verificationError = await requireAccountVerification(authUserId);
+    if (verificationError) return verificationError;
 
     if (!otherUserId)
       return jsonError("otherUserId required", 400);
@@ -200,6 +203,9 @@ export async function getMessages(req: NextRequest, conversationId: string) {
   try {
     const authUserId = getAuthUserIdFromReq(req);
     if (!conversationId) return jsonError("conversationId required", 400);
+
+    const verificationError = await requireAccountVerification(authUserId);
+    if (verificationError) return verificationError;
 
     const conv = await prisma.conversation.findUnique({
       where: { id: conversationId },

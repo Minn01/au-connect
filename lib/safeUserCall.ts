@@ -11,6 +11,8 @@ export const safeUserSelect = {
   location: true,
   about: true,
   connections: true,
+  accountVerificationStatus: true,
+  accountVerificationRole: true,
 
   email: true,
   phoneNo: true,
