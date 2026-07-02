@@ -7,6 +7,7 @@ import {
   VIEW_JOB_APPLICATIONS_API_PATH,
 } from "@/lib/constants";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { VerificationRequiredError } from "@/lib/verificationError";
 
 export function useApplyJob() {
   const queryClient = useQueryClient();
@@ -41,7 +42,11 @@ export function useApplyJob() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (err?.requiresVerification) throw new VerificationRequiredError();
+        throw new Error(err?.error || "Failed");
+      }
 
       return res.json();
     },

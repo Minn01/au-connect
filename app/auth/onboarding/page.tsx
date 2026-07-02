@@ -1,6 +1,6 @@
 "use client";
 
-import { MAIN_PAGE_PATH } from "@/lib/constants";
+import { ACCOUNT_VERIFICATION_PAGE_PATH } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, ChangeEvent } from "react";
 
@@ -34,8 +34,7 @@ export default function OnBoardingPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    alert("Form submitted!");
-    router.push(MAIN_PAGE_PATH);
+    router.push(ACCOUNT_VERIFICATION_PAGE_PATH);
   };
 
   return (

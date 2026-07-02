@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export const VERIFICATION_REQUIRED_MESSAGE =
-  "Account verification is required for this action.";
+export { VerificationRequiredError, VERIFICATION_REQUIRED_MESSAGE } from "@/lib/verificationError";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/lib/verificationError";
 
 export async function getAccountVerificationStatus(userId: string) {
   const user = await prisma.user.findUnique({
