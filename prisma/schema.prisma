@@ -56,6 +56,8 @@ model User {
 
   notificationsReceived Notification[] @relation("NotificationUser")
   notificationsSent     Notification[] @relation("NotificationFromUser")
+
+  // reportsMade Report[] relation("ReportsMade")
 }
 
 enum EmploymentType {
@@ -323,8 +325,8 @@ model JobPost {
   location     String?
   locationType JobLocationType?
 
-  jobDetails      String?
-  jobRequirements String[]
+  jobDetails String?
+  jobSkills  JobSkill[]
 
   employmentType EmploymentType
 
@@ -378,4 +380,23 @@ model JobApplication {
   @@unique([jobPostId, applicantId])
   @@index([jobPostId])
   @@index([applicantId])
+}
+
+model Skill {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  jobSkills JobSkill[]
+}
+
+model JobSkill {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  jobPostId String @db.ObjectId
+  skillId   String @db.ObjectId
+
+  jobPost JobPost @relation(fields: [jobPostId], references: [id])
+  skill   Skill   @relation(fields: [skillId], references: [id])
+
+  @@unique([jobPostId, skillId])
+  @@index([skillId])
 }

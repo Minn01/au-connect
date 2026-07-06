@@ -16,6 +16,11 @@ import {
 } from "./env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
+import {
+  getSkillNamesFromJobSkills,
+  normalizeSkillNames,
+  syncJobSkills,
+} from "@/lib/jobSkillFunctions";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -109,7 +114,7 @@ export async function createPost(req: NextRequest) {
 
       // 🔹 If job post → create JobPost record
       if (data.postType === "job_post" && job) {
-        await tx.jobPost.create({
+        const createdJobPost = await tx.jobPost.create({
           data: {
             postId: basePost.id,
             jobTitle: job.jobTitle,
@@ -124,11 +129,16 @@ export async function createPost(req: NextRequest) {
             salaryCurrency: job.salaryCurrency,
             deadline: job.deadline ? new Date(job.deadline) : undefined,
             jobDetails: job.jobDetails,
-            jobRequirements: job.jobRequirements,
             applyUrl: job.applyUrl,
             allowExternalApply: job.allowExternalApply,
           },
         });
+
+        await syncJobSkills(
+          tx,
+          createdJobPost.id,
+          normalizeSkillNames(job.jobSkills ?? job.jobRequirements),
+        );
       }
 
       return basePost;
@@ -487,7 +497,7 @@ export async function editPost(req: NextRequest) {
       });
 
       if (data.postType === "job_post" && job) {
-        await tx.jobPost.upsert({
+        const updatedJobPost = await tx.jobPost.upsert({
           where: { postId },
           update: {
             jobTitle: job.jobTitle,
@@ -502,7 +512,6 @@ export async function editPost(req: NextRequest) {
             salaryCurrency: job.salaryCurrency,
             deadline: job.deadline ? new Date(job.deadline) : null,
             jobDetails: job.jobDetails,
-            jobRequirements: job.jobRequirements,
             applyUrl: job.applyUrl,
             allowExternalApply: job.allowExternalApply,
           },
@@ -520,18 +529,33 @@ export async function editPost(req: NextRequest) {
             salaryCurrency: job.salaryCurrency,
             deadline: job.deadline ? new Date(job.deadline) : null,
             jobDetails: job.jobDetails,
-            jobRequirements: job.jobRequirements,
             applyUrl: job.applyUrl,
             allowExternalApply: job.allowExternalApply,
           },
         });
+
+        if (job.jobSkills !== undefined || job.jobRequirements !== undefined) {
+          await syncJobSkills(
+            tx,
+            updatedJobPost.id,
+            normalizeSkillNames(job.jobSkills ?? job.jobRequirements),
+          );
+        }
       }
 
       // 🔥 FETCH AGAIN AFTER UPSERT
       return tx.post.findUnique({
         where: { id: postId },
         include: {
-          jobPost: true,
+          jobPost: {
+            include: {
+              jobSkills: {
+                include: {
+                  skill: true,
+                },
+              },
+            },
+          },
         },
       });
     });
@@ -543,13 +567,26 @@ export async function editPost(req: NextRequest) {
       );
     }
 
+    const updatedPostWithCompatibleJob = {
+      ...updatedPost,
+      jobPost: updatedPost.jobPost
+        ? {
+            ...updatedPost.jobPost,
+            jobRequirements: getSkillNamesFromJobSkills(
+              updatedPost.jobPost.jobSkills,
+            ),
+            jobSkills: undefined,
+          }
+        : null,
+    };
+
     // Generate SAS tokens for media if present
-    if (Array.isArray(updatedPost.media)) {
+    if (Array.isArray(updatedPostWithCompatibleJob.media)) {
       const sharedKeyCredential = new StorageSharedKeyCredential(
         AZURE_STORAGE_ACCOUNT_NAME,
         AZURE_STORAGE_ACCOUNT_KEY,
       );
-      const media = updatedPost.media as PostMedia[];
+      const media = updatedPostWithCompatibleJob.media as PostMedia[];
 
       try {
         const mediaWithUrls: PostMediaWithUrl[] = media.map((mediaItem) => {
@@ -585,7 +622,7 @@ export async function editPost(req: NextRequest) {
 
         // to mutate exisiting post return media with urls
         return NextResponse.json(
-          { ...updatedPost, media: mediaWithUrls },
+          { ...updatedPostWithCompatibleJob, media: mediaWithUrls },
           { status: 200 },
         );
       } catch (sasError) {
@@ -597,7 +634,7 @@ export async function editPost(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(updatedPost, { status: 200 });
+    return NextResponse.json(updatedPostWithCompatibleJob, { status: 200 });
   } catch (error) {
     console.error("Error editing post:", error);
     return NextResponse.json(
@@ -711,6 +748,10 @@ export async function deletePost(req: NextRequest) {
           where: { jobPostId: post.jobPost.id },
         });
 
+        await tx.jobSkill.deleteMany({
+          where: { jobPostId: post.jobPost.id },
+        });
+
         await tx.jobPost.delete({
           where: { id: post.jobPost.id },
         });
@@ -779,58 +820,3 @@ function computeHasLinks(links: unknown): boolean {
 
   return false;
 }
-
-// jobPost: {
-//   select: {
-//     id: true,
-//     jobTitle: true,
-//     companyName: true,
-//     location: true,
-//     locationType: true,
-//     employmentType: true,
-//
-//     positionsAvailable: true,
-//     positionsFilled: true,
-//     status: true,
-//
-//     salaryMin: true,
-//     salaryMax: true,
-//     salaryCurrency: true,
-//     deadline: true,
-//
-//     jobDetails: true,
-//     jobRequirements: true,
-//     applyUrl: true,
-//     allowExternalApply: true,
-//
-//     applications: {
-//       where: {
-//         applicantId: userId,
-//       },
-//       select: {
-//         id: true,
-//         status: true,
-//       },
-//     },
-//
-//     _count: {
-//       select: {
-//         applications: true,
-//       },
-//     },
-//   },
-// },
-//
-// jobPost: post.jobPost
-//   ? {
-//       ...post.jobPost,
-//
-//       positionsFilled: post.jobPost.positionsFilled,
-//
-//       remainingPositions:
-//         post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
-//
-//       hasApplied: post.jobPost.applications.length > 0,
-//       applicationStatus: post.jobPost.applications[0]?.status ?? null,
-//     }
-//   : null,

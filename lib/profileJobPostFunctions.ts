@@ -13,6 +13,7 @@ import {
 } from "@/lib/env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "@/lib/constants";
 import type { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
+import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
 
 function isValidObjectId(id: string) {
   return /^[a-fA-F0-9]{24}$/.test(id);
@@ -35,7 +36,15 @@ const JOBPOST_SELECT = {
   deadline: true,
   status: true,
   jobDetails: true,
-  jobRequirements: true,
+  jobSkills: {
+    select: {
+      skill: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  },
   applyUrl: true,
   allowExternalApply: true,
 };
@@ -142,6 +151,10 @@ export async function getProfileJobPosts(
           ? {
               jobPost: {
                 ...post.jobPost,
+                jobRequirements: getSkillNamesFromJobSkills(
+                  post.jobPost.jobSkills,
+                ),
+                jobSkills: undefined,
                 remainingPositions:
                   post.jobPost.positionsAvailable -
                   post.jobPost.positionsFilled,

@@ -14,20 +14,46 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     const myApplications = await prisma.jobApplication.findMany({
       where: {
         applicantId: userId,
-        status: "APPLIED",
-
+        OR: [
+          {
+            status: "SHORTLISTED",
+          },
+          {
+            status: "APPLIED",
+            createdAt: {
+              gte: thirtyDaysAgo,
+            },
+            jobPost: {
+              status: "OPEN",
+            },
+          },
+        ],
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 3,
       include: {
         jobPost: {
-          include: {
-            post: true,
+          select: {
+            id: true,
+            jobTitle: true,
+            companyName: true,
+            status: true,
+            deadline: true,
           },
         },
       },
     });
+
+    console.log("My Applications");
+    console.log(myApplications);
 
     return NextResponse.json({
       applications: myApplications,

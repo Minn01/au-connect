@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useJobPosts } from "../(main)/profile/utils/jobPostFetchFunctions";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useFeedStore } from "@/lib/stores/feedStore";
@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchUser } from "../(main)/profile/utils/fetchfunctions";
 import Post from "../components/Post";
 import { MyApplicationSection } from "../components/MyApplicationSection";
+import { TRENDING_JOB_SKILLS_API_PATH } from "@/lib/constants";
 
 const sampleJobsRecs = [
   {
@@ -50,6 +51,27 @@ const LOCATION_FILTERS = [
 const SALARY_SLIDER_MIN = 0;
 const SALARY_SLIDER_MAX = 20000;
 const SALARY_STEP = 250;
+
+type TrendingSkill = {
+  id: string;
+  name: string;
+  count: number;
+  percentage: number;
+};
+
+async function fetchTrendingJobSkills() {
+  const res = await fetch(`${TRENDING_JOB_SKILLS_API_PATH}?limit=5`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch trending skills");
+  }
+
+  const data = (await res.json()) as { skills: TrendingSkill[] };
+  return data.skills;
+}
 
 export default function JobsPage() {
   // job filters
@@ -103,9 +125,23 @@ export default function JobsPage() {
     salaryRange: salaryRangeParam,
   });
 
+  useEffect(() => {
+    console.log("Job posts data updated:", data);
+  }, [data]);
+
+
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
+  });
+
+  const {
+    data: trendingSkills = [],
+    isLoading: trendingSkillsLoading,
+    isError: trendingSkillsError,
+  } = useQuery({
+    queryKey: ["trending-job-skills"],
+    queryFn: fetchTrendingJobSkills,
   });
 
   const virtuosoRef = useRef<VirtuosoHandle>(null!);
@@ -507,32 +543,51 @@ export default function JobsPage() {
 
         {/* Right Sidebar */}
         <aside className="col-span-3 space-y-6">
-          <MyApplicationSection user={user} userLoading={userLoading} />
+          <MyApplicationSection />
 
           <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
             <h2 className="font-semibold text-lg mb-6">Trending skills</h2>
 
             <div className="space-y-5">
-              {[
-                ["React", 80],
-                ["Go", 65],
-                ["Python", 50],
-                ["TypeScript", 40],
-              ].map(([skill, width], i) => (
-                <div key={i}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span>{skill}</span>
-                    <span className="text-zinc-500 text-sm">{width}%</span>
-                  </div>
-
-                  <div className="h-2 rounded-full bg-zinc-200 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-500"
-                      style={{ width: `${width}%` }}
-                    />
-                  </div>
+              {trendingSkillsLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <div key={index}>
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="h-4 w-24 animate-pulse rounded bg-zinc-200" />
+                        <div className="h-4 w-10 animate-pulse rounded bg-zinc-200" />
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-zinc-200" />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : trendingSkillsError ? (
+                <p className="text-sm text-zinc-500">
+                  Trending skills are unavailable.
+                </p>
+              ) : trendingSkills.length > 0 ? (
+                trendingSkills.map((skill) => (
+                  <div key={skill.id}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span>{skill.name}</span>
+                      <span className="text-zinc-500 text-sm">
+                        {skill.count}
+                      </span>
+                    </div>
+
+                    <div className="h-2 rounded-full bg-zinc-200 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-linear-to-r from-red-400 to-red-500"
+                        style={{ width: `${skill.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-zinc-500">
+                  No trending skills yet.
+                </p>
+              )}
             </div>
           </div>
         </aside>
