@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Ellipsis, Pencil, Trash2 } from "lucide-react";
+import { Ellipsis, Flag, Pencil, Trash2 } from "lucide-react";
 
 import PostType from "@/types/Post";
 import parseDate from "../(main)/profile/utils/parseDate";
@@ -60,7 +60,7 @@ export default function PostProfile({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [postMenuDropDownOpen]);
+  }, [postMenuDropDownOpen, setPostMenuDropDownOpen]);
 
   const handleProfileClick = (slug: string) => {
     if (!slug) return;
@@ -98,20 +98,23 @@ export default function PostProfile({
         </p>
       </div>
 
-      {/* Only show menu if user owns the post */}
-      {isOwnPost && (
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setPostMenuDropDownOpen(!postMenuDropDownOpen)}
-            className="cursor-pointer p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-          >
-            <Ellipsis className="text-gray-400" />
-          </button>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          type="button"
+          aria-label="More post options"
+          onClick={() => setPostMenuDropDownOpen(!postMenuDropDownOpen)}
+          className="cursor-pointer p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+        >
+          <Ellipsis className="text-gray-400" />
+        </button>
 
-          {/* Dropdown Menu */}
-          {postMenuDropDownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        {/* Dropdown Menu */}
+        {postMenuDropDownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+            {isOwnPost ? (
+              <>
               <button
+                type="button"
                 onClick={handleEdit}
                 className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
@@ -119,16 +122,27 @@ export default function PostProfile({
                 Edit post
               </button>
               <button
+                type="button"
                 onClick={handleDelete}
                 className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete post
               </button>
-            </div>
-          )}
-        </div>
-      )}
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
+              >
+                <Flag className="w-4 h-4" />
+                Report post
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       {popupOpen && (
         <PopupModal

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { Ellipsis, Flag, Pencil, Trash2, X } from "lucide-react";
 
 import CommentInput from "./CommentInput";
 import CommentItem from "./CommentItem";
@@ -9,6 +10,7 @@ import CommentType from "@/types/CommentType";
 import MediaCarousel from "./MediaCarousel";
 import {
   createComment,
+  useDeletePost,
   useToggleSave,
   useTopLevelComments,
 } from "../(main)/profile/utils/fetchfunctions";
@@ -22,15 +24,47 @@ import {
   JOB_APPLICANTS_PAGE_PATH,
   SINGLE_POST_API_PATH,
 } from "@/lib/constants";
+import PostDetailsSkeleton from "./PostDetailsSkeleton";
+import PopupModal from "./PopupModal";
+
+type CreateCommentVariables = {
+  postId: string;
+  content: string;
+  parentCommentId?: string;
+};
+
+type CachePost = {
+  id: string;
+  numOfComments?: number;
+} & Record<string, unknown>;
+
+type PostsCache = {
+  pages: ({ posts: CachePost[] } & Record<string, unknown>)[];
+} & Record<string, unknown>;
+
+type SinglePostCache = {
+  numOfComments?: number;
+} & Record<string, unknown>;
+
+type CommentsCache = {
+  pages: ({ comments: CommentType[] } & Record<string, unknown>)[];
+} & Record<string, unknown>;
+
+type RepliesCache = {
+  pages: ({ replies: CommentType[]; nextCursor?: string | null } & Record<
+    string,
+    unknown
+  >)[];
+  pageParams?: unknown[];
+} & Record<string, unknown>;
 
 export default function PostDetailsModal({
   currentUserId,
   postInfo,
   media,
-  title,
-  content,
   clickedIndex,
   onClose,
+  onEdit,
 }: PostDetailsModalTypes) {
   const router = useRouter();
   const { data: post, isLoading: postIsLoading } = useQuery({
@@ -69,8 +103,11 @@ export default function PostDetailsModal({
     : hasMedia
       ? "media"
       : "compact";
+
   const showLeftPane =
-    (isJobPost && !!postInfo.jobPost) || postInfo.postType === "poll" || hasMedia;
+    (isJobPost && !!postInfo.jobPost) ||
+    postInfo.postType === "poll" ||
+    hasMedia;
 
   const avatarUrl = useResolvedMediaUrl(
     postInfo.profilePic,
@@ -79,6 +116,21 @@ export default function PostDetailsModal({
 
   const queryClient = useQueryClient();
   const commentsDisabled = postInfo.commentsDisabled ?? false;
+
+  const [postMenuDropDownOpen, setPostMenuDropDownOpen] =
+    useState<boolean>(false);
+
+  const postOwner = currentUserId === postInfo.userId;
+  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
+
+  const deletePost = useDeletePost();
+  const handleDelete = (postId: string) => {
+    deletePost.mutate(postId, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
+  };
 
   const {
     data,
@@ -100,17 +152,21 @@ export default function PostDetailsModal({
 
   // Drop-in replacement for the createCommentMutation in PostDetailsModal.tsx
 
-  const createCommentMutation = useMutation({
-    mutationFn: createComment,
+  const createCommentMutation = useMutation<
+    CommentType,
+    Error,
+    CreateCommentVariables
+  >({
+    mutationFn: (variables) => createComment(variables) as Promise<CommentType>,
 
     onSuccess: (newComment, variables) => {
-      const bumpPostCommentCount = (oldData: any) => {
+      const bumpPostCommentCount = (oldData: PostsCache | undefined) => {
         if (!oldData?.pages) return oldData;
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page) => ({
             ...page,
-            posts: page.posts.map((p: any) =>
+            posts: page.posts.map((p) =>
               p.id === variables.postId
                 ? { ...p, numOfComments: (p.numOfComments ?? 0) + 1 }
                 : p,
@@ -119,7 +175,9 @@ export default function PostDetailsModal({
         };
       };
 
-      const bumpSinglePostCommentCount = (oldPost: any) => {
+      const bumpSinglePostCommentCount = (
+        oldPost: SinglePostCache | undefined,
+      ) => {
         if (!oldPost) return oldPost;
         return {
           ...oldPost,
@@ -130,11 +188,11 @@ export default function PostDetailsModal({
       if (!variables.parentCommentId) {
         queryClient.setQueryData(
           ["comments", variables.postId],
-          (oldData: any) => {
+          (oldData: CommentsCache | undefined) => {
             if (!oldData) return oldData;
             return {
               ...oldData,
-              pages: oldData.pages.map((page: any, index: number) =>
+              pages: oldData.pages.map((page, index) =>
                 index === 0
                   ? { ...page, comments: [newComment, ...page.comments] }
                   : page,
@@ -164,7 +222,7 @@ export default function PostDetailsModal({
       // 1. Append the new reply into the replies cache for this parent comment
       queryClient.setQueryData(
         ["replies", variables.postId, variables.parentCommentId],
-        (oldData: any) => {
+        (oldData: RepliesCache | undefined) => {
           if (!oldData) {
             // Replies were never fetched yet — seed the cache from scratch
             // so the panel can open and show the new reply immediately
@@ -175,7 +233,7 @@ export default function PostDetailsModal({
           }
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any, index: number) =>
+            pages: oldData.pages.map((page, index) =>
               index === 0
                 ? { ...page, replies: [...page.replies, newComment] }
                 : page,
@@ -188,13 +246,13 @@ export default function PostDetailsModal({
       //    so the "View replies (n)" button appears / shows the correct number.
       queryClient.setQueryData(
         ["comments", variables.postId],
-        (oldData: any) => {
+        (oldData: CommentsCache | undefined) => {
           if (!oldData) return oldData;
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => ({
+            pages: oldData.pages.map((page) => ({
               ...page,
-              comments: page.comments.map((comment: any) =>
+              comments: page.comments.map((comment) =>
                 comment.id === variables.parentCommentId
                   ? { ...comment, replyCount: (comment.replyCount ?? 0) + 1 }
                   : comment,
@@ -232,14 +290,26 @@ export default function PostDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4 pb-4 pt-16 md:py-8 md:pl-8 md:pr-20"
       onClick={onClose}
     >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+        aria-label="Close post details"
+        className="absolute right-4 top-4 z-[60] flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-white/10 md:right-8 md:top-8 cursor-pointer"
+      >
+        <X className="h-7 w-7" />
+      </button>
+
       <div
         onClick={(e) => e.stopPropagation()}
         className={`bg-white w-full ${
           isJobPost ? "max-w-[1100px]" : hasMedia ? "max-w-6xl" : "max-w-xl"
-        } h-[90vh] rounded-lg flex overflow-hidden`}
+        } h-[calc(100vh-5rem)] rounded-lg flex overflow-hidden md:h-[calc(100vh-4rem)]`}
         style={{
           display: "flex",
           maxWidth: isJobPost ? "1300px" : hasMedia ? "1100px" : "576px",
@@ -262,7 +332,7 @@ export default function PostDetailsModal({
                 flexShrink: 0,
                 display: "flex",
                 minHeight: 0,
-                backgroundColor: "#000", // optional, matches media background style
+                // backgroundColor: "#000", // optional, matches media background style
               }}
             >
               {isJobPost && postInfo.jobPost ? (
@@ -442,23 +512,16 @@ export default function PostDetailsModal({
           jobTitle={postInfo.jobPost?.jobTitle || ""}
           companyName={postInfo.jobPost?.companyName}
           onSubmit={async (data) => {
-            // console.log("Parent onSubmit called");
-            // console.log("jobPostId:", postInfo.jobPost?.id);
-
             if (!postInfo.jobPost?.id) {
               // console.log("No jobPostId, returning early");
               return;
             }
-
-            // console.log("Calling mutation now");
 
             await applyMutation.mutateAsync({
               postId: post.id,
               jobPostId: postInfo.jobPost.id,
               ...data,
             });
-
-            // console.log("Mutation finished");
           }}
         />
       </div>
@@ -487,28 +550,88 @@ export default function PostDetailsModal({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="text-gray-900 hover:text-gray-500 cursor-pointer"
-          >
-            ✕
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              aria-label="More post options"
+              onClick={() => setPostMenuDropDownOpen(!postMenuDropDownOpen)}
+              className="cursor-pointer p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+            >
+              <Ellipsis className="text-gray-400" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {postMenuDropDownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                {postOwner ? (
+                  <>
+                    <button
+                      type="button"
+                      className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => {
+                        setPostMenuDropDownOpen(false);
+                        onEdit?.(post);
+                      }}
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Edit post
+                    </button>
+                    <button
+                      type="button"
+                      className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      onClick={() => {
+                        // TODO:delete-function
+                        setPostMenuDropDownOpen(false);
+                        setDeletePopupOpen(true);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete post
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
+                  >
+                    <Flag className="w-4 h-4" />
+                    Report post
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {(title || content) && (
+        {(post.title || post.content) && (
           <div className="px-4 pb-4">
-            {title && (
+            {post.title && (
               <h2 className="font-semibold text-gray-900 text-[15px] mb-1">
-                {title}
+                {post.title}
               </h2>
             )}
 
-            {content && (
+            {post.content && (
               <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                {content}
+                {post.content}
               </p>
             )}
           </div>
+        )}
+
+        {deletePopupOpen && (
+          <PopupModal
+            title="Delete Post?"
+            titleText="Are you sure you want to delete this post?"
+            actionText="Delete"
+            open={deletePopupOpen}
+            onClose={() => setDeletePopupOpen(false)}
+            onConfirm={() => {
+              setDeletePopupOpen(false);
+              handleDelete?.(post.id);
+            }}
+          />
         )}
       </div>
     );
@@ -610,126 +733,4 @@ export default function PostDetailsModal({
       </>
     );
   }
-}
-
-export function PostDetailsSkeleton({
-  onClose = () => {},
-  sizeVariant = "compact",
-  showLeftPane = false,
-}: {
-  onClose?: () => void;
-  sizeVariant?: "job" | "media" | "compact";
-  showLeftPane?: boolean;
-}) {
-  const maxWidth =
-    sizeVariant === "job" ? "1300px" : sizeVariant === "media" ? "1100px" : "576px";
-
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className={`bg-white w-full ${
-          sizeVariant === "job"
-            ? "max-w-[1100px]"
-            : sizeVariant === "media"
-              ? "max-w-6xl"
-              : "max-w-xl"
-        } h-[90vh] rounded-lg flex overflow-hidden`}
-        style={{ display: "flex", maxWidth }}
-      >
-        <div className="hidden md:flex w-full h-full min-h-0">
-          {showLeftPane && (
-            <div
-              style={{
-                width: "65%",
-                minWidth: 0,
-                flexShrink: 0,
-                display: "flex",
-                minHeight: 0,
-                backgroundColor: "#111827",
-              }}
-              className="animate-pulse p-6 items-center justify-center"
-            >
-              <div className="w-full space-y-4">
-                <div className="h-6 w-2/3 rounded bg-gray-700" />
-                <div className="h-4 w-1/2 rounded bg-gray-700" />
-                <div className="h-64 w-full rounded bg-gray-800" />
-              </div>
-            </div>
-          )}
-
-          <div
-            style={{
-              width: showLeftPane ? "35%" : "100%",
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              overflow: "hidden",
-              borderLeft: showLeftPane ? "1px solid #e5e7eb" : "none",
-            }}
-            className="animate-pulse"
-          >
-            <div className="flex items-center gap-3 p-4 border-b">
-              <div className="w-10 h-10 bg-gray-300 rounded-full" />
-              <div className="flex flex-col gap-2">
-                <div className="h-3 w-24 bg-gray-300 rounded" />
-                <div className="h-2 w-16 bg-gray-200 rounded" />
-              </div>
-            </div>
-            <div className="px-4 py-3 space-y-3 border-b">
-              <div className="h-4 w-3/4 bg-gray-300 rounded" />
-              <div className="h-3 w-full bg-gray-200 rounded" />
-              <div className="h-3 w-5/6 bg-gray-200 rounded" />
-            </div>
-            <div className="flex-1 p-4 space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 w-32 bg-gray-300 rounded" />
-                    <div className="h-3 w-full bg-gray-200 rounded" />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="border-t p-3">
-              <div className="h-9 w-full bg-gray-200 rounded-full" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex md:hidden flex-col w-full animate-pulse">
-          <div className="flex items-center gap-3 p-4 border-b">
-            <div className="w-10 h-10 bg-gray-300 rounded-full" />
-            <div className="flex flex-col gap-2">
-              <div className="h-3 w-24 bg-gray-300 rounded" />
-              <div className="h-2 w-16 bg-gray-200 rounded" />
-            </div>
-          </div>
-          <div className="px-4 py-3 space-y-3 border-b">
-            <div className="h-4 w-3/4 bg-gray-300 rounded" />
-            <div className="h-3 w-full bg-gray-200 rounded" />
-          </div>
-          <div className="flex-1 p-4 space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="w-8 h-8 bg-gray-300 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-28 bg-gray-300 rounded" />
-                  <div className="h-3 w-full bg-gray-200 rounded" />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="border-t p-3">
-            <div className="h-9 w-full bg-gray-200 rounded-full" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }

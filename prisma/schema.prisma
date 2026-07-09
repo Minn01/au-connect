@@ -57,7 +57,7 @@ model User {
   notificationsReceived Notification[] @relation("NotificationUser")
   notificationsSent     Notification[] @relation("NotificationFromUser")
 
-  // reportsMade Report[] relation("ReportsMade")
+  reportsMade Report[] @relation("ReportsMade")
 }
 
 enum EmploymentType {
@@ -399,4 +399,60 @@ model JobSkill {
 
   @@unique([jobPostId, skillId])
   @@index([skillId])
+}
+
+model Report {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  reporterId String @db.ObjectId
+  reporter   User   @relation("ReportsMade", fields: [reporterId], references: [id])
+
+  targetType ReportTargetType
+  targetId   String           @db.ObjectId
+
+  reason      ReportReason
+  description String?
+
+  // snapshots
+  reportedUsername   String?
+  reportedProfilePic String?
+  reportedTitle      String?
+  reportedContent    String?
+  reportedMedia      Json?
+  reportedLinks      Json?
+
+  status ReportStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([reporterId])
+  @@index([status])
+}
+
+enum ReportTargetType {
+  POST
+  USER
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  HATE_SPEECH
+  VIOLENCE
+  NUDITY
+  SCAM
+  MISINFORMATION
+  FAKE_ACCOUNT
+  IMPERSONATION
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+  ACTION_TAKEN
 }
