@@ -3,44 +3,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AlertTriangle, X } from "lucide-react";
-
-export type ReportTargetType = "POST" | "USER";
-
-export type ReportReason =
-  | "SPAM"
-  | "HARASSMENT"
-  | "HATE_SPEECH"
-  | "VIOLENCE"
-  | "NUDITY"
-  | "SCAM"
-  | "MISINFORMATION"
-  | "FAKE_ACCOUNT"
-  | "IMPERSONATION"
-  | "OTHER";
-
-export type ReportTargetSnapshot = {
-  type?: ReportTargetType;
-  id: string;
-  username?: string | null;
-  profilePic?: string | null;
-  title?: string | null;
-  content?: string | null;
-  media?: unknown;
-  links?: unknown;
-};
-
-export type ReportSubmitPayload = {
-  targetType: ReportTargetType;
-  targetId: string;
-  reason: ReportReason;
-  description?: string;
-  reportedUsername?: string;
-  reportedProfilePic?: string;
-  reportedTitle?: string;
-  reportedContent?: string;
-  reportedMedia?: unknown;
-  reportedLinks?: unknown;
-};
+import { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
+import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
+import { ReportReason } from "@/types/Report";
+import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 
 type ReportModalProps = {
   isOpen: boolean;
@@ -85,6 +51,7 @@ export default function ReportModal({
   const targetType = target.type ?? "USER";
   const targetName = target.username || "this user";
   const targetLabel = targetType === "USER" ? "user" : "post";
+  const resolvedProfilePicUrl = useResolvedMediaUrl(target.profilePic);
 
   const payload = useMemo<ReportSubmitPayload | null>(() => {
     if (!reason) return null;
@@ -94,12 +61,6 @@ export default function ReportModal({
       targetId: target.id,
       reason,
       description: description.trim() || undefined,
-      reportedUsername: target.username || undefined,
-      reportedProfilePic: target.profilePic || undefined,
-      reportedTitle: target.title || undefined,
-      reportedContent: target.content || undefined,
-      reportedMedia: target.media,
-      reportedLinks: target.links,
     };
   }, [description, reason, target, targetType]);
 
@@ -163,20 +124,14 @@ export default function ReportModal({
         <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-5">
           <div className="rounded-lg border border-gray-200 p-3">
             <div className="flex items-center gap-3">
-              {target.profilePic ? (
-                <Image
-                  src={target.profilePic}
-                  alt=""
-                  width={40}
-                  height={40}
-                  unoptimized
-                  className="h-10 w-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-600">
-                  {targetName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <Image
+                src={resolvedProfilePicUrl}
+                alt=""
+                width={40}
+                height={40}
+                unoptimized
+                className="h-10 w-10 rounded-full object-cover"
+              />
 
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-gray-900">

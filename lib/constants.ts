@@ -147,6 +147,8 @@ export const DELETE_EDUCATION_API_PATH =
 
 export const MEDIA_UPLOAD_API_PATH = BASE_API_PATH + "/upload-media";
 
+export const REPORT_API_PATH = BASE_API_PATH + `/report`;
+
 // OAuth URLs
 
 // Google

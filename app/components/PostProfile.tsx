@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Ellipsis, Flag, Pencil, Trash2 } from "lucide-react";
 
@@ -8,7 +8,11 @@ import PostType from "@/types/Post";
 import parseDate from "../(main)/profile/utils/parseDate";
 import { buildSlug } from "../(main)/profile/utils/buildSlug";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
+import { postReport } from "@/app/(main)/profile/utils/reportFunctions";
 import PopupModal from "./PopupModal";
+import ReportModal from "./ReportModal";
+import type { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
+import type { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
 
 const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
@@ -41,7 +45,18 @@ export default function PostProfile({
     DEFAULT_PROFILE_PIC,
   );
 
-  // Check if current user owns this post
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const reportTarget: ReportTargetSnapshot = {
+    type: "POST",
+    id: post.id,
+    username: post.username,
+    profilePic: post.profilePic,
+    title: post.title,
+    content: post.content,
+    media: post.media,
+    links: post.links
+  }
+
   const isOwnPost = currentUserId === post.userId;
 
   // Close dropdown when clicking outside
@@ -75,6 +90,10 @@ export default function PostProfile({
   const handleDelete = () => {
     setPostMenuDropDownOpen(false);
     setPopupOpen(true);
+  };
+
+  const handleReportSubmit = async (payload: ReportSubmitPayload) => {
+    await postReport(payload);
   };
 
   return (
@@ -133,8 +152,10 @@ export default function PostProfile({
             ) : (
               <button
                 type="button"
-                disabled
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 cursor-pointer hover:bg-gra"
+                onClick={() => {
+                  setReportModalOpen(true);
+                }}
               >
                 <Flag className="w-4 h-4" />
                 Report post
@@ -155,6 +176,15 @@ export default function PostProfile({
             setPopupOpen(false);
             onDelete?.(post.id);
           }}
+        />
+      )}
+
+      {reportModalOpen && (
+        <ReportModal 
+          isOpen={reportModalOpen}
+          onClose={() => {setReportModalOpen(false)}}
+          target={reportTarget}
+          onSubmit={handleReportSubmit}
         />
       )}
     </div>

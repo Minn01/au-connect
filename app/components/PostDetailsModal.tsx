@@ -26,6 +26,10 @@ import {
 } from "@/lib/constants";
 import PostDetailsSkeleton from "./PostDetailsSkeleton";
 import PopupModal from "./PopupModal";
+import ReportModal from "./ReportModal";
+import { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
+import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
+import { postReport } from "../(main)/profile/utils/reportFunctions";
 
 type CreateCommentVariables = {
   postId: string;
@@ -83,6 +87,21 @@ export default function PostDetailsModal({
   const [mobileView, setMobileView] = useState<"content" | "comments">(
     "content",
   );
+
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const reportTarget: ReportTargetSnapshot = {
+    type: "POST",
+    id: postInfo.id,
+    username: postInfo.username,
+    profilePic: postInfo.profilePic,
+    title: postInfo.title,
+    content: postInfo.content,
+    media: postInfo.media,
+    links: postInfo.links
+  }
+  const handleReportSubmit = async (payload: ReportSubmitPayload) => {
+    await postReport(payload);
+  };
 
   const handleJobApply = (
     allowedExternalApply: boolean,
@@ -415,6 +434,17 @@ export default function PostDetailsModal({
             <Header />
             <CommentsSection />
           </div>
+
+          {reportModalOpen && (
+            <ReportModal
+              isOpen={reportModalOpen}
+              onClose={() => {
+                setReportModalOpen(false);
+              }}
+              target={reportTarget}
+              onSubmit={handleReportSubmit}
+            />
+          )}
         </div>
 
         {/* ================= MOBILE ================= */}
@@ -580,7 +610,6 @@ export default function PostDetailsModal({
                       type="button"
                       className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       onClick={() => {
-                        // TODO:delete-function
                         setPostMenuDropDownOpen(false);
                         setDeletePopupOpen(true);
                       }}
@@ -592,8 +621,10 @@ export default function PostDetailsModal({
                 ) : (
                   <button
                     type="button"
-                    disabled
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 cursor-pointer"
+                    onClick={() => {
+                      setReportModalOpen(true);
+                    }}
                   >
                     <Flag className="w-4 h-4" />
                     Report post
