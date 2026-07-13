@@ -58,10 +58,14 @@ export async function GET(req: NextRequest) {
     })
 
   } catch (err) {
-    console.log(
+    console.error(
       err instanceof Error
         ? err.message
         : "Something went wrong while trying to upload image"
+    );
+    return NextResponse.json(
+      { error: "Failed to generate media URL" },
+      { status: 500 }
     );
   }
 }
