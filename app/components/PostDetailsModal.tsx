@@ -435,16 +435,15 @@ export default function PostDetailsModal({
             <CommentsSection />
           </div>
 
-          {reportModalOpen && (
             <ReportModal
               isOpen={reportModalOpen}
               onClose={() => {
+                setPostMenuDropDownOpen(false);
                 setReportModalOpen(false);
               }}
               target={reportTarget}
               onSubmit={handleReportSubmit}
             />
-          )}
         </div>
 
         {/* ================= MOBILE ================= */}

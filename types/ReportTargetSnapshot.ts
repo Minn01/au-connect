@@ -1,7 +1,7 @@
 import { ReportTargetType } from "./Report";
 
 export type ReportTargetSnapshot = {
-  type?: ReportTargetType;
+  type: ReportTargetType;
   id: string;
   username?: string | null;
   profilePic?: string | null;
