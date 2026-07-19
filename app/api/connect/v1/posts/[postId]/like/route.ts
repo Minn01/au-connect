@@ -2,6 +2,7 @@ import { getHeaderUserInfo } from "@/lib/authFunctions";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { createNotification } from "@/lib/server/notifications.server";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 
 // like or unlike a post
@@ -18,6 +19,8 @@ export async function POST(
         { status: 401 }
       );
     }
+    const verificationError = await requireAccountVerification(userId);
+    if (verificationError) return verificationError;
     const params = await context.params;
     const postId = params.postId;
 

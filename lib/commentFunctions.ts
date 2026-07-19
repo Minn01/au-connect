@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { REPLIES_PER_FETCH, TOP_LEVEL_COMMENTS_FETCH_LIMIT } from "./constants";
 import { CreateCommentSchema } from "@/zod/CommentSchema";
 import { createNotification } from "@/lib/server/notifications.server";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 
 // function to create comments/replies
@@ -23,6 +24,9 @@ export async function createComments(
         { status: 401 },
       );
     }
+
+    const verificationError = await requireAccountVerification(userId);
+    if (verificationError) return verificationError;
 
     const { postId } = params;
 

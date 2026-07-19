@@ -18,6 +18,7 @@ import {
   LINK_PREVIEW_API_PATH,
   SAVE_POST_API_PATH,
 } from "@/lib/constants";
+import { VerificationRequiredError } from "@/lib/verificationError";
 import PostsPage from "@/types/PostsPage";
 import PostType from "@/types/Post";
 import LinkEmbed from "@/types/LinkEmbeds";
@@ -341,6 +342,7 @@ export async function createComment({
 
   if (!res.ok) {
     const error = await res.json();
+    if (error?.requiresVerification) throw new VerificationRequiredError();
     throw new Error(error?.error || "Failed to create comment");
   }
 
@@ -478,6 +480,7 @@ export async function callPostLikeUpdate({ postId }: { postId: string }) {
 
   if (!res.ok) {
     const error = await res.json();
+    if (error?.requiresVerification) throw new VerificationRequiredError();
     throw new Error(error?.error || "Failed to toggle like");
   }
 
@@ -494,6 +497,7 @@ export async function voteInPoll(postId: string, optionIndex: number) {
 
   if (!res.ok) {
     const err = await res.json();
+    if (err?.requiresVerification) throw new VerificationRequiredError();
     throw new Error(err.error || "Vote failed");
   }
 

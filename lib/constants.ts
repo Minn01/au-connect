@@ -40,6 +40,7 @@ export const ONBOARD_PAGE_PATH = "/auth/onboarding";
 export const JOBS_PAGE_PATH = "/jobs";
 export const CONNECT_PAGE_PATH = "/connect";
 export const MESSAGES_PAGE_PATH = "/messages";
+export const ACCOUNT_VERIFICATION_PAGE_PATH = "/verification";
 
 export const PROFILE_PAGE_PATH = "/profile";
 
@@ -55,6 +56,8 @@ export const MICROSOFT_AUTH_DIRECT_PATH = BASE_API_PATH + "/auth/azure-ad";
 // api routes
 export const LOGOUT_API_PATH = BASE_API_PATH + "/auth/logout";
 export const ME_API_PATH = BASE_API_PATH + "/profile/me";
+export const ACCOUNT_VERIFICATION_API_PATH =
+  BASE_API_PATH + "/account-verification";
 
 // POST create comments/replies
 export const COMMENT_API_PATH = (postId: string) =>

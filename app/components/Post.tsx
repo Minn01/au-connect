@@ -27,6 +27,8 @@ import { JobPostCard } from "./JobPostCard";
 import PostInteractionSection from "./PostInteractionSection";
 import ApplyJobModal from "./ApplyJobModal";
 import { useApplyJob } from "../(main)/profile/utils/jobPostFetchFunctions";
+import VerificationRequiredModal from "./VerificationRequiredModal";
+import { VerificationRequiredError } from "@/lib/verificationError";
 
 export default function Post({
   user,
@@ -49,6 +51,13 @@ export default function Post({
   const [postMenuDropDownOpen, setPostMenuDropDownOpen] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
   const [applyJobModalOpen, setApplyJobModalOpen] = useState(false);
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [verificationAction, setVerificationAction] = useState<string | undefined>();
+
+  const requireVerification = (action: string) => {
+    setVerificationAction(action);
+    setVerificationModalOpen(true);
+  };
 
   const toggleLike = useToggleLike();
   const deletePost = useDeletePost();
@@ -159,15 +168,13 @@ export default function Post({
             likePending={toggleLike.isPending}
             commentCount={numOfCommentsContent(post)}
             onLikeClicked={() => {
-              toggleLike.mutate({
-                postId: post.id,
-                isLiked: post.isLiked ?? false,
-              });
+              toggleLike.mutate(
+                { postId: post.id, isLiked: post.isLiked ?? false },
+                { onError: (err) => { if (err instanceof VerificationRequiredError) requireVerification("like posts"); } },
+              );
             }}
             onCommentClicked={() => openPostModal(post.id, 0)}
-            onShareClicked={() => {
-              setShareModalOpen(true);
-            }}
+            onShareClicked={() => setShareModalOpen(true)}
           />
         </div>
       </>
@@ -248,10 +255,10 @@ export default function Post({
           likePending={toggleLike.isPending}
           commentCount={numOfCommentsContent(post)}
           onLikeClicked={() => {
-            toggleLike.mutate({
-              postId: post.id,
-              isLiked: post.isLiked ?? false,
-            });
+            toggleLike.mutate(
+              { postId: post.id, isLiked: post.isLiked ?? false },
+              { onError: (err) => { if (err instanceof VerificationRequiredError) requireVerification("like posts"); } },
+            );
           }}
           onCommentClicked={() => openPostModal(post.id, 0)}
           onShareClicked={() => setShareModalOpen(true)}
@@ -292,15 +299,19 @@ export default function Post({
         jobTitle={post.jobPost?.jobTitle || ""}
         companyName={post.jobPost?.companyName}
         onSubmit={async (data) => {
-          if (!post.jobPost?.id) {
-            // console.log("No jobPostId, returning early");
-            return;
+          if (!post.jobPost?.id) return;
+          try {
+            await applyMutation.mutateAsync({
+              postId: post.id,
+              jobPostId: post.jobPost.id,
+              ...data,
+            });
+          } catch (err) {
+            if (err instanceof VerificationRequiredError) {
+              setApplyJobModalOpen(false);
+              requireVerification("apply for jobs");
+            }
           }
-          await applyMutation.mutateAsync({
-            postId: post.id,
-            jobPostId: post.jobPost.id,
-            ...data,
-          });
         }}
       />
 
@@ -314,6 +325,12 @@ export default function Post({
           "share",
           user?.id,
         )}`}
+      />
+
+      <VerificationRequiredModal
+        open={verificationModalOpen}
+        onClose={() => setVerificationModalOpen(false)}
+        action={verificationAction}
       />
     </>
   );

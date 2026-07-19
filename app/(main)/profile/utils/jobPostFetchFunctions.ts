@@ -15,6 +15,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import PostType from "@/types/Post";
+import { VerificationRequiredError } from "@/lib/verificationError";
 
 export function useApplyJob() {
   const queryClient = useQueryClient();
@@ -49,7 +50,11 @@ export function useApplyJob() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (err?.requiresVerification) throw new VerificationRequiredError();
+        throw new Error(err?.error || "Failed");
+      }
 
       return res.json();
     },

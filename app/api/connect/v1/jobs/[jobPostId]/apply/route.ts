@@ -6,6 +6,7 @@ import {
   StorageSharedKeyCredential,
 } from "@azure/storage-blob";
 import { createNotification } from "@/lib/server/notifications.server";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -29,6 +30,9 @@ export async function POST(
         { status: 401 },
       );
     }
+
+    const verificationError = await requireAccountVerification(applicantId);
+    if (verificationError) return verificationError;
 
     const { jobPostId } = await context.params;
 

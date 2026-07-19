@@ -16,6 +16,7 @@ import {
 } from "./env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -27,6 +28,9 @@ export async function createPost(req: NextRequest) {
         { status: 401 },
       );
     }
+
+    const verificationError = await requireAccountVerification(userId);
+    if (verificationError) return verificationError;
 
     // parsing body with zod
     const body = await req.json();

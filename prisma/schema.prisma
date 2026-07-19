@@ -39,9 +39,13 @@ model User {
 
   connections Int @default(0)
 
+  accountVerificationStatus AccountVerificationStatus @default(UNSUBMITTED)
+  accountVerificationRole   AccountVerificationRole?
+
   experience Experience[]
   education  Education[]
   posts      Post[]
+  verificationRequests AccountVerificationRequest[]
 
   // For Connection
   sentConnectionRequests     ConnectionRequest[] @relation("SentConnectionRequests")
@@ -56,6 +60,60 @@ model User {
 
   notificationsReceived Notification[] @relation("NotificationUser")
   notificationsSent     Notification[] @relation("NotificationFromUser")
+}
+
+enum AccountVerificationStatus {
+  UNSUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccountVerificationRole {
+  STUDENT
+  ALUMNI
+  STAFF
+  LECTURER
+}
+
+model AccountVerificationRequest {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role         AccountVerificationRole
+  documentType String
+  documents    Json
+  note         String?
+
+  status       AccountVerificationStatus @default(PENDING)
+  reviewedBy   String?
+  reviewNote   String?
+  reviewedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  history AccountVerificationHistory[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model AccountVerificationHistory {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  requestId String @db.ObjectId
+  request   AccountVerificationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  action AccountVerificationStatus
+  actor  String
+  note   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([requestId, createdAt])
 }
 
 enum EmploymentType {

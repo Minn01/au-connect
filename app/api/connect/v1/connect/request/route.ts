@@ -3,12 +3,16 @@ import prisma from "@/lib/prisma";
 import { normalizePair } from "@/lib/connect";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
 import { createNotification } from "@/lib/server/notifications.server";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 
 export async function POST(req: NextRequest) {
     try {
         const fromUserId = getAuthUserIdFromReq(req);
         const { toUserId } = await req.json();
+
+        const verificationError = await requireAccountVerification(fromUserId);
+        if (verificationError) return verificationError;
 
         if (!toUserId) return NextResponse.json({ error: "toUserId required" }, { status: 400 });
         if (toUserId === fromUserId) return NextResponse.json({ error: "Cannot connect to yourself" }, { status: 400 });
