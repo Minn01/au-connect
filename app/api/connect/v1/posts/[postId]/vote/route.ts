@@ -29,7 +29,7 @@ export async function POST(
     }
 
     const post = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { id: postId, moderationStatus: "VISIBLE" },
       select: {
         userId: true,
         pollOptions: true,

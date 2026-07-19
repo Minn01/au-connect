@@ -34,6 +34,7 @@ import {
 } from "./env";
 
 import { BlobServiceClient } from "@azure/storage-blob";
+import { getAccountRestriction } from "@/lib/accountStatus";
 
 // TODO: check for errors from providers in each function
 // TODO: google and linkedin are missing error handline for fetching token
@@ -397,7 +398,7 @@ export async function checkExistUser(email: string) {
   });
 }
 
-export function createUserSession(
+export async function createUserSession(
   user: { id: string; email: string },
   method: SessionMethod
 ) {
@@ -406,7 +407,12 @@ export function createUserSession(
     expiresIn: JWT_COOKIE_EXPIRATION_TIME,
   });
 
-  const response = getResponse(method);
+  const restriction = await getAccountRestriction(user.id);
+  const response = restriction
+    ? NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/account-restricted`,
+      )
+    : getResponse(method);
 
   if (response) {
     // delete oauth state cookie

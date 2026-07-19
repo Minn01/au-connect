@@ -112,7 +112,7 @@ export async function getSinglePost(
       },
     });
 
-    if (!post) {
+    if (!post || (post.moderationStatus === "REMOVED" && post.userId !== userId)) {
       return NextResponse.json(
         { error: "Internal server error; post(single) is not found!" },
         { status: 404 },
@@ -171,6 +171,7 @@ export async function getSinglePost(
 
     return NextResponse.json({
       ...post,
+      removedByModeration: post.moderationStatus === "REMOVED",
       media: mediaWithUrls,
 
       username: post.user.username,

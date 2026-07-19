@@ -52,7 +52,7 @@ export async function POST(
     }
 
     const job_post = await prisma.jobPost.findUnique({
-      where: { id: jobPostId },
+      where: { id: jobPostId, post: { moderationStatus: "VISIBLE" } },
       select: {
         status: true,
         postId: true,

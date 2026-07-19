@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
+    "db:backfill-post-moderation": "tsx migration_scripts/backfill-post-moderation-status.ts",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint"

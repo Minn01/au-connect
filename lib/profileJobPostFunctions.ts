@@ -85,6 +85,7 @@ export async function getProfileJobPosts(
 
     // ✅ Base filters
     const whereAND: any[] = [
+      { moderationStatus: "VISIBLE" },
       { jobPost: { isNot: null } },
       { postType: "job_post" }, // keep if your app really uses this exact string
     ];

@@ -75,6 +75,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
     // ✅ Build where clause
     const whereClause: any = {
       userId: normalizedProfileUserId,
+      moderationStatus: "VISIBLE",
     };
 
     // ✅ NEW: postType filters

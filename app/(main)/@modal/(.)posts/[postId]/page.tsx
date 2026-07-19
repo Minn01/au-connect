@@ -25,6 +25,19 @@ export default async function PostModalPage({
     redirect("/");
   }
 
+  if (post.removedByModeration) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="w-full max-w-md rounded-xl bg-white p-7 text-center shadow-xl">
+          <h2 className="text-xl font-semibold text-gray-900">Removed by moderation</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            This post is no longer visible to anyone else.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <PostModalClient
       post={post}

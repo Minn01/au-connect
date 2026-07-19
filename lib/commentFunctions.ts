@@ -38,6 +38,15 @@ export async function createComments(
 
     const { content, parentCommentId } = parsed.data;
 
+    const visiblePost = await prisma.post.findUnique({
+      where: { id: postId, moderationStatus: "VISIBLE" },
+      select: { id: true },
+    });
+
+    if (!visiblePost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
     // get user info
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -165,11 +174,15 @@ export async function getCommentsForPost(
     }
 
     const post = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { id: postId, moderationStatus: "VISIBLE" },
       select: { commentsDisabled: true },
     });
 
-    if (post && post.commentsDisabled) {
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (post.commentsDisabled) {
       return NextResponse.json(
         { error: "comments for this posts are disabled" },
         { status: 400 },
@@ -248,11 +261,15 @@ export async function getRepliesForComment(
     }
 
     const post = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { id: postId, moderationStatus: "VISIBLE" },
       select: { commentsDisabled: true },
     });
 
-    if (post?.commentsDisabled) {
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (post.commentsDisabled) {
       return NextResponse.json(
         { error: "Comments for this post are disabled" },
         { status: 400 },

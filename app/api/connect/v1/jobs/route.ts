@@ -81,6 +81,7 @@ export async function GET(req: NextRequest) {
 
     // Building the final dynamic query
     const where: Prisma.PostWhereInput = {
+      moderationStatus: "VISIBLE",
       jobPost: {
         isNot: null,
         is:

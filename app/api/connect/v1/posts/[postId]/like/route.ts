@@ -21,6 +21,14 @@ export async function POST(
     const params = await context.params;
     const postId = params.postId;
 
+    const visiblePost = await prisma.post.findUnique({
+      where: { id: postId, moderationStatus: "VISIBLE" },
+      select: { id: true },
+    });
+    if (!visiblePost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
     const existingLike = await prisma.postInteraction.findUnique({
       where: {
         userId_postId_type: {

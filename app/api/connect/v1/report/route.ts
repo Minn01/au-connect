@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     let snapshot = {};
     if (reportPayload.targetType === "POST") {
       const reportedPost = await prisma.post.findUnique({
-        where: { id: reportPayload.targetId },
+        where: { id: reportPayload.targetId, moderationStatus: "VISIBLE" },
         select: {
           id: true,
           userId: true,

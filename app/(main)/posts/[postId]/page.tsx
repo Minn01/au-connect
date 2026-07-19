@@ -25,6 +25,17 @@ export default async function PostPage({
     notFound();
   }
 
+  if (post.removedByModeration) {
+    return (
+      <main className="mx-auto mt-8 max-w-2xl rounded-xl bg-white p-8 text-center shadow-sm">
+        <h1 className="text-xl font-semibold text-gray-900">Removed by moderation</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          This post is no longer visible to anyone else.
+        </p>
+      </main>
+    );
+  }
+
   return (
     <PostPageClient
       post={post}

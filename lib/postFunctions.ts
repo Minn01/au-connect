@@ -252,6 +252,7 @@ export async function getPosts(req: NextRequest) {
         },
       },
       where: {
+        moderationStatus: "VISIBLE",
         jobPost: {
           is: null,
         },
@@ -369,7 +370,7 @@ export async function editPost(req: NextRequest) {
 
     // Check if post exists and belongs to user
     const existingPost = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { id: postId, moderationStatus: "VISIBLE" },
       select: {
         userId: true,
         media: true,

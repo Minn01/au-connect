@@ -18,6 +18,7 @@ export async function GET(
     const jobPost = await prisma.jobPost.findUnique({
       where: {
         postId: postId,
+        post: { moderationStatus: "VISIBLE" },
       },
       select: {
         id: true,

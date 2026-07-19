@@ -58,6 +58,10 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
     return null;
   }
 
+  if (post.moderationStatus === "REMOVED" && post.userId !== currentUserId) {
+    return null;
+  }
+
   const sharedKeyCredential = new StorageSharedKeyCredential(
     AZURE_STORAGE_ACCOUNT_NAME,
     AZURE_STORAGE_ACCOUNT_KEY,
@@ -87,6 +91,7 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
 
   return {
     ...post,
+    removedByModeration: post.moderationStatus === "REMOVED",
     media: mediaWithUrls,
     links: post.links as LinkEmbed[] | null,
     pollVotes: post.pollVotes as Record<string, string[]> | undefined,

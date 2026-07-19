@@ -15,6 +15,9 @@ import {
   SIGNIN_PAGE_PATH,
 } from "@/lib/constants";
 import { verifyJwtToken } from "./lib/authFunctions";
+import { getAccountRestriction } from "./lib/accountStatus";
+
+const ACCOUNT_RESTRICTED_PATH = "/account-restricted";
 
 const protectedRoutes = [
   ONBOARD_PAGE_PATH,
@@ -28,7 +31,7 @@ const protectedRoutes = [
 
 const PUBLIC_API_ROUTES = [BASE_API_PATH + "/auth"];
 
-export const proxy: NextProxy = (req: NextRequest) => {
+export const proxy: NextProxy = async (req: NextRequest) => {
   const sessionToken = req.cookies.get(JWT_COOKIE)?.value;
   const pathname = req.nextUrl.pathname;
 
@@ -71,13 +74,37 @@ export const proxy: NextProxy = (req: NextRequest) => {
   return verifySession(req, sessionToken, pathname);
 }
 
-function verifySession(
+async function verifySession(
   req: NextRequest,
   sessionToken: string,
   pathname: string,
 ) {
   try {
     const decoded = verifyJwtToken(sessionToken);
+
+    const restriction = await getAccountRestriction(decoded.userId);
+
+    if (restriction) {
+      if (pathname.startsWith(BASE_API_PATH)) {
+        const response = NextResponse.json(
+          {
+            error: restriction.status === "BANNED"
+              ? "This account has been banned"
+              : "This account is suspended",
+            accountStatus: restriction.status,
+            suspendedUntil: restriction.suspendedUntil,
+          },
+          { status: 403 },
+        );
+        return response;
+      }
+
+      if (!pathname.startsWith(ACCOUNT_RESTRICTED_PATH)) {
+        return NextResponse.redirect(new URL(ACCOUNT_RESTRICTED_PATH, req.url));
+      }
+    } else if (pathname.startsWith(ACCOUNT_RESTRICTED_PATH)) {
+      return NextResponse.redirect(new URL(MAIN_PAGE_PATH, req.url));
+    }
 
     const headers = new Headers(req.headers);
     headers.set("x-user-id", decoded.userId);
