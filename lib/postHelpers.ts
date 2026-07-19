@@ -12,6 +12,7 @@ import {
   AZURE_STORAGE_CONTAINER_NAME,
 } from "./env";
 import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
+import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
 
 export async function getPostWithMedia(postId: string, currentUserId: string) {
   const post = await prisma.post.findUnique({
@@ -29,6 +30,11 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
       },
       jobPost: {
         include: {
+          jobSkills: {
+            include: {
+              skill: true,
+            },
+          },
           applications: {
             where: {
               applicantId: currentUserId,
@@ -49,6 +55,10 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
   });
 
   if (!post) {
+    return null;
+  }
+
+  if (post.moderationStatus === "REMOVED" && post.userId !== currentUserId) {
     return null;
   }
 
@@ -81,6 +91,7 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
 
   return {
     ...post,
+    removedByModeration: post.moderationStatus === "REMOVED",
     media: mediaWithUrls,
     links: post.links as LinkEmbed[] | null,
     pollVotes: post.pollVotes as Record<string, string[]> | undefined,
@@ -92,6 +103,8 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
     jobPost: post.jobPost
       ? {
           ...post.jobPost,
+          jobRequirements: getSkillNamesFromJobSkills(post.jobPost.jobSkills),
+          jobSkills: undefined,
           positionsFilled: post.jobPost._count.applications,
           remainingPositions:
             post.jobPost.positionsAvailable - post.jobPost._count.applications,

@@ -16,7 +16,7 @@ export async function PATCH(
     const { postId } = await context.params;
 
     const jobPost = await prisma.jobPost.findUnique({
-      where: { postId },
+      where: { postId, post: { moderationStatus: "VISIBLE" } },
       include: { post: true },
     });
 

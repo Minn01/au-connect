@@ -30,6 +30,14 @@ export async function POST(
       );
     }
 
+    const visiblePost = await prisma.post.findUnique({
+      where: { id: postId, moderationStatus: "VISIBLE" },
+      select: { id: true },
+    });
+    if (!visiblePost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
     let sharedByUserId: string | undefined;
     try {
       const body = await req.json();

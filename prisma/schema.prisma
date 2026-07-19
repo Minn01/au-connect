@@ -60,6 +60,19 @@ model User {
 
   notificationsReceived Notification[] @relation("NotificationUser")
   notificationsSent     Notification[] @relation("NotificationFromUser")
+
+  reportsMade       Report[]           @relation("ReportsMade")
+  moderationNotices ModerationNotice[]
+
+  accountStatus  UserAccountStatus @default(ACTIVE)
+  suspendedUntil DateTime?
+  warningCount   Int               @default(0)
+}
+
+enum UserAccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
 }
 
 enum AccountVerificationStatus {
@@ -194,8 +207,17 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  comments     Comment[]
-  interactions PostInteraction[]
+  comments          Comment[]
+  interactions      PostInteraction[]
+  moderationNotices ModerationNotice[]
+
+  moderationStatus PostModerationStatus @default(VISIBLE)
+  removedAt        DateTime?
+}
+
+enum PostModerationStatus {
+  VISIBLE
+  REMOVED
 }
 
 model Comment {
@@ -381,8 +403,8 @@ model JobPost {
   location     String?
   locationType JobLocationType?
 
-  jobDetails      String?
-  jobRequirements String[]
+  jobDetails String?
+  jobSkills  JobSkill[]
 
   employmentType EmploymentType
 
@@ -467,4 +489,125 @@ model JobApplication {
   @@unique([jobPostId, applicantId])
   @@index([jobPostId])
   @@index([applicantId])
+}
+
+model Skill {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  jobSkills JobSkill[]
+}
+
+model JobSkill {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  jobPostId String @db.ObjectId
+  skillId   String @db.ObjectId
+
+  jobPost JobPost @relation(fields: [jobPostId], references: [id])
+  skill   Skill   @relation(fields: [skillId], references: [id])
+
+  @@unique([jobPostId, skillId])
+  @@index([skillId])
+}
+
+model Report {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  reporterId String @db.ObjectId
+  reporter   User   @relation("ReportsMade", fields: [reporterId], references: [id])
+
+  targetType ReportTargetType
+  targetId   String           @db.ObjectId
+
+  reason      ReportReason
+  description String?
+
+  // snapshots
+  reportedUsername   String?
+  reportedProfilePic String?
+  reportedTitle      String?
+  reportedContent    String?
+  reportedMedia      Json?
+  reportedLinks      Json?
+
+  status ReportStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([reporterId])
+  @@index([status])
+}
+
+enum ReportTargetType {
+  POST
+  USER
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  HATE_SPEECH
+  VIOLENCE
+  NUDITY
+  SCAM
+  MISINFORMATION
+  FAKE_ACCOUNT
+  IMPERSONATION
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  REVIEWED
+  DISMISSED
+  ACTION_TAKEN
+}
+
+model ModerationAction {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  targetType ReportTargetType
+  targetId   String           @db.ObjectId
+  action     AdminActionType
+  note       String?
+
+  durationDays Int?
+  createdAt    DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+enum AdminActionType {
+  MARK_UNDER_REVIEW
+  REOPEN_CASE
+  DISMISS_REPORTS
+  KEEP_POST
+  WARN_USER
+  SUSPEND_USER
+  BAN_USER
+  REMOVE_POST
+  REMOVE_POST_WARN_AUTHOR
+}
+
+model ModerationNotice {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  recipientId String @db.ObjectId
+  recipient   User   @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  action AdminActionType
+  reason String?
+
+  targetPostId String? @db.ObjectId
+  targetPost   Post?   @relation(fields: [targetPostId], references: [id], onDelete: SetNull)
+
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([recipientId, isRead, createdAt])
 }

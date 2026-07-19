@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { Pencil, Camera } from "lucide-react";
+import { Pencil, Camera, Flag } from "lucide-react";
 
 import SectionCard from "./SectionCard";
 import ExperienceItem from "./ExperienceItem";
@@ -31,6 +31,10 @@ import { buildSlug } from "../utils/buildSlug";
 
 import { useInfiniteScroll } from "../[slug]/hook/useInfiniteScroll";
 import { setInvalidateProfilePosts } from "@/lib/services/uploadService";
+import ReportModal from "@/app/components/ReportModal";
+import { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
+import { postReport } from "../utils/reportFunctions";
+import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
 
 type ConnectionUser = {
   id: string;
@@ -49,7 +53,10 @@ type ConnectionRequest = {
 
 function ConnectionPreviewItem({ user }: { user: ConnectionUser }) {
   const router = useRouter();
-  const avatarUrl = useResolvedMediaUrl(user.profilePic, "/default_profile.jpg");
+  const avatarUrl = useResolvedMediaUrl(
+    user.profilePic,
+    "/default_profile.jpg",
+  );
   const slug = buildSlug(user.username || "", user.id);
 
   return (
@@ -59,11 +66,20 @@ function ConnectionPreviewItem({ user }: { user: ConnectionUser }) {
       className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-slate-50"
     >
       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200">
-        <Image src={avatarUrl} alt={user.username} fill className="object-cover" />
+        <Image
+          src={avatarUrl}
+          alt={user.username}
+          fill
+          className="object-cover"
+        />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-slate-900">{user.username}</p>
-        {user.title && <p className="truncate text-xs text-slate-500">{user.title}</p>}
+        <p className="truncate text-sm font-semibold text-slate-900">
+          {user.username}
+        </p>
+        {user.title && (
+          <p className="truncate text-xs text-slate-500">{user.title}</p>
+        )}
       </div>
     </button>
   );
@@ -168,7 +184,6 @@ export default function ProfileView({
   //   console.log("Session user ID:", sessionUserId);
   // }, [user, sessionUserId]);
 
-
   // ✅ OLD: profile posts (unchanged)
   const {
     data: postData,
@@ -213,7 +228,7 @@ export default function ProfileView({
     });
 
     return () => {
-      setInvalidateProfilePosts(() => { });
+      setInvalidateProfilePosts(() => {});
     };
   }, [queryClient]);
 
@@ -226,7 +241,9 @@ export default function ProfileView({
     ? !!isFetchingNextJobPage
     : !!isFetchingNextPage;
 
-  const activeFetchNextPage = usingJobSection ? fetchNextJobPage : fetchNextPage;
+  const activeFetchNextPage = usingJobSection
+    ? fetchNextJobPage
+    : fetchNextPage;
 
   // ✅ infinite scroll uses ACTIVE pagination
   const { rootRef, sentinelRef } = useInfiniteScroll({
@@ -247,6 +264,18 @@ export default function ProfileView({
 
   const isPostsLoading = profilePostLoading;
   const isHiringLoading = jobPostLoading;
+
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const reportTarget: ReportTargetSnapshot = {
+    type: "USER",
+    id: user.id,
+    username: user.username,
+    profilePic: user.profilePic,
+  } 
+
+  const handleReportSubmit = async (payload: ReportSubmitPayload) => {
+    await postReport(payload);
+  };
 
   // ✅ UPDATED: On profile load: check connection status (connected / outgoing / incoming)
   useEffect(() => {
@@ -450,7 +479,9 @@ export default function ProfileView({
       setIncomingRequestId(null);
       setIsConnected(true);
     } catch (e: unknown) {
-      setConnectError(e instanceof Error ? e.message : "Failed to accept request");
+      setConnectError(
+        e instanceof Error ? e.message : "Failed to accept request",
+      );
     } finally {
       setConnectLoading(false);
     }
@@ -558,13 +589,13 @@ export default function ProfileView({
                         </button>
                       </div>
 
-                      {/* EDIT / CONNECT BUTTONS */}
+                      {/* EDIT / CONNECT / REPORT BUTTONS */}
                       <div className="z-20 flex flex-col items-end gap-2 flex-1 min-w-0 md:mb-0 md:absolute md:top-4 md:right-4 md:w-auto">
                         <div className="flex flex-wrap justify-end items-center gap-2 md:gap-3 w-full md:w-auto">
                           {isOwner ? (
                             <button
                               onClick={() => setOpenEditModal(true)}
-                              className="flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border rounded-lg text-xs md:text-base text-gray-700 hover:bg-gray-50 shadow-sm bg-white cursor-pointer"
+                              className="flex h-9 md:h-10 items-center gap-1.5 md:gap-2 px-3 md:px-4 border rounded-lg text-xs md:text-base text-gray-700 hover:bg-gray-50 shadow-sm bg-white cursor-pointer"
                             >
                               <Pencil size={14} className="md:w-4 md:h-4" />
                               Edit Profile
@@ -576,10 +607,11 @@ export default function ProfileView({
                                 <button
                                   onClick={() => setOpenRemoveModal(true)}
                                   disabled={connectLoading}
-                                  className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-base rounded-lg shadow text-white transition-colors bg-red-500 hover:bg-red-600 cursor-pointer ${connectLoading
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                  className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-base rounded-lg shadow text-white transition-colors bg-red-500 hover:bg-red-600 cursor-pointer ${
+                                    connectLoading
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 >
                                   {connectLoading ? "Removing..." : "Remove"}
                                 </button>
@@ -588,10 +620,11 @@ export default function ProfileView({
                                   <button
                                     onClick={handleAcceptIncoming}
                                     disabled={connectLoading}
-                                    className={`px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg bg-blue-600 text-white text-xs md:text-base hover:bg-blue-700 cursor-pointer ${connectLoading
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                      }`}
+                                    className={`px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg bg-blue-600 text-white text-xs md:text-base hover:bg-blue-700 cursor-pointer ${
+                                      connectLoading
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
                                   >
                                     {connectLoading ? "Accepting..." : "Accept"}
                                   </button>
@@ -599,10 +632,11 @@ export default function ProfileView({
                                   <button
                                     onClick={handleDeclineIncoming}
                                     disabled={connectLoading}
-                                    className={`px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg bg-red-500 text-white text-xs md:text-base hover:bg-red-600 cursor-pointer ${connectLoading
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                      }`}
+                                    className={`px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg bg-red-500 text-white text-xs md:text-base hover:bg-red-600 cursor-pointer ${
+                                      connectLoading
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
                                   >
                                     Decline
                                   </button>
@@ -617,10 +651,11 @@ export default function ProfileView({
                                   <button
                                     onClick={handleCancelRequest}
                                     disabled={connectLoading}
-                                    className={`px-3 py-2 rounded-lg border border-red-300 bg-white text-red-600 hover:bg-red-50 transition-colors text-sm font-medium cursor-pointer ${connectLoading
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                      }`}
+                                    className={`px-3 py-2 rounded-lg border border-red-300 bg-white text-red-600 hover:bg-red-50 transition-colors text-sm font-medium cursor-pointer ${
+                                      connectLoading
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
                                     title="Cancel request"
                                   >
                                     {connectLoading ? "Canceling..." : "Cancel"}
@@ -630,10 +665,11 @@ export default function ProfileView({
                                 <button
                                   onClick={handleConnect}
                                   disabled={connectLoading}
-                                  className={`px-4 py-2 rounded-lg shadow text-white transition-colors bg-blue-600 hover:bg-blue-700 cursor-pointer ${connectLoading
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                  className={`h-9 md:h-10 px-3 md:px-4 rounded-lg text-xs md:text-base shadow text-white transition-colors bg-blue-600 hover:bg-blue-700 cursor-pointer ${
+                                    connectLoading
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 >
                                   {connectLoading ? "Sending..." : "Connect"}
                                 </button>
@@ -645,6 +681,14 @@ export default function ProfileView({
                                 className="px-3 py-1.5 md:px-4 md:py-2 border rounded-lg text-xs md:text-base text-gray-700 hover:bg-gray-50 shadow-sm bg-white cursor-pointer"
                               >
                                 Message
+                              </button>
+
+                              <button
+                                onClick={() => {setReportModalOpen(true)}}
+                                className="inline-flex h-9 md:h-10 items-center gap-2 px-3 md:px-4 rounded-lg text-xs md:text-base font-medium text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 transition-all duration-150 cursor-pointer"
+                              >
+                                <Flag className="w-4 h-4" />
+                                Report
                               </button>
                             </>
                           )}
@@ -685,15 +729,22 @@ export default function ProfileView({
                 <div className="lg:hidden">
                   <SectionCard title="Your connections">
                     {connectionsLoading ? (
-                      <p className="text-sm text-slate-500">Loading connections...</p>
+                      <p className="text-sm text-slate-500">
+                        Loading connections...
+                      </p>
                     ) : connectionsList.length > 0 ? (
                       <div className="space-y-1">
                         {connectionsList.slice(0, 4).map((connection) => (
-                          <ConnectionPreviewItem key={connection.id} user={connection} />
+                          <ConnectionPreviewItem
+                            key={connection.id}
+                            user={connection}
+                          />
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-500">No connections yet.</p>
+                      <p className="text-sm text-slate-500">
+                        No connections yet.
+                      </p>
                     )}
 
                     <button
@@ -786,10 +837,11 @@ export default function ProfileView({
                       onClick={() => {
                         setMainSection("activity");
                       }}
-                      className={`pb-2 cursor-pointer ${mainSection === "activity"
-                        ? "border-b-2 border-blue-600 text-blue-600"
-                        : "text-gray-600"
-                        }`}
+                      className={`pb-2 cursor-pointer ${
+                        mainSection === "activity"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-600"
+                      }`}
                     >
                       Social Activity
                     </button>
@@ -799,10 +851,11 @@ export default function ProfileView({
                         setMainSection("jobActivity");
                         setJobTab("hiring"); // nicer UX default
                       }}
-                      className={`pb-2 cursor-pointer ${mainSection === "jobActivity"
-                        ? "border-b-2 border-blue-600 text-blue-600"
-                        : "text-gray-600"
-                        }`}
+                      className={`pb-2 cursor-pointer ${
+                        mainSection === "jobActivity"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-600"
+                      }`}
                     >
                       Job Activity
                     </button>
@@ -823,10 +876,11 @@ export default function ProfileView({
                           <button
                             key={t.key}
                             onClick={() => setTab(t.key)}
-                            className={`pb-2 flex-shrink-0 cursor-pointer ${tab === t.key
-                              ? "border-b-2 border-blue-600 text-blue-600"
-                              : "text-gray-600"
-                              }`}
+                            className={`pb-2 flex-shrink-0 cursor-pointer ${
+                              tab === t.key
+                                ? "border-b-2 border-blue-600 text-blue-600"
+                                : "text-gray-600"
+                            }`}
                           >
                             {t.label}
                           </button>
@@ -843,27 +897,30 @@ export default function ProfileView({
   "
                     >
                       <div className="flex gap-4 pb-2 min-w-max">
-                        {JOB_TABS.filter((t) => !t.ownerOnly || isOwner).map((t) => (
-                          <button
-                            key={t.key}
-                            onClick={() => setJobTab(t.key)}
-                            className={`pb-2 flex-shrink-0 cursor-pointer ${jobTab === t.key
-                              ? "border-b-2 border-blue-600 text-blue-600"
-                              : "text-gray-600"
+                        {JOB_TABS.filter((t) => !t.ownerOnly || isOwner).map(
+                          (t) => (
+                            <button
+                              key={t.key}
+                              onClick={() => setJobTab(t.key)}
+                              className={`pb-2 flex-shrink-0 cursor-pointer ${
+                                jobTab === t.key
+                                  ? "border-b-2 border-blue-600 text-blue-600"
+                                  : "text-gray-600"
                               }`}
-                          >
-                            {t.label}
-                            {t.ownerOnly && (
-                              <span
-                                className="ml-1 text-xs text-gray-400 cursor-help"
-                                title="Only you can see this Section"
-                                aria-label="Only you can see this Section"
-                              >
-                                🔒
-                              </span>
-                            )}
-                          </button>
-                        ))}
+                            >
+                              {t.label}
+                              {t.ownerOnly && (
+                                <span
+                                  className="ml-1 text-xs text-gray-400 cursor-help"
+                                  title="Only you can see this Section"
+                                  aria-label="Only you can see this Section"
+                                >
+                                  🔒
+                                </span>
+                              )}
+                            </button>
+                          ),
+                        )}
                       </div>
                     </div>
                   )}
@@ -906,7 +963,8 @@ export default function ProfileView({
                       </>
                     ) : (
                       <>
-                        {!isOwner && (jobTab === "saved" || jobTab === "applied") ? (
+                        {!isOwner &&
+                        (jobTab === "saved" || jobTab === "applied") ? (
                           <div className="text-center text-sm text-gray-600 py-10">
                             This section is private.
                           </div>
@@ -963,15 +1021,22 @@ export default function ProfileView({
                   </h2>
 
                   {connectionsLoading ? (
-                    <p className="text-sm text-slate-500">Loading connections...</p>
+                    <p className="text-sm text-slate-500">
+                      Loading connections...
+                    </p>
                   ) : connectionsList.length > 0 ? (
                     <div className="space-y-1">
                       {connectionsList.slice(0, 4).map((connection) => (
-                        <ConnectionPreviewItem key={connection.id} user={connection} />
+                        <ConnectionPreviewItem
+                          key={connection.id}
+                          user={connection}
+                        />
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-500">No connections yet.</p>
+                    <p className="text-sm text-slate-500">
+                      No connections yet.
+                    </p>
                   )}
 
                   <button
@@ -1063,6 +1128,13 @@ export default function ProfileView({
         titleText="Are you sure you want to remove this connection? You will need to send a new request to connect again."
         actionText="Remove"
       />
+
+        <ReportModal
+          isOpen={reportModalOpen}
+          onClose={() => { setReportModalOpen(false) }}
+          target={reportTarget}
+          onSubmit={handleReportSubmit}
+         />
     </>
   );
 }

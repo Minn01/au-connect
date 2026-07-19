@@ -154,7 +154,7 @@ export async function deletePost(postId: string) {
 
   if (!res.ok) {
     const error = await res.json();
-    throw new Error(error?.error || "Failed to toggle like");
+    throw new Error(error?.error || "Failed to delete post");
   }
 
   return res.json();
@@ -166,16 +166,18 @@ export function useDeletePost() {
     mutationFn: deletePost,
     onSuccess: (_, postId) => {
       // Update the infinite query structure
-      queryClient.setQueryData(["posts"], (oldData: any) => {
+      queryClient.setQueryData<InfiniteData<PostsPage>>(["posts"], (oldData) => {
         if (!oldData?.pages) return oldData;
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page) => ({
             ...page,
-            posts: page.posts.filter((post: any) => post.id !== postId),
+            posts: page.posts.filter((post) => post.id !== postId),
           })),
         };
       });
+      queryClient.removeQueries({ queryKey: ["post", postId] });
+      queryClient.removeQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
       queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     },

@@ -8,6 +8,7 @@ type PostDetailsModalTypes = {
   content: string | undefined;
   clickedIndex: number;
   onClose: () => void;
+  onEdit?: (post: PostType) => void;
 };
 
 export default PostDetailsModalTypes;

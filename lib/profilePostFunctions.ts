@@ -13,6 +13,7 @@ import {
 } from "@/lib/env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "@/lib/constants";
 import type { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
+import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
 
 // Validate Mongo ObjectId
 function isValidObjectId(id: string) {
@@ -74,6 +75,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
     // ✅ Build where clause
     const whereClause: any = {
       userId: normalizedProfileUserId,
+      moderationStatus: "VISIBLE",
     };
 
     // ✅ NEW: postType filters
@@ -129,7 +131,15 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
             deadline: true,
             status: true,
             jobDetails: true,
-            jobRequirements: true,
+            jobSkills: {
+              select: {
+                skill: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
             applyUrl: true,
             allowExternalApply: true,
 
@@ -160,6 +170,10 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
           ? {
             jobPost: {
               ...post.jobPost,
+              jobRequirements: getSkillNamesFromJobSkills(
+                post.jobPost.jobSkills,
+              ),
+              jobSkills: undefined,
               remainingPositions:
                 post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
               hasApplied,

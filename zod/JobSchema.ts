@@ -19,6 +19,7 @@ const JobSchema = z
     salaryCurrency: z.string().optional(),
     deadline: z.string().optional(),
     jobDetails: z.string().optional(),
+    jobSkills: z.array(z.string()).optional(),
     jobRequirements: z.array(z.string()).optional(),
     allowExternalApply: z.boolean(),
     applyUrl: z.string().optional(),

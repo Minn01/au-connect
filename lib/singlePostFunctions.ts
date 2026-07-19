@@ -14,6 +14,7 @@ import {
 } from "./env";
 import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia } from "@/types/PostMedia";
+import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
 
 export async function getSinglePost(
   req: NextRequest,
@@ -76,7 +77,15 @@ export async function getSinglePost(
             salaryCurrency: true,
             deadline: true,
             jobDetails: true,
-            jobRequirements: true,
+            jobSkills: {
+              select: {
+                skill: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
             applyUrl: true,
             allowExternalApply: true,
 
@@ -103,7 +112,7 @@ export async function getSinglePost(
       },
     });
 
-    if (!post) {
+    if (!post || (post.moderationStatus === "REMOVED" && post.userId !== userId)) {
       return NextResponse.json(
         { error: "Internal server error; post(single) is not found!" },
         { status: 404 },
@@ -147,6 +156,8 @@ export async function getSinglePost(
     const jobPostWithStatus = post.jobPost
       ? {
           ...post.jobPost,
+          jobRequirements: getSkillNamesFromJobSkills(post.jobPost.jobSkills),
+          jobSkills: undefined,
 
           positionsFilled: post.jobPost.positionsFilled,
 
@@ -160,6 +171,7 @@ export async function getSinglePost(
 
     return NextResponse.json({
       ...post,
+      removedByModeration: post.moderationStatus === "REMOVED",
       media: mediaWithUrls,
 
       username: post.user.username,

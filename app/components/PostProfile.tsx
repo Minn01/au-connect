@@ -1,14 +1,18 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Ellipsis, Pencil, Trash2 } from "lucide-react";
+import { Ellipsis, Flag, Pencil, Trash2 } from "lucide-react";
 
 import PostType from "@/types/Post";
 import parseDate from "../(main)/profile/utils/parseDate";
 import { buildSlug } from "../(main)/profile/utils/buildSlug";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
+import { postReport } from "@/app/(main)/profile/utils/reportFunctions";
 import PopupModal from "./PopupModal";
+import ReportModal from "./ReportModal";
+import type { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
+import type { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
 
 const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
@@ -41,7 +45,18 @@ export default function PostProfile({
     DEFAULT_PROFILE_PIC,
   );
 
-  // Check if current user owns this post
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const reportTarget: ReportTargetSnapshot = {
+    type: "POST",
+    id: post.id,
+    username: post.username,
+    profilePic: post.profilePic,
+    title: post.title,
+    content: post.content,
+    media: post.media,
+    links: post.links,
+  };
+
   const isOwnPost = currentUserId === post.userId;
 
   // Close dropdown when clicking outside
@@ -60,7 +75,7 @@ export default function PostProfile({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [postMenuDropDownOpen]);
+  }, [postMenuDropDownOpen, setPostMenuDropDownOpen]);
 
   const handleProfileClick = (slug: string) => {
     if (!slug) return;
@@ -75,6 +90,10 @@ export default function PostProfile({
   const handleDelete = () => {
     setPostMenuDropDownOpen(false);
     setPopupOpen(true);
+  };
+
+  const handleReportSubmit = async (payload: ReportSubmitPayload) => {
+    await postReport(payload);
   };
 
   return (
@@ -98,37 +117,53 @@ export default function PostProfile({
         </p>
       </div>
 
-      {/* Only show menu if user owns the post */}
-      {isOwnPost && (
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setPostMenuDropDownOpen(!postMenuDropDownOpen)}
-            className="cursor-pointer p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-          >
-            <Ellipsis className="text-gray-400" />
-          </button>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          type="button"
+          aria-label="More post options"
+          onClick={() => setPostMenuDropDownOpen(!postMenuDropDownOpen)}
+          className="cursor-pointer p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+        >
+          <Ellipsis className="text-gray-400" />
+        </button>
 
-          {/* Dropdown Menu */}
-          {postMenuDropDownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        {/* Dropdown Menu */}
+        {postMenuDropDownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+            {isOwnPost ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleEdit}
+                  className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit post
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete post
+                </button>
+              </>
+            ) : (
               <button
-                onClick={handleEdit}
-                className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 cursor-pointer hover:bg-gra"
+                onClick={() => {
+                  setReportModalOpen(true);
+                }}
               >
-                <Pencil className="w-4 h-4" />
-                Edit post
+                <Flag className="w-4 h-4" />
+                Report post
               </button>
-              <button
-                onClick={handleDelete}
-                className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete post
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
 
       {popupOpen && (
         <PopupModal
@@ -143,6 +178,15 @@ export default function PostProfile({
           }}
         />
       )}
+
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => {
+          setReportModalOpen(false);
+        }}
+        target={reportTarget}
+        onSubmit={handleReportSubmit}
+      />
     </div>
   );
 }

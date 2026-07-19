@@ -1,16 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import PostDetailsModal, {
-  PostDetailsSkeleton,
-} from "@/app/components/PostDetailsModal";
 import { SHARE_POST_API_PATH, POST_DETAIL_PAGE_PATH } from "@/lib/constants";
 import { fetchUser } from "../(main)/profile/utils/fetchfunctions";
 import PostArg from "@/types/PostArg";
 import PostType from "@/types/Post";
+import PostDetailsSkeleton from "./PostDetailsSkeleton";
+import PostDetailsModal from "./PostDetailsModal";
+import CreatePostModal from "./CreatePostModal";
 
 export default function PostPageClient({
   post,
@@ -43,6 +43,21 @@ export default function PostPageClient({
   const showLeftPane =
     (isJobPost && !!post.jobPost) || post.postType === "poll" || hasMedia;
 
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<PostType | null>(null);
+
+  const setEditModalOpenAndCloseRoute: Dispatch<SetStateAction<boolean>> = (
+    value,
+  ) => {
+    const nextOpen = typeof value === "function" ? value(editModalOpen) : value;
+    setEditModalOpen(nextOpen);
+
+    if (!nextOpen) {
+      setEditingPost(null);
+      router.push("/");
+    }
+  };
+
   // Track share when someone visits via shared link
   useEffect(() => {
     if (hasRefShare) {
@@ -74,14 +89,32 @@ export default function PostPageClient({
   const postAsPostType = post as unknown as PostType;
 
   return (
-    <PostDetailsModal
-      currentUserId={user?.id}
-      postInfo={postAsPostType}
-      media={post.media}
-      title={post.title}
-      content={post.content}
-      clickedIndex={initialIndex}
-      onClose={() => router.push("/")}
-    />
+    <>
+      {!editModalOpen && (
+        <PostDetailsModal
+          currentUserId={user.id}
+          postInfo={postAsPostType}
+          media={post.media}
+          title={post.title}
+          content={post.content}
+          clickedIndex={initialIndex}
+          onClose={() => router.push("/")}
+          onEdit={(selectedPost) => {
+            setEditingPost(selectedPost);
+            setEditModalOpen(true);
+          }}
+        />
+      )}
+
+      {editModalOpen && editingPost && (
+        <CreatePostModal
+          user={user}
+          isOpen={editModalOpen}
+          setIsOpen={setEditModalOpenAndCloseRoute}
+          editMode={true}
+          exisistingPost={editingPost}
+        />
+      )}
+    </>
   );
 }

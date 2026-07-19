@@ -80,9 +80,11 @@ export const JOB_POST_API_PATH = (postId: string) =>
 export const CLOSE_JOB_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/job-posts/${postId}/close`;
 export const JOB_API_PATH = BASE_API_PATH + `/jobs`;
+export const TRENDING_JOB_SKILLS_API_PATH =
+  BASE_API_PATH + `/trendingJobSkills`;
 export const REOPEN_JOB_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/job-posts/${postId}/reopen`;
-export const MY_APPLICATIONS_API_PATH =  BASE_API_PATH + `jobApplications/me`;
+export const MY_APPLICATIONS_API_PATH = BASE_API_PATH + `/jobApplications/me`;
 
 export const LIKE_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/posts/${postId}/like`;
@@ -148,6 +150,8 @@ export const DELETE_EDUCATION_API_PATH =
 
 export const MEDIA_UPLOAD_API_PATH = BASE_API_PATH + "/upload-media";
 export const ANNOUNCEMENTS_API_PATH = BASE_API_PATH + "/announcements";
+
+export const REPORT_API_PATH = BASE_API_PATH + `/report`;
 
 // OAuth URLs
 

@@ -23,7 +23,7 @@ export async function GET(
 
     // Verify ownership
     const post = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { id: postId, moderationStatus: "VISIBLE" },
       select: { userId: true },
     });
 
@@ -179,7 +179,7 @@ export async function PATCH(
 
     // Verify ownership
     const post = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { id: postId, moderationStatus: "VISIBLE" },
       select: { userId: true },
     });
 

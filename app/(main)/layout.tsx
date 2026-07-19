@@ -1,3 +1,5 @@
+import ModerationNoticeModal from "./ModerationNoticeModal";
+
 export default function MainLayout({
   children,
   modal,
@@ -9,6 +11,7 @@ export default function MainLayout({
     <>
       {children}
       {modal}
+      <ModerationNoticeModal />
     </>
   );
 }

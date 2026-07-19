@@ -25,6 +25,7 @@ const LinkEmbedSchema = z.object({
   siteName: optionalString,
   favicon: optionalUrl,
   jobDetails: optionalString,
+  jobSkills: z.array(z.string()).optional(),
   jobRequirements: z.array(z.string()).optional(),
 });
 
