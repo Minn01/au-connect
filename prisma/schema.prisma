@@ -414,6 +414,37 @@ enum ApplicationStatus {
   REJECTED
 }
 
+enum AnnouncementStatus {
+  ACTIVE
+  SCHEDULED
+  EXPIRED
+}
+
+model Announcement {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title       String
+  description String
+
+  startDate DateTime
+  endDate   DateTime?
+
+  thumbnailBlobName    String
+  contentImageBlobName String?
+
+  status AnnouncementStatus @default(ACTIVE)
+
+  createdByAdminId String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([createdByAdminId])
+}
+
 model JobApplication {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 

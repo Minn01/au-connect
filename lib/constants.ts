@@ -147,6 +147,7 @@ export const DELETE_EDUCATION_API_PATH =
   ME_API_PATH + "/delete/educationFields";
 
 export const MEDIA_UPLOAD_API_PATH = BASE_API_PATH + "/upload-media";
+export const ANNOUNCEMENTS_API_PATH = BASE_API_PATH + "/announcements";
 
 // OAuth URLs
 
@@ -181,6 +182,7 @@ export const SAS_TOKEN_EXPIRE_DURATION = 10 * 60 * 1000; // 10 min
 // number of posts displayed before needing a refresh/another fetch
 export const POST_REFRESH_LIMIT = 10;
 export const POSTS_PER_FETCH = 10;
+export const ANNOUNCEMENTS_PER_FETCH = 5;
 export const TOP_LEVEL_COMMENTS_FETCH_LIMIT = 15;
 export const REPLIES_PER_FETCH = 5;
 export const REPLY_CHARACTER_LIMIT = 5000;
