@@ -308,6 +308,9 @@ export async function sendMessage(req: NextRequest, conversationId: string) {
     const authUserId = getAuthUserIdFromReq(req);
     if (!conversationId) return jsonError("conversationId required", 400);
 
+    const verificationError = await requireAccountVerification(authUserId);
+    if (verificationError) return verificationError;
+
     const conv = await prisma.conversation.findUnique({
       where: { id: conversationId },
       select: { userAId: true, userBId: true },

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { normalizePair } from "@/lib/connect";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
 import { createNotification } from "@/lib/server/notifications.server";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 
 export async function POST(
@@ -12,6 +13,9 @@ export async function POST(
   const { id: requestId } = await params;
 
   const authUserId = getAuthUserIdFromReq(req);
+
+  const verificationError = await requireAccountVerification(authUserId);
+  if (verificationError) return verificationError;
 
   const row = await prisma.connectionRequest.findUnique({
     where: { id: requestId },
