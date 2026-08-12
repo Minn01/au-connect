@@ -1,0 +1,62 @@
+name: CI
+
+# Runs on every PR into dev/main and on every push to dev.
+# Latest team code lives in dev, so this is where we catch breakage
+# (lint errors, failing `next build`, missing exports) before it reaches main.
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Build-time placeholders only. The app never connects to these during
+    # `next build`; they just satisfy code that reads env at build time.
+    # These mirror the placeholders baked into the Dockerfile.
+    env:
+      DATABASE_URL: mongodb://placeholder
+      GOOGLE_CLIENT_ID: placeholder
+      GOOGLE_CLIENT_SECRET: placeholder
+      LINKEDIN_CLIENT_ID: placeholder
+      LINKEDIN_CLIENT_SECRET: placeholder
+      MICROSOFT_CLIENT_ID: placeholder
+      MICROSOFT_CLIENT_SECRET: placeholder
+      AZURE_STORAGE_ACCOUNT_KEY: placeholder
+      AZURE_STORAGE_ACCOUNT_NAME: placeholder
+      AZURE_STORAGE_CONNECTION_STRING: placeholder
+      AZURE_STORAGE_CONTAINER_NAME: placeholder
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      JWT_SECRET: placeholder
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Non-blocking for now: the codebase has ~93 existing lint errors
+      # (mostly `no-explicit-any`). This reports them without failing CI.
+      # Remove `continue-on-error` once that debt is paid down to enforce it.
+      - name: Lint
+        run: pnpm lint
+        continue-on-error: true
+
+      # `pnpm build` runs `prisma generate && next build`, so this validates
+      # the exact production build that the Docker image will later produce.
+      - name: Build
+        run: pnpm build
