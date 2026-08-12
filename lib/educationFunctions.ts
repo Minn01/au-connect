@@ -5,36 +5,61 @@ import { getHeaderUserInfo } from "./authFunctions";
 /* =========================
    VALIDATION
 ========================= */
-// TODO: body needs type
-function validateEducation(body: any) {
-  const {
-    school,
-    startMonth,
-    startYear,
-    endMonth,
-    endYear,
-  } = body;
+type EducationData = {
+  school: string;
+  degree: string;
+  fieldOfStudy: string;
+  startMonth: number;
+  startYear: number;
+  endMonth: number;
+  endYear: number;
+};
+
+function validateEducation(
+  body: Record<string, unknown>
+): { error: string } | { data: EducationData } {
+  const school = typeof body.school === "string" ? body.school : "";
+  const degree = typeof body.degree === "string" ? body.degree : "";
+  const fieldOfStudy =
+    typeof body.fieldOfStudy === "string" ? body.fieldOfStudy : "";
+
+  // Coerce to numbers so string inputs (e.g. "5") don't break the math or
+  // the Int columns. Number(null) is NaN, so this also catches null/undefined.
+  const startMonth = Number(body.startMonth);
+  const startYear = Number(body.startYear);
+  const endMonth = Number(body.endMonth);
+  const endYear = Number(body.endYear);
 
   if (!school) {
-    return "School is required";
+    return { error: "School is required" };
   }
 
-  if (startMonth === undefined || startYear === undefined) {
-    return "Start date is required";
+  if (Number.isNaN(startMonth) || Number.isNaN(startYear)) {
+    return { error: "Start date is required" };
   }
 
-  if (endMonth === undefined || endYear === undefined) {
-    return "End date is required";
+  if (Number.isNaN(endMonth) || Number.isNaN(endYear)) {
+    return { error: "End date is required" };
   }
 
   const startValue = startYear * 12 + startMonth;
   const endValue = endYear * 12 + endMonth;
 
   if (endValue <= startValue) {
-    return "End date must be later than start date";
+    return { error: "End date must be later than start date" };
   }
 
-  return null;
+  return {
+    data: {
+      school,
+      degree,
+      fieldOfStudy,
+      startMonth,
+      startYear,
+      endMonth,
+      endYear,
+    },
+  };
 }
 
 /* =========================
@@ -84,21 +109,15 @@ export async function addEducation(req: NextRequest) {
     }
 
     const body = await req.json();
-    const error = validateEducation(body);
+    const result = validateEducation(body);
 
-    if (error) {
-      return NextResponse.json({ error }, { status: 400 });
+    if ("error" in result) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     const edu = await prisma.education.create({
       data: {
-        school: body.school,
-        degree: body.degree || "",
-        fieldOfStudy: body.fieldOfStudy || "",
-        startMonth: body.startMonth,
-        startYear: body.startYear,
-        endMonth: body.endMonth,
-        endYear: body.endYear,
+        ...result.data,
         userId,
       },
     });
@@ -131,10 +150,10 @@ export async function updateEducation(
     }
 
     const body = await req.json();
-    const error = validateEducation(body);
+    const result = validateEducation(body);
 
-    if (error) {
-      return NextResponse.json({ error }, { status: 400 });
+    if ("error" in result) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     const existing = await prisma.education.findFirst({
@@ -150,15 +169,7 @@ export async function updateEducation(
 
     const updated = await prisma.education.update({
       where: { id: eduId },
-      data: {
-        school: body.school,
-        degree: body.degree || "",
-        fieldOfStudy: body.fieldOfStudy || "",
-        startMonth: body.startMonth,
-        startYear: body.startYear,
-        endMonth: body.endMonth,
-        endYear: body.endYear,
-      },
+      data: result.data,
     });
 
     return NextResponse.json(updated, { status: 200 });
