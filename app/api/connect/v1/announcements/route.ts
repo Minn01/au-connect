@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAnnouncementStatus } from "@/lib/announcementHelpers";
+import {
+  getAnnouncementStatus,
+  getStartOfDay,
+  getStartOfNextDay,
+} from "@/lib/announcementHelpers";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
 import { ANNOUNCEMENTS_PER_FETCH } from "@/lib/constants";
 import prisma from "@/lib/prisma";
@@ -17,6 +21,8 @@ export async function GET(req: NextRequest) {
     }
 
     const now = new Date();
+    const todayStart = getStartOfDay(now);
+    const tomorrowStart = getStartOfNextDay(now);
     const cursor = req.nextUrl.searchParams.get("cursor");
 
     const announcements = await prisma.announcement.findMany({
@@ -26,8 +32,8 @@ export async function GET(req: NextRequest) {
         cursor: { id: cursor },
       }),
       where: {
-        startDate: { lte: now },
-        OR: [{ endDate: null }, { endDate: { gte: now } }],
+        startDate: { lt: tomorrowStart },
+        OR: [{ endDate: null }, { endDate: { gte: todayStart } }],
       },
       orderBy: { startDate: "desc" },
       select: {
