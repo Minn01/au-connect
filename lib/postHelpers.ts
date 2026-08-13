@@ -19,8 +19,17 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
     where: { id: postId },
     include: {
       user: true,
+      community: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          profilePic: true,
+        },
+      },
       interactions: {
         where: {
+          actorType: "USER",
           userId: currentUserId,
           type: "SAVED",
         },
@@ -97,8 +106,14 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
     pollVotes: post.pollVotes as Record<string, string[]> | undefined,
     pollOptions: post.pollOptions ?? null,
     pollEndsAt: post.pollEndsAt ?? undefined,
-    username: post.user.username,
-    profilePic: post.user.profilePic,
+    username:
+      post.actorType === "COMMUNITY"
+        ? (post.community?.name ?? post.username)
+        : post.user.username,
+    profilePic:
+      post.actorType === "COMMUNITY"
+        ? post.community?.profilePic || "/default_profile.jpg"
+        : post.user.profilePic,
     isSaved: post.interactions.length > 0,
     jobPost: post.jobPost
       ? {

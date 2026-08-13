@@ -51,10 +51,6 @@ export default function AnnouncementsSection() {
     }
   }
 
-  if (!isLoading && announcements.length === 0) {
-    return null;
-  }
-
   return (
     <>
       <section className="mt-4">
@@ -78,7 +74,7 @@ export default function AnnouncementsSection() {
               <AnnouncementSkeleton />
               <AnnouncementSkeleton />
             </>
-          ) : (
+          ) : announcements.length > 0 ? (
             announcements.map((announcement) => (
               <AnnouncementCard
                 key={announcement.id}
@@ -86,6 +82,15 @@ export default function AnnouncementsSection() {
                 onPreview={setPreviewingAnnouncement}
               />
             ))
+          ) : (
+            <div className="bg-white border border-neutral-200 rounded-xl p-5 text-center shadow-sm">
+              <p className="text-sm font-medium text-neutral-800">
+                No announcements for now
+              </p>
+              <p className="mt-1 text-xs text-neutral-500">
+                Check back later for new updates.
+              </p>
+            </div>
           )}
 
           {isFetchingNextPage && <AnnouncementSkeleton />}

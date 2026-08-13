@@ -12,6 +12,9 @@ import {
   MessageCircleMore,
   LogOut,
   BriefcaseBusiness,
+  ChevronDown,
+  Check,
+  UsersRound,
 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +29,8 @@ import {
   MESSAGES_PAGE_PATH,
   PROFILE_PAGE_PATH,
   JOBS_PAGE_PATH,
+  MY_MANAGED_COMMUNITIES_API_PATH,
+  COMMUNITY_PAGE_PATH,
 } from "@/lib/constants";
 import {
   fetchUser,
@@ -37,13 +42,24 @@ import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
 import PopupModal from "./PopupModal";
 import { fetchUnreadCount } from "@/lib/client/notifications.client";
 import { fetchUnreadMessagesCount } from "@/lib/headerMessaging";
+import { useActorStore } from "@/lib/stores/actorStore";
 
-const Skeleton = ({ className = "" }) => (
-  <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
-);
+type SearchUser = {
+  id: string;
+  username: string;
+  slug?: string;
+  title?: string | null;
+  profilePic?: string | null;
+};
 
 // Search result item
-const SearchResultItem = ({ user, onClick }: any) => {
+const SearchResultItem = ({
+  user,
+  onClick,
+}: {
+  user: SearchUser;
+  onClick: () => void;
+}) => {
   const resolvedProfilePic = useResolvedMediaUrl(
     user.profilePic,
     "/default_profile.jpg",
@@ -69,11 +85,43 @@ const SearchResultItem = ({ user, onClick }: any) => {
   );
 };
 
+type ManagedCommunity = {
+  id: string;
+  name: string;
+  slug: string;
+  profilePic: string | null;
+  coverPhoto: string | null;
+  status: "ACTIVE" | "ARCHIVED";
+};
+
+const ActorAvatar = ({
+  src,
+  alt,
+  className = "",
+}: {
+  src: string | null | undefined;
+  alt: string;
+  className?: string;
+}) => {
+  const resolvedSrc = useResolvedMediaUrl(src, "/default_profile.jpg");
+
+  return (
+    <Image
+      src={resolvedSrc}
+      alt={alt}
+      width={38}
+      height={38}
+      className={`rounded-full object-cover ${className}`}
+    />
+  );
+};
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [query, setQuery] = useState("");
   const [openResults, setOpenResults] = useState(false);
+  const [actorMenuOpen, setActorMenuOpen] = useState(false);
 
   const pathnameRaw = usePathname();
   const pathname = pathnameRaw ?? "";
@@ -84,6 +132,21 @@ export default function Header() {
     queryFn: fetchUser,
   });
 
+  const selectedActor = useActorStore((s) => s.selectedActor);
+  const selectUserActor = useActorStore((s) => s.useUserActor);
+  const selectCommunityActor = useActorStore((s) => s.useCommunityActor);
+
+  const { data: managedCommunities = [] } = useQuery<ManagedCommunity[]>({
+    queryKey: ["managed-communities"],
+    queryFn: async () => {
+      const res = await fetch(MY_MANAGED_COMMUNITIES_API_PATH);
+      if (!res.ok) return [];
+      const json = await res.json();
+      return Array.isArray(json.communities) ? json.communities : [];
+    },
+    enabled: !!user,
+  });
+
   const { data: msgUnreadData } = useQuery({
     queryKey: ["messages-unread-count"],
     queryFn: fetchUnreadMessagesCount,
@@ -91,7 +154,7 @@ export default function Header() {
   });
   const msgUnreadCount = msgUnreadData?.count ?? 0;
 
-  const { data: searchResults = [], isFetching } = useQuery({
+  const { data: searchResults = [], isFetching } = useQuery<SearchUser[]>({
     queryKey: ["search-users", query],
     queryFn: async () => {
       const res = await fetch(
@@ -105,22 +168,29 @@ export default function Header() {
 
   // 🔔 unread notifications
   const { data: unreadData, refetch: refetchUnread } = useQuery({
-    queryKey: ["notifications-unread-count"],
+    queryKey: ["notifications-unread-count", selectedActor],
     queryFn: fetchUnreadCount,
     refetchInterval: 60_000,
   });
 
   const unreadCount = unreadData?.count ?? 0;
 
-  const resolvedProfilePicUrl = useResolvedMediaUrl(
-    user?.profilePic,
-    "/default_profile.jpg",
-  );
+  const activeCommunity =
+    selectedActor.type === "COMMUNITY"
+      ? managedCommunities.find(
+          (community) => community.id === selectedActor.communityId,
+        )
+      : null;
+  const activeActorName = activeCommunity?.name ?? user?.username ?? "Profile";
+  const activeActorPic = activeCommunity
+    ? activeCommunity.profilePic || "/default_profile.jpg"
+    : user?.profilePic;
 
   const navBarIndicatedPages = [
     MAIN_PAGE_PATH,
     CONNECT_PAGE_PATH,
     JOBS_PAGE_PATH,
+    COMMUNITY_PAGE_PATH,
     MESSAGES_PAGE_PATH,
     NOTIFICATION_PAGE_PATH,
     PROFILE_PAGE_PATH,
@@ -129,6 +199,80 @@ export default function Header() {
   const currentPage = navBarIndicatedPages.includes(pathname)
     ? pathname
     : "not-valid-path";
+
+  const desktopNavItems = [
+    { href: MAIN_PAGE_PATH, icon: <Home />, label: "Home" },
+    {
+      href: CONNECT_PAGE_PATH,
+      icon: <UserPlus />,
+      label: "Connect",
+      hideInCommunityMode: true,
+    },
+    {
+      href: JOBS_PAGE_PATH,
+      icon: <BriefcaseBusiness />,
+      label: "Jobs",
+      hideInCommunityMode: true,
+    },
+    {
+      href: COMMUNITY_PAGE_PATH,
+      icon: <UsersRound />,
+      label: "Community",
+    },
+    {
+      href: MESSAGES_PAGE_PATH,
+      label: "Messaging",
+      icon: (
+        <div className="relative">
+          <MessageCircleMore />
+          {msgUnreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+              {msgUnreadCount > 9 ? "9+" : msgUnreadCount}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      href: NOTIFICATION_PAGE_PATH,
+      label: "Notification",
+      icon: (
+        <div className="relative">
+          <Bell />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </div>
+      ),
+    },
+  ].filter((item) => !(activeCommunity && item.hideInCommunityMode));
+
+  const mobileNavItems = [
+    { href: MAIN_PAGE_PATH, icon: <Home className="w-5 h-5" />, label: "Home" },
+    {
+      href: CONNECT_PAGE_PATH,
+      icon: <UserPlus className="w-5 h-5" />,
+      label: "Connect",
+      hideInCommunityMode: true,
+    },
+    {
+      href: MESSAGES_PAGE_PATH,
+      icon: <MessageCircleMore className="w-5 h-5" />,
+      label: "Messaging",
+    },
+    {
+      href: COMMUNITY_PAGE_PATH,
+      icon: <UsersRound className="w-5 h-5" />,
+      label: "Community",
+    },
+    {
+      href: NOTIFICATION_PAGE_PATH,
+      icon: <Bell className="w-5 h-5" />,
+      label: "Notifications",
+    },
+  ].filter((item) => !(activeCommunity && item.hideInCommunityMode));
 
   const hidden =
     [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH].includes(pathname) ||
@@ -184,7 +328,7 @@ export default function Header() {
                       Searching...
                     </div>
                   ) : searchResults.length > 0 ? (
-                    searchResults.map((u: any) => {
+                    searchResults.map((u) => {
                       const userSlug = u.slug || buildSlug(u.username, u.id);
 
                       return (
@@ -209,43 +353,7 @@ export default function Header() {
 
           {/* NAV */}
           <nav className="hidden md:flex items-center gap-6">
-            {[
-              { href: MAIN_PAGE_PATH, icon: <Home />, label: "Home" },
-              { href: CONNECT_PAGE_PATH, icon: <UserPlus />, label: "Connect" },
-              {
-                href: JOBS_PAGE_PATH,
-                icon: <BriefcaseBusiness />,
-                label: "Jobs",
-              },
-              {
-                href: MESSAGES_PAGE_PATH,
-                label: "Messaging",
-                icon: (
-                  <div className="relative">
-                    <MessageCircleMore />
-                    {msgUnreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                        {msgUnreadCount > 9 ? "9+" : msgUnreadCount}
-                      </span>
-                    )}
-                  </div>
-                ),
-              },
-              {
-                href: NOTIFICATION_PAGE_PATH,
-                label: "Notification",
-                icon: (
-                  <div className="relative">
-                    <Bell />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                  </div>
-                ),
-              },
-            ].map((item, i) => (
+            {desktopNavItems.map((item, i) => (
               <Link
                 key={i}
                 href={item.href}
@@ -266,20 +374,102 @@ export default function Header() {
 
             {/* PROFILE + LOGOUT */}
             <div className="flex items-center gap-2">
-              <button
-                onClick={() =>
-                  user?.slug && router.push(`/profile/${user.slug}`)
-                }
-                disabled={userLoading}
-              >
-                <Image
-                  src={resolvedProfilePicUrl}
-                  alt="avatar"
-                  width={38}
-                  height={38}
-                  className="rounded-full border-red-400 border-2 shadow-lg hover:transition-transform hover:scale-105 active:opacity-80 cursor-pointer"
-                />
-              </button>
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => {
+                    if (activeCommunity) {
+                      router.push(`/community/${activeCommunity.slug}`);
+                    } else if (user?.slug) {
+                      router.push(`/profile/${user.slug}`);
+                    }
+                  }}
+                  disabled={userLoading}
+                  className="rounded-full"
+                  title={activeActorName}
+                >
+                  <ActorAvatar
+                    src={activeActorPic}
+                    alt={activeActorName}
+                    className="border-red-400 border-2 shadow-lg hover:transition-transform hover:scale-105 active:opacity-80 cursor-pointer"
+                  />
+                </button>
+
+                {managedCommunities.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setActorMenuOpen((open) => !open)}
+                    className="ml-1 rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                    title="Switch profile"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                )}
+
+                {actorMenuOpen && managedCommunities.length > 0 && (
+                  <div className="absolute right-0 top-full mt-3 w-72 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl z-50">
+                    <div className="border-b border-gray-100 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        Use as
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        selectUserActor();
+                        setActorMenuOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
+                    >
+                      <ActorAvatar
+                        src={user?.profilePic}
+                        alt={user?.username ?? "Profile"}
+                        className="h-9 w-9"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-gray-900">
+                          {user?.username ?? "My profile"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Personal profile
+                        </p>
+                      </div>
+                      {!activeCommunity && (
+                        <Check className="h-4 w-4 text-red-500" />
+                      )}
+                    </button>
+
+                    {managedCommunities.map((community) => (
+                      <button
+                        key={community.id}
+                        type="button"
+                        onClick={() => {
+                          selectCommunityActor(community.id);
+                          setActorMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
+                      >
+                        <ActorAvatar
+                          src={community.profilePic}
+                          alt={community.name}
+                          className="h-9 w-9"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-gray-900">
+                            {community.name}
+                          </p>
+                          <p className="truncate text-xs text-gray-500">
+                            Community page
+                          </p>
+                        </div>
+                        {activeCommunity?.id === community.id && (
+                          <Check className="h-4 w-4 text-red-500" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <button
                 title="Logout"
@@ -327,7 +517,7 @@ export default function Header() {
                       Searching...
                     </div>
                   ) : searchResults.length > 0 ? (
-                    searchResults.map((u: any) => {
+                    searchResults.map((u) => {
                       const userSlug = u.slug || buildSlug(u.username, u.id);
                       return (
                         <SearchResultItem
@@ -355,28 +545,7 @@ export default function Header() {
         {mobileMenuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
             <div className="flex flex-col gap-3">
-              {[
-                {
-                  href: MAIN_PAGE_PATH,
-                  icon: <Home className="w-5 h-5" />,
-                  label: "Home",
-                },
-                {
-                  href: CONNECT_PAGE_PATH,
-                  icon: <UserPlus className="w-5 h-5" />,
-                  label: "Connect",
-                },
-                {
-                  href: MESSAGES_PAGE_PATH,
-                  icon: <MessageCircleMore className="w-5 h-5" />,
-                  label: "Messaging",
-                },
-                {
-                  href: NOTIFICATION_PAGE_PATH,
-                  icon: <Bell className="w-5 h-5" />,
-                  label: "Notifications",
-                },
-              ].map((item, i) => (
+              {mobileNavItems.map((item, i) => (
                 <Link
                   key={i}
                   href={item.href}
@@ -405,6 +574,55 @@ export default function Header() {
                 <LogOut className="w-5 h-5" />
                 <span className="font-medium">Logout</span>
               </button>
+
+              {managedCommunities.length > 0 && (
+                <div className="mt-2 border-t border-gray-200 pt-3">
+                  <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Use as
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      selectUserActor();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50"
+                  >
+                    <ActorAvatar
+                      src={user?.profilePic}
+                      alt={user?.username ?? "Profile"}
+                      className="h-8 w-8"
+                    />
+                    <span className="font-medium">
+                      {user?.username ?? "My profile"}
+                    </span>
+                    {!activeCommunity && (
+                      <Check className="ml-auto h-4 w-4 text-red-500" />
+                    )}
+                  </button>
+                  {managedCommunities.map((community) => (
+                    <button
+                      key={community.id}
+                      type="button"
+                      onClick={() => {
+                        selectCommunityActor(community.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <ActorAvatar
+                        src={community.profilePic}
+                        alt={community.name}
+                        className="h-8 w-8"
+                      />
+                      <span className="font-medium">{community.name}</span>
+                      {activeCommunity?.id === community.id && (
+                        <Check className="ml-auto h-4 w-4 text-red-500" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </nav>
         )}

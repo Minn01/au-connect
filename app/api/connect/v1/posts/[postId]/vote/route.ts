@@ -36,6 +36,8 @@ export async function POST(
       where: { id: postId, moderationStatus: "VISIBLE" },
       select: {
         userId: true,
+        actorType: true,
+        communityId: true,
         pollOptions: true,
         pollVotes: true,
         pollEndsAt: true,
@@ -80,10 +82,18 @@ export async function POST(
     // ===============================
     // CREATE NOTIFICATION
     // ===============================
-    if (post.userId !== userId) {
+    const recipientActorType =
+      post.actorType === "COMMUNITY" && post.communityId
+        ? "COMMUNITY"
+        : "USER";
+
+    if (!(recipientActorType === "USER" && post.userId === userId)) {
       await createNotification({
         userId: post.userId,     // post owner
         fromUserId: userId,      // who voted
+        recipientActorType,
+        recipientCommunityId:
+          recipientActorType === "COMMUNITY" ? post.communityId : null,
         type: "POST_VOTED",
         entityId: postId,
       });

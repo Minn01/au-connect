@@ -86,6 +86,7 @@ export async function getProfileJobPosts(
     // ✅ Base filters
     const whereAND: any[] = [
       { moderationStatus: "VISIBLE" },
+      { actorType: "USER" },
       { jobPost: { isNot: null } },
       { postType: "job_post" }, // keep if your app really uses this exact string
     ];
@@ -96,7 +97,9 @@ export async function getProfileJobPosts(
 
     if (jobTab === "saved") {
       whereAND.push({
-        interactions: { some: { userId: viewerUserId, type: "SAVED" } },
+        interactions: {
+          some: { actorType: "USER", userId: viewerUserId, type: "SAVED" },
+        },
       });
     }
 
@@ -118,7 +121,11 @@ export async function getProfileJobPosts(
       include: {
         _count: { select: { comments: true } },
         interactions: {
-          where: { userId: viewerUserId, type: { in: ["LIKE", "SAVED"] } },
+          where: {
+            actorType: "USER",
+            userId: viewerUserId,
+            type: { in: ["LIKE", "SAVED"] },
+          },
           select: { type: true },
         },
         jobPost: {

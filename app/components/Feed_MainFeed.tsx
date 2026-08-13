@@ -15,6 +15,7 @@ import LeftProfile from "./Feed_LeftProfile";
 export default function MainFeed({
   user,
   userLoading,
+  community,
   posts,
   loading,
   fetchNextPage,
@@ -58,7 +59,11 @@ export default function MainFeed({
     return (
       <>
         <div className="w-full md:hidden block">
-          <LeftProfile user={user} loading={userLoading} />
+          <LeftProfile
+            user={user}
+            loading={userLoading}
+            community={community}
+          />
         </div>
         <div className="bg-white md:rounded-lg border border-gray-200 p-4 pt-7 mb-4">
           <div className="flex items-center gap-3 mb-3">

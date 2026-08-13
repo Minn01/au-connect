@@ -42,10 +42,12 @@ model User {
   accountVerificationStatus AccountVerificationStatus @default(UNSUBMITTED)
   accountVerificationRole   AccountVerificationRole?
 
-  experience Experience[]
-  education  Education[]
-  posts      Post[]
+  experience           Experience[]
+  education            Education[]
+  posts                Post[]
   verificationRequests AccountVerificationRequest[]
+  communityManagements CommunityManager[]
+  communityFollows     CommunityFollow[]
 
   // For Connection
   sentConnectionRequests     ConnectionRequest[] @relation("SentConnectionRequests")
@@ -100,10 +102,10 @@ model AccountVerificationRequest {
   documents    Json
   note         String?
 
-  status       AccountVerificationStatus @default(PENDING)
-  reviewedBy   String?
-  reviewNote   String?
-  reviewedAt   DateTime?
+  status     AccountVerificationStatus @default(PENDING)
+  reviewedBy String?
+  reviewNote String?
+  reviewedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,7 +119,7 @@ model AccountVerificationRequest {
 model AccountVerificationHistory {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  requestId String @db.ObjectId
+  requestId String                     @db.ObjectId
   request   AccountVerificationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   action AccountVerificationStatus
@@ -134,6 +136,80 @@ enum EmploymentType {
   PART_TIME
   FREELANCE
   INTERNSHIP
+}
+
+enum ActorType {
+  USER
+  COMMUNITY
+}
+
+enum CommunityStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Community {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  slug String @unique
+
+  about    String?
+  location String?
+
+  profilePic         String?
+  profilePicOriginal String?
+  profilePicCrop     Json?
+
+  coverPhoto         String?
+  coverPhotoOriginal String?
+  coverPhotoCrop     Json?
+
+  status CommunityStatus @default(ACTIVE)
+
+  createdByAdminId String? @db.ObjectId
+
+  managers  CommunityManager[]
+  followers CommunityFollow[]
+  posts     Post[]
+  comments  Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postInteractions            PostInteraction[]
+  notificationsReceivedAsPage Notification[]    @relation("NotificationRecipientCommunity")
+  notificationsSentAsPage     Notification[]    @relation("NotificationFromCommunity")
+}
+
+model CommunityManager {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  communityId String    @db.ObjectId
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([communityId, userId])
+  @@index([userId])
+}
+
+model CommunityFollow {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  communityId String    @db.ObjectId
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([communityId, userId])
+  @@index([userId])
 }
 
 model Experience {
@@ -179,6 +255,11 @@ model Post {
   userId     String  @db.ObjectId
   username   String
   profilePic String?
+
+  actorType ActorType @default(USER)
+
+  communityId String?    @db.ObjectId
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
   postType   String
   visibility String?
@@ -227,6 +308,11 @@ model Comment {
   userId     String @db.ObjectId
   username   String
   profilePic String
+
+  actorType ActorType @default(USER)
+
+  communityId String?    @db.ObjectId
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
   // comment fields
   content String
@@ -292,12 +378,18 @@ model PostInteraction {
   userId String @db.ObjectId
   postId String @db.ObjectId
 
+  actorType ActorType @default(USER)
+
+  communityId String?    @db.ObjectId
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
   type      PostInteractionType
   createdAt DateTime            @default(now())
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, postId, type])
+  @@index([actorType, userId, postId, type])
+  @@index([actorType, communityId, postId, type])
   @@index([postId, type])
 }
 
@@ -323,14 +415,25 @@ model Notification {
   userId     String @db.ObjectId
   fromUserId String @db.ObjectId
 
+  recipientActorType   ActorType @default(USER)
+  recipientCommunityId String?   @db.ObjectId
+
+  fromActorType   ActorType @default(USER)
+  fromCommunityId String?   @db.ObjectId
+
   type     NotificationType
   entityId String?
   isRead   Boolean          @default(false)
 
   createdAt DateTime @default(now())
 
-  user     User @relation("NotificationUser", fields: [userId], references: [id])
-  fromUser User @relation("NotificationFromUser", fields: [fromUserId], references: [id])
+  user               User       @relation("NotificationUser", fields: [userId], references: [id])
+  fromUser           User       @relation("NotificationFromUser", fields: [fromUserId], references: [id])
+  recipientCommunity Community? @relation("NotificationRecipientCommunity", fields: [recipientCommunityId], references: [id], onDelete: SetNull)
+  fromCommunity      Community? @relation("NotificationFromCommunity", fields: [fromCommunityId], references: [id], onDelete: SetNull)
+
+  @@index([recipientActorType, userId, isRead])
+  @@index([recipientActorType, recipientCommunityId, isRead])
 }
 
 model Conversation {

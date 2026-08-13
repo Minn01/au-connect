@@ -75,6 +75,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
     // ✅ Build where clause
     const whereClause: any = {
       userId: normalizedProfileUserId,
+      actorType: "USER",
       moderationStatus: "VISIBLE",
     };
 
@@ -109,6 +110,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
         // ✅ include LIKE + SAVED so UI can show correct state
         interactions: {
           where: {
+            actorType: "USER",
             userId: viewerUserId,
             type: { in: ["LIKE", "SAVED"] },
           },

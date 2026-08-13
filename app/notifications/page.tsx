@@ -14,6 +14,7 @@ import { timeAgo } from "@/lib/timeAgo";
 import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 import { SINGLE_POST_API_PATH } from "@/lib/constants";
+import { useActorStore } from "@/lib/stores/actorStore";
 
 type NotificationType =
   | "CONNECTION_REQUEST"
@@ -36,6 +37,13 @@ type Notification = {
     username: string;
     profilePic?: string;
   };
+  fromActorType?: "USER" | "COMMUNITY";
+  fromCommunity?: {
+    id: string;
+    name: string;
+    slug: string;
+    profilePic?: string;
+  } | null;
 };
 
 const notificationMessages: Record<NotificationType, string> = {
@@ -74,9 +82,11 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [navigationError, setNavigationError] = useState<string | null>(null);
   const router = useRouter();
+  const selectedActor = useActorStore((state) => state.selectedActor);
 
   useEffect(() => {
     async function load() {
+      setLoading(true);
       try {
         const data = await fetchNotifications();
         setNotifications(data);
@@ -88,7 +98,7 @@ export default function NotificationsPage() {
     }
 
     load();
-  }, []);
+  }, [selectedActor]);
 
   useEffect(() => {
     if (!navigationError) return;
@@ -227,6 +237,15 @@ export default function NotificationsPage() {
           <div className="space-y-4">
             {notifications.map((notification) => {
               const fromUser = notification.fromUser;
+              const fromCommunity = notification.fromCommunity;
+              const senderName =
+                notification.fromActorType === "COMMUNITY" && fromCommunity
+                  ? fromCommunity.name
+                  : fromUser?.username || "Someone";
+              const senderPic =
+                notification.fromActorType === "COMMUNITY" && fromCommunity
+                  ? fromCommunity.profilePic
+                  : fromUser?.profilePic;
 
               return (
                 <div
@@ -251,10 +270,10 @@ export default function NotificationsPage() {
                               ? "ring-neutral-200 group-hover:ring-blue-400"
                               : "ring-blue-300 group-hover:ring-blue-500"
                           }`}
-                      >
+                        >
                         <NotificationAvatar
-                          profilePic={fromUser?.profilePic}
-                          username={fromUser?.username}
+                          profilePic={senderPic}
+                          username={senderName}
                         />
                       </div>
 
@@ -267,7 +286,7 @@ export default function NotificationsPage() {
                     <div className="flex-1 min-w-0 space-y-1">
                       <p className="text-sm font-semibold text-neutral-900">
                         <span className="font-bold">
-                          {fromUser?.username || "Someone"}
+                          {senderName}
                         </span>{" "}
                         {notificationMessages[notification.type]}
                       </p>

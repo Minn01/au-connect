@@ -30,6 +30,7 @@ import ApplyJobModal from "./ApplyJobModal";
 import { useApplyJob } from "../(main)/profile/utils/jobPostFetchFunctions";
 import VerificationRequiredModal from "./VerificationRequiredModal";
 import { VerificationRequiredError } from "@/lib/verificationError";
+import { useActorStore } from "@/lib/stores/actorStore";
 
 export default function Post({
   user,
@@ -43,6 +44,7 @@ export default function Post({
   skeletonVariant?: "default" | "job";
 }) {
   const router = useRouter();
+  const selectedActor = useActorStore((state) => state.selectedActor);
   const openPostModal = (postId: string, index: number) => {
     router.push(POST_DETAIL_PAGE_PATH(postId, index));
   };
@@ -170,7 +172,15 @@ export default function Post({
             commentCount={numOfCommentsContent(post)}
             onLikeClicked={() => {
               toggleLike.mutate(
-                { postId: post.id, isLiked: post.isLiked ?? false },
+                {
+                  postId: post.id,
+                  isLiked: post.isLiked ?? false,
+                  actorType: selectedActor.type,
+                  communityId:
+                    selectedActor.type === "COMMUNITY"
+                      ? selectedActor.communityId
+                      : null,
+                },
                 { onError: (err) => { if (err instanceof VerificationRequiredError) requireVerification("like posts"); } },
               );
             }}
@@ -257,7 +267,15 @@ export default function Post({
           commentCount={numOfCommentsContent(post)}
           onLikeClicked={() => {
             toggleLike.mutate(
-              { postId: post.id, isLiked: post.isLiked ?? false },
+              {
+                postId: post.id,
+                isLiked: post.isLiked ?? false,
+                actorType: selectedActor.type,
+                communityId:
+                  selectedActor.type === "COMMUNITY"
+                    ? selectedActor.communityId
+                    : null,
+              },
               { onError: (err) => { if (err instanceof VerificationRequiredError) requireVerification("like posts"); } },
             );
           }}

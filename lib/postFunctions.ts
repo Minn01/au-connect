@@ -22,6 +22,8 @@ import {
   normalizeSkillNames,
   syncJobSkills,
 } from "@/lib/jobSkillFunctions";
+import { getManagedCommunity } from "@/lib/communityAuth";
+import type { Prisma } from "@/lib/generated/prisma";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -53,7 +55,7 @@ export async function createPost(req: NextRequest) {
     }
 
     // separating certain data
-    const { pollDuration, job, ...data } = parsed.data;
+    const { pollDuration, job, actorType, communityId, ...data } = parsed.data;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -69,6 +71,28 @@ export async function createPost(req: NextRequest) {
         { status: 400 },
       );
     }
+
+    const activeActorType = actorType === "COMMUNITY" ? "COMMUNITY" : "USER";
+    const community =
+      activeActorType === "COMMUNITY" && communityId
+        ? await getManagedCommunity(userId, communityId)
+        : null;
+
+    if (activeActorType === "COMMUNITY" && !community) {
+      return NextResponse.json(
+        { error: "Unauthorized to post as this community" },
+        { status: 403 },
+      );
+    }
+
+    const displayName = community?.name ?? user.username;
+    const displayProfilePic = community
+      ? community.profilePic && community.profilePic.trim() !== ""
+        ? community.profilePic
+        : "/default_profile.jpg"
+      : user.profilePic && user.profilePic.trim() !== ""
+        ? user.profilePic
+        : "/default_profile.jpg";
 
     // handle post duration
     const pollData: any = {};
@@ -89,11 +113,10 @@ export async function createPost(req: NextRequest) {
       const basePost = await tx.post.create({
         data: {
           userId,
-          username: user.username,
-          profilePic:
-            user.profilePic && user.profilePic.trim() !== ""
-              ? user.profilePic
-              : "/default_profile.jpg",
+          username: displayName,
+          profilePic: displayProfilePic,
+          actorType: activeActorType,
+          communityId: community?.id ?? null,
 
           postType: data.postType,
           visibility: data.visibility,
@@ -224,6 +247,37 @@ export async function getPosts(req: NextRequest) {
     }
 
     const cursor = req.nextUrl.searchParams.get("cursor");
+    const feed = req.nextUrl.searchParams.get("feed");
+    const communityId = req.nextUrl.searchParams.get("communityId");
+    const interactionActorType = req.nextUrl.searchParams.get("actorType");
+    const interactionCommunityId =
+      req.nextUrl.searchParams.get("actorCommunityId");
+    const isCommunityFeed = feed === "community";
+
+    if (communityId && !/^[a-f\d]{24}$/i.test(communityId)) {
+      return NextResponse.json(
+        { error: "A valid community ID is required" },
+        { status: 400 },
+      );
+    }
+
+    const interactionCommunity =
+      interactionActorType === "COMMUNITY" && interactionCommunityId
+        ? await getManagedCommunity(userId, interactionCommunityId)
+        : null;
+
+    const interactionWhere: Prisma.PostInteractionWhereInput =
+      interactionActorType === "COMMUNITY" && interactionCommunity
+        ? {
+            actorType: "COMMUNITY",
+            communityId: interactionCommunity.id,
+            type: { in: ["LIKE"] },
+          }
+        : {
+            actorType: "USER",
+            userId,
+            type: { in: ["LIKE", "SAVED"] },
+          };
 
     // Fetch posts
     const posts = await prisma.post.findMany({
@@ -243,23 +297,42 @@ export async function getPosts(req: NextRequest) {
         },
         // get likes and shares
         interactions: {
-          where: {
-            userId: userId,
-            type: {
-              in: ["LIKE", "SAVED"],
-            },
-          },
+          where: interactionWhere,
           select: {
             id: true,
             type: true,
           },
         },
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            profilePic: true,
+          },
+        },
+        jobPost: {
+          include: {
+            jobSkills: {
+              include: {
+                skill: true,
+              },
+            },
+            applications: {
+              where: { applicantId: userId },
+              select: { status: true },
+              take: 1,
+            },
+          },
+        },
       },
       where: {
+        actorType: isCommunityFeed
+          ? "COMMUNITY"
+          : { in: ["USER", "COMMUNITY"] },
+        ...(isCommunityFeed && communityId ? { communityId } : {}),
         moderationStatus: "VISIBLE",
-        jobPost: {
-          is: null,
-        },
+        ...(isCommunityFeed ? {} : { jobPost: { is: null } }),
       },
     });
 
@@ -272,12 +345,26 @@ export async function getPosts(req: NextRequest) {
       const isSaved = post.interactions.some(
         (interaction) => interaction.type === "SAVED",
       );
+      const hasApplied = (post.jobPost?.applications?.length ?? 0) > 0;
+      const applicationStatus = post.jobPost?.applications?.[0]?.status;
 
       return {
         ...post,
         isLiked,
         isSaved,
         numOfComments: post._count.comments,
+        jobPost: post.jobPost
+          ? {
+              ...post.jobPost,
+              jobRequirements: getSkillNamesFromJobSkills(post.jobPost.jobSkills),
+              jobSkills: undefined,
+              remainingPositions:
+                post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
+              hasApplied,
+              applicationStatus,
+              applications: undefined,
+            }
+          : null,
       };
     });
 
@@ -377,13 +464,19 @@ export async function editPost(req: NextRequest) {
       where: { id: postId, moderationStatus: "VISIBLE" },
       select: {
         userId: true,
+        actorType: true,
+        communityId: true,
         media: true,
         pollVotes: true,
         postType: true,
       },
     });
 
-    const exsistingPostType = existingPost?.postType;
+    if (!existingPost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    const exsistingPostType = existingPost.postType;
     if (exsistingPostType !== data.postType) {
       return NextResponse.json(
         { error: "Cannot edit to different post type" },
@@ -391,11 +484,19 @@ export async function editPost(req: NextRequest) {
       );
     }
 
-    if (!existingPost) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    const canEditCommunityPost =
+      existingPost.actorType === "COMMUNITY" &&
+      existingPost.communityId &&
+      (await getManagedCommunity(userId, existingPost.communityId));
+
+    if (existingPost.actorType !== "COMMUNITY" && existingPost.userId !== userId) {
+      return NextResponse.json(
+        { error: "Unauthorized to edit this post" },
+        { status: 403 },
+      );
     }
 
-    if (existingPost.userId !== userId) {
+    if (existingPost.actorType === "COMMUNITY" && !canEditCommunityPost) {
       return NextResponse.json(
         { error: "Unauthorized to edit this post" },
         { status: 403 },
@@ -688,6 +789,8 @@ export async function deletePost(req: NextRequest) {
       where: { id: postId },
       select: {
         userId: true,
+        actorType: true,
+        communityId: true,
         media: true,
         jobPost: {
           select: { id: true },
@@ -699,7 +802,19 @@ export async function deletePost(req: NextRequest) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    if (post.userId !== userId) {
+    const canDeleteCommunityPost =
+      post.actorType === "COMMUNITY" &&
+      post.communityId &&
+      (await getManagedCommunity(userId, post.communityId));
+
+    if (post.actorType !== "COMMUNITY" && post.userId !== userId) {
+      return NextResponse.json(
+        { error: "Unauthorized to delete this post" },
+        { status: 403 },
+      );
+    }
+
+    if (post.actorType === "COMMUNITY" && !canDeleteCommunityPost) {
       return NextResponse.json(
         { error: "Unauthorized to delete this post" },
         { status: 403 },

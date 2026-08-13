@@ -18,12 +18,14 @@ export default function PostPageClient({
   initialIndex,
   hasRefShare,
   sharedByUserId,
+  sharedByCommunityId,
 }: {
   post: PostArg;
   postId: string;
   initialIndex: number;
   hasRefShare: boolean;
   sharedByUserId?: string | null;
+  sharedByCommunityId?: string | null;
 }) {
   const router = useRouter();
 
@@ -65,9 +67,10 @@ export default function PostPageClient({
       fetch(SHARE_POST_API_PATH(postId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sharedByUserId: sharedByUserId ?? undefined,
-        }),
+	        body: JSON.stringify({
+	          sharedByUserId: sharedByUserId ?? undefined,
+	          sharedByCommunityId: sharedByCommunityId ?? undefined,
+	        }),
       }).catch((err) => console.error("Failed to track share:", err));
 
       // Clean up URL
@@ -75,7 +78,14 @@ export default function PostPageClient({
         scroll: false,
       });
     }
-  }, [hasRefShare, postId, initialIndex, router, sharedByUserId]);
+  }, [
+    hasRefShare,
+    postId,
+    initialIndex,
+    router,
+    sharedByUserId,
+    sharedByCommunityId,
+  ]);
 
   if (userLoading || !user) {
     return (

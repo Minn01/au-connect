@@ -1,26 +1,46 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { LeftProfilePropTypes } from "@/types/FeedPagePropTypes";
+import {
+  CommunityActorProfile,
+  LeftProfilePropTypes,
+} from "@/types/FeedPagePropTypes";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 
 const DEFAULT_AVATAR = "/default-avatar.png";
 
-export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
+export default function LeftProfile({
+  user,
+  loading,
+  community,
+}: LeftProfilePropTypes & { community?: CommunityActorProfile | null }) {
   const router = useRouter();
 
+  const profilePicSource = community
+    ? community.profilePic || DEFAULT_AVATAR
+    : user?.profilePic || DEFAULT_AVATAR;
+
+  const coverPhotoSource = community
+    ? community.coverPhoto || "/default_cover.jpg"
+    : user?.coverPhoto || "/default_cover.jpg";
+
   const resolvedProfilePicUrl = useResolvedMediaUrl(
-    user?.profilePic,
+    profilePicSource,
     DEFAULT_AVATAR,
   );
 
   const resolvedCoverPhotoUrl = useResolvedMediaUrl(
-    user?.coverPhoto,
+    coverPhotoSource,
     "/default_cover.jpg",
   );
 
   // Safely handle navigation
   const handleProfileClick = () => {
+    if (community?.slug) {
+      router.push(`/community/${community.slug}`);
+      return;
+    }
+
     if (!user?.slug) return; // prevent runtime crash
     router.push(`/profile/${user.slug}`);
   };
@@ -42,9 +62,9 @@ export default function LeftProfile({ user, loading }: LeftProfilePropTypes) {
     );
   }
 
-  const name = user?.username || "Unknown User";
-  const title = user?.title || "No title provided";
-  const location = user?.location || "Unknown location";
+  const name = community?.name || user?.username || "Unknown User";
+  const title = community ? "Community page" : user?.title || "No title provided";
+  const location = community?.location || user?.location || "Unknown location";
 
   return (
     <div className="w-full md:flex justify-center md:justify-start">

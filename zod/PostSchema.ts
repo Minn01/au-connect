@@ -30,6 +30,8 @@ const LinkEmbedSchema = z.object({
 });
 
 export const CreatePostSchema = z.object({
+  actorType: z.enum(["USER", "COMMUNITY"]).default("USER"),
+  communityId: z.string().optional().nullable(),
   postType: z.enum(["media", "article", "poll", "job_post"]),
   visibility: z.enum(["everyone", "friends", "only-me"]).optional(),
   title: z.string().optional(),

@@ -1,6 +1,8 @@
 export type PostArg = {
   id: string;
   userId: string;
+  actorType: "USER" | "COMMUNITY";
+  communityId: string | null;
   username: string;
   profilePic: string | null;
   postType: string;

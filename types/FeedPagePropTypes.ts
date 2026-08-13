@@ -6,10 +6,21 @@ export type LeftProfilePropTypes = {
   user: User | null
   loading: boolean
 };
+
+export type CommunityActorProfile = {
+  id: string;
+  name: string;
+  slug: string;
+  about?: string | null;
+  location?: string | null;
+  profilePic?: string | null;
+  coverPhoto?: string | null;
+};
  
 export type MainFeedPropTypes = {
   user: User;
   userLoading: boolean;
+  community?: CommunityActorProfile | null;
   posts: PostType[];
   loading: boolean;
  

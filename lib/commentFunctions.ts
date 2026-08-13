@@ -6,10 +6,31 @@ import { REPLIES_PER_FETCH, TOP_LEVEL_COMMENTS_FETCH_LIMIT } from "./constants";
 import { CreateCommentSchema } from "@/zod/CommentSchema";
 import { createNotification } from "@/lib/server/notifications.server";
 import { requireAccountVerification } from "@/lib/accountVerification";
+import { getManagedCommunity } from "@/lib/communityAuth";
 
 
 // function to create comments/replies
 const MAX_COMMENT_DEPTH = 2; // 0,1,2 = 3 layers total
+
+function withCommentActorIdentity<
+  T extends {
+    actorType?: "USER" | "COMMUNITY";
+    username: string;
+    profilePic: string;
+    community?: {
+      name: string;
+      profilePic?: string | null;
+    } | null;
+  },
+>(comment: T): T {
+  if (comment.actorType !== "COMMUNITY") return comment;
+
+  return {
+    ...comment,
+    username: comment.community?.name ?? comment.username,
+    profilePic: comment.community?.profilePic || "/default_profile.jpg",
+  };
+}
 
 export async function createComments(
   req: NextRequest,
@@ -40,7 +61,7 @@ export async function createComments(
       );
     }
 
-    const { content, parentCommentId } = parsed.data;
+    const { content, parentCommentId, actorType, communityId } = parsed.data;
 
     const visiblePost = await prisma.post.findUnique({
       where: { id: postId, moderationStatus: "VISIBLE" },
@@ -87,6 +108,26 @@ export async function createComments(
       }
     }
 
+    const activeActorType = actorType === "COMMUNITY" ? "COMMUNITY" : "USER";
+    const community =
+      activeActorType === "COMMUNITY" && communityId
+        ? await getManagedCommunity(userId, communityId)
+        : null;
+
+    if (activeActorType === "COMMUNITY" && !community) {
+      return NextResponse.json(
+        { error: "Unauthorized to comment as this community" },
+        { status: 403 },
+      );
+    }
+
+    const displayName = community?.name ?? user.username;
+    const displayProfilePic = community
+      ? community.profilePic && community.profilePic.trim() !== ""
+        ? community.profilePic
+        : "/default_profile.jpg"
+      : user.profilePic || "/default_profile.jpg";
+
     const comment = await prisma.comment.create({
       data: {
         postId,
@@ -94,8 +135,20 @@ export async function createComments(
         content: content.trim(),
 
         userId: user.id,
-        username: user.username,
-        profilePic: user.profilePic || "/default_profile.jpg",
+        username: displayName,
+        profilePic: displayProfilePic,
+        actorType: activeActorType,
+        communityId: community?.id ?? null,
+      },
+      include: {
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            profilePic: true,
+          },
+        },
       },
     });
 
@@ -115,39 +168,71 @@ export async function createComments(
     if (parentCommentId) {
       const parentComment = await prisma.comment.findUnique({
         where: { id: parentCommentId },
-        select: { userId: true },
+        select: { userId: true, actorType: true, communityId: true },
       });
 
-      if (
-        parentComment &&
-        parentComment.userId !== user.id
-      ) {
+      if (parentComment) {
+        const recipientActorType =
+          parentComment.actorType === "COMMUNITY" && parentComment.communityId
+            ? "COMMUNITY"
+            : "USER";
+        const isSameActor =
+          recipientActorType === "COMMUNITY"
+            ? activeActorType === "COMMUNITY" &&
+              parentComment.communityId === community?.id
+            : activeActorType === "USER" && parentComment.userId === user.id;
+
+        if (!isSameActor) {
         await createNotification({
           userId: parentComment.userId, // original comment owner
           fromUserId: user.id,          // who replied
+          recipientActorType,
+          recipientCommunityId:
+            recipientActorType === "COMMUNITY"
+              ? parentComment.communityId
+              : null,
+          fromActorType: activeActorType,
+          fromCommunityId: community?.id ?? null,
           type: "COMMENT_REPLIED",
           entityId: postId,
         });
+        }
       }
     } else {
       // This is a normal comment on post
       const post = await prisma.post.findUnique({
         where: { id: postId },
-        select: { userId: true },
+        select: { userId: true, actorType: true, communityId: true },
       });
 
-      if (post && post.userId !== user.id) {
+      if (post) {
+        const recipientActorType =
+          post.actorType === "COMMUNITY" && post.communityId
+            ? "COMMUNITY"
+            : "USER";
+        const isSameActor =
+          recipientActorType === "COMMUNITY"
+            ? activeActorType === "COMMUNITY" && post.communityId === community?.id
+            : activeActorType === "USER" && post.userId === user.id;
+
+        if (!isSameActor) {
         await createNotification({
           userId: post.userId,          // post owner
           fromUserId: user.id,          // who commented
+          recipientActorType,
+          recipientCommunityId:
+            recipientActorType === "COMMUNITY" ? post.communityId : null,
+          fromActorType: activeActorType,
+          fromCommunityId: community?.id ?? null,
           type: "POST_COMMENTED",
           entityId: postId,
         });
+        }
       }
     }
 
     return NextResponse.json({
-      ...comment,
+      ...withCommentActorIdentity(comment),
       replyCount: 0,
     });
 
@@ -200,9 +285,27 @@ export async function getCommentsForPost(
       take: TOP_LEVEL_COMMENTS_FETCH_LIMIT,
       ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
       include: {
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            profilePic: true,
+          },
+        },
         replies: {
           take: REPLIES_PER_FETCH,
           orderBy: { createdAt: "asc" },
+          include: {
+            community: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                profilePic: true,
+              },
+            },
+          },
         },
       },
     });
@@ -215,7 +318,8 @@ export async function getCommentsForPost(
         });
 
         return {
-          ...comment,
+          ...withCommentActorIdentity(comment),
+          replies: comment.replies.map(withCommentActorIdentity),
           replyCount: totalReplies,
         };
       }),
@@ -288,13 +392,23 @@ export async function getRepliesForComment(
       take: REPLIES_PER_FETCH + 1,
       ...(cursor && { skip: 1, cursor: { id: cursor } }),
       orderBy: { createdAt: "asc" },
+      include: {
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            profilePic: true,
+          },
+        },
+      },
     });
 
     const hasMore = replies.length > REPLIES_PER_FETCH;
     const pageReplies = hasMore ? replies.slice(0, REPLIES_PER_FETCH) : replies;
 
     return NextResponse.json({
-      replies: pageReplies,
+      replies: pageReplies.map(withCommentActorIdentity),
       // Only set a cursor when there are genuinely more items to fetch
       nextCursor: hasMore ? pageReplies[pageReplies.length - 1].id : null,
     });

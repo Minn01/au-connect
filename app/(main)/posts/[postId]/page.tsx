@@ -8,10 +8,15 @@ export default async function PostPage({
   searchParams,
 }: {
   params: Promise<{ postId: string }>;
-  searchParams: Promise<{ media?: string; ref?: string; by?: string }>;
+	  searchParams: Promise<{
+	    media?: string;
+	    ref?: string;
+	    by?: string;
+	    community?: string;
+	  }>;
 }) {
   const { postId } = await params;
-  const { media, ref, by } = await searchParams;
+  const { media, ref, by, community } = await searchParams;
 
   const auth = await getCurrentUser();
   if (!auth) {
@@ -41,8 +46,9 @@ export default async function PostPage({
       post={post}
       postId={postId}
       initialIndex={media ? parseInt(media, 10) : 0}
-      hasRefShare={ref === "share"}
-      sharedByUserId={by ?? null}
-    />
+	      hasRefShare={ref === "share"}
+	      sharedByUserId={by ?? null}
+	      sharedByCommunityId={community ?? null}
+	    />
   );
 }
