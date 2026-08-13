@@ -10,10 +10,17 @@ export async function PATCH(
     const userId = getAuthUserIdFromReq(req);
     const { id } = await params;
 
-    await prisma.moderationNotice.updateMany({
+    const result = await prisma.moderationNotice.updateMany({
       where: { id, recipientId: userId },
       data: { isRead: true },
     });
+
+    if (result.count === 0) {
+      return NextResponse.json(
+        { error: "Moderation notice not found" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
