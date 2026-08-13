@@ -1,5 +1,6 @@
 "use client";
 
+import { LOGOUT_API_PATH } from "@/lib/constants";
 import { useState } from "react";
 
 export default function SignOutButton() {
@@ -7,7 +8,7 @@ export default function SignOutButton() {
 
   async function signOut() {
     setLoading(true);
-    await fetch("/api/connect/v1/auth/logout", { method: "DELETE" });
+    await fetch(LOGOUT_API_PATH, { method: "DELETE" });
     window.location.href = "/auth/register";
   }
 

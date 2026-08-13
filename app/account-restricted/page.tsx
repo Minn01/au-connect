@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import getCurrentUser from "@/lib/getCurrentUser";
 import { getAccountRestriction } from "@/lib/accountStatus";
 import SignOutButton from "./SignOutButton";
+import { CircleAlert } from "lucide-react";
 
 export default async function AccountRestrictedPage() {
   const auth = await getCurrentUser();
@@ -15,8 +16,8 @@ export default async function AccountRestrictedPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-lg rounded-2xl bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-2xl">
-          !
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-500 text-2xl">
+             <CircleAlert className="h-8 w-8"/>
         </div>
         <h1 className="text-2xl font-semibold text-gray-900">
           {isBanned ? "Account banned" : "Account suspended"}

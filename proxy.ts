@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextProxy, NextRequest } from "next/server";
 
 import {
+  ACCOUNT_RESTRICTED_PAGE_PATH,
   BASE_API_PATH,
   CONNECT_PAGE_PATH,
   JOBS_PAGE_PATH,
@@ -16,8 +17,6 @@ import {
 } from "@/lib/constants";
 import { verifyJwtToken } from "./lib/authFunctions";
 import { getAccountRestriction } from "./lib/accountStatus";
-
-const ACCOUNT_RESTRICTED_PATH = "/account-restricted";
 
 const protectedRoutes = [
   ONBOARD_PAGE_PATH,
@@ -99,10 +98,10 @@ async function verifySession(
         return response;
       }
 
-      if (!pathname.startsWith(ACCOUNT_RESTRICTED_PATH)) {
-        return NextResponse.redirect(new URL(ACCOUNT_RESTRICTED_PATH, req.url));
+      if (!pathname.startsWith(ACCOUNT_RESTRICTED_PAGE_PATH)) {
+        return NextResponse.redirect(new URL(ACCOUNT_RESTRICTED_PAGE_PATH, req.url));
       }
-    } else if (pathname.startsWith(ACCOUNT_RESTRICTED_PATH)) {
+    } else if (pathname.startsWith(ACCOUNT_RESTRICTED_PAGE_PATH)) {
       return NextResponse.redirect(new URL(MAIN_PAGE_PATH, req.url));
     }
 

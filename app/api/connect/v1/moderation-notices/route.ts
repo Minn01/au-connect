@@ -6,8 +6,8 @@ export async function GET(req: NextRequest) {
   try {
     const userId = getAuthUserIdFromReq(req);
     const notices = await prisma.moderationNotice.findMany({
-      where: { recipientId: userId },
-      orderBy: { createdAt: "desc" },
+      where: { recipientId: userId, isRead: false },
+      orderBy: { createdAt: "asc" },
       include: {
         targetPost: { select: { id: true, content: true, moderationStatus: true } },
       },

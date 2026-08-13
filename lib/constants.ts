@@ -86,6 +86,14 @@ export const REOPEN_JOB_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/job-posts/${postId}/reopen`;
 export const MY_APPLICATIONS_API_PATH = BASE_API_PATH + `/jobApplications/me`;
 
+export const ACCOUNT_RESTRICTED_PAGE_PATH = "/account-restricted";
+
+export const MODERATION_NOTICES_API_PATH =
+  BASE_API_PATH + "/moderation-notices";
+
+export const MODERATION_NOTICE_API_PATH = (noticeId: string) =>
+  `${MODERATION_NOTICES_API_PATH}/${noticeId}`;
+
 export const LIKE_POST_API_PATH = (postId: string) =>
   BASE_API_PATH + `/posts/${postId}/like`;
 
