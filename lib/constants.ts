@@ -109,6 +109,13 @@ export const SINGLE_POST_API_PATH = (postId: string) => {
 };
 export const SHARE_POST_API_PATH = (postId: string) =>
   `${BASE_API_PATH}/posts/${postId}/share`;
+
+// Public, crawler-accessible pages used to render social link previews
+// (Facebook / LinkedIn thumbnail cards). Not behind auth.
+export const SHARE_POST_PAGE_PATH = (postId: string, by?: string) =>
+  `/share/posts/${postId}${by ? `?by=${by}` : ""}`;
+export const SHARE_POST_OG_IMAGE_PATH = (postId: string) =>
+  `/share/posts/${postId}/image`;
 export const LINK_PREVIEW_API_PATH = BASE_API_PATH + `/link-preview`;
 
 // GET all my experiences

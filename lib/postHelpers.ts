@@ -114,3 +114,50 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
       : null,
   };
 }
+
+/** Build a short-lived, read-only SAS URL for a single blob. */
+export function buildBlobReadSasUrl(blobName: string): string {
+  const sharedKeyCredential = new StorageSharedKeyCredential(
+    AZURE_STORAGE_ACCOUNT_NAME,
+    AZURE_STORAGE_ACCOUNT_KEY,
+  );
+
+  const sasToken = generateBlobSASQueryParameters(
+    {
+      containerName: AZURE_STORAGE_CONTAINER_NAME,
+      blobName,
+      permissions: BlobSASPermissions.parse("r"),
+      expiresOn: new Date(Date.now() + SAS_TOKEN_EXPIRE_DURATION),
+    },
+    sharedKeyCredential,
+  ).toString();
+
+  return `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${blobName}?${sasToken}`;
+}
+
+/** blobName of the first previewable image for a post's media, or null. */
+export function firstImageBlobName(media: unknown): string | null {
+  if (!Array.isArray(media) || media.length === 0) return null;
+  const first = media[0] as PostMedia;
+  // Videos carry an image poster in thumbnailBlobName; images use blobName.
+  return first.thumbnailBlobName ?? first.blobName ?? null;
+}
+
+/**
+ * Minimal, public-safe post data for the social share preview. Only ever
+ * returns VISIBLE posts and exposes just what the OG card needs — no
+ * comments, interactions, or viewer-specific fields.
+ */
+export async function getPublicPostPreview(postId: string) {
+  return prisma.post.findFirst({
+    where: { id: postId, moderationStatus: "VISIBLE" },
+    select: {
+      id: true,
+      username: true,
+      profilePic: true,
+      title: true,
+      content: true,
+      media: true,
+    },
+  });
+}

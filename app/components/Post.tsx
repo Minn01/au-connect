@@ -19,6 +19,7 @@ import ShareModal from "../(main)/profile/components/ShareModal";
 import {
   JOB_APPLICANTS_PAGE_PATH,
   POST_DETAIL_PAGE_PATH,
+  SHARE_POST_PAGE_PATH,
 } from "@/lib/constants";
 
 import PostPoll from "./PostPoll";
@@ -319,10 +320,8 @@ export default function Post({
       <ShareModal
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
-        shareUrl={`${window.location.origin}${POST_DETAIL_PAGE_PATH(
+        shareUrl={`${window.location.origin}${SHARE_POST_PAGE_PATH(
           post.id,
-          0,
-          "share",
           user?.id,
         )}`}
       />

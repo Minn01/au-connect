@@ -30,12 +30,20 @@ const protectedRoutes = [
 
 const PUBLIC_API_ROUTES = [BASE_API_PATH + "/auth"];
 
+// Public, no-auth pages so Facebook/LinkedIn crawlers can read OG tags.
+const PUBLIC_PAGE_ROUTES = ["/share"];
+
 export const proxy: NextProxy = async (req: NextRequest) => {
   const sessionToken = req.cookies.get(JWT_COOKIE)?.value;
   const pathname = req.nextUrl.pathname;
 
   // 1. Public API routes
   if (PUBLIC_API_ROUTES.some((path) => pathname.startsWith(path))) {
+    return NextResponse.next();
+  }
+
+  // 1b. Public share-preview pages (crawlers have no session cookie).
+  if (PUBLIC_PAGE_ROUTES.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
