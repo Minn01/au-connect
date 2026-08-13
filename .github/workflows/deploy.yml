@@ -1,8 +1,6 @@
 name: Build and Push Docker Image
 
-# Only production-ready code (merged into main) gets published as an image.
-# Pushes to YOUR Docker Hub account. workflow_dispatch lets you also run it
-# manually from the Actions tab if needed.
+# Publish a Docker image on every merge to main (or run manually).
 on:
   push:
     branches: [main]
@@ -16,10 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # QEMU lets the amd64 runner also build the arm64 image (via emulation).
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -29,8 +23,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Produces two tags: :latest and :<short-git-sha> (so every prod build
-      # is traceable back to a commit).
+      # Tags: :latest and :<short-sha> for traceability.
       - name: Generate image tags
         id: meta
         uses: docker/metadata-action@v5
@@ -40,15 +33,12 @@ jobs:
             type=raw,value=latest
             type=sha,format=short
 
-      # The Dockerfile already bakes its own build-time placeholders and runs
-      # `next build` internally, so no app env is needed here.
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          # Multi-arch: runs natively on both x86 servers and Apple Silicon.
-          # Note: the arm64 half builds under emulation, so CI is slower.
-          platforms: linux/amd64,linux/arm64
+          # amd64 only: deploy server is x86 (no slow arm64 emulation).
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
