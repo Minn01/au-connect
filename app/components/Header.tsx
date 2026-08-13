@@ -130,7 +130,9 @@ export default function Header() {
     ? pathname
     : "not-valid-path";
 
-  const hidden = [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH].includes(pathname);
+  const hidden =
+    [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH].includes(pathname) ||
+    pathname.startsWith("/share");
   const scrollFeedToTop = useFeedStore((s) => s.scrollToTop);
 
   if (hidden) return null;
