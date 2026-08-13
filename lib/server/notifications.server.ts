@@ -2,7 +2,7 @@
 
 import prisma from "../prisma";
 import nodemailer from "nodemailer";
-import { NotificationType } from "@/lib/generated/prisma";
+import { ActorType, NotificationType } from "@/lib/generated/prisma";
 import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -31,16 +31,33 @@ function getGmailTransporter() {
 export async function createNotification({
   userId,
   fromUserId,
+  recipientActorType = "USER",
+  recipientCommunityId,
+  fromActorType = "USER",
+  fromCommunityId,
   type,
   entityId,
 }: {
   userId: string;
   fromUserId: string;
+  recipientActorType?: ActorType;
+  recipientCommunityId?: string | null;
+  fromActorType?: ActorType;
+  fromCommunityId?: string | null;
   type: NotificationType;
   entityId?: string;
 }) {
   const notification = await prisma.notification.create({
-    data: { userId, fromUserId, type, entityId },
+    data: {
+      userId,
+      fromUserId,
+      recipientActorType,
+      recipientCommunityId: recipientCommunityId ?? null,
+      fromActorType,
+      fromCommunityId: fromCommunityId ?? null,
+      type,
+      entityId,
+    },
   });
 
   await sendNotificationEmail(userId, fromUserId, type);

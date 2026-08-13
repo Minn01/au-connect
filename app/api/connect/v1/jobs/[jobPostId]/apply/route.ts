@@ -60,7 +60,7 @@ export async function POST(
       select: {
         status: true,
         postId: true,
-        post: { select: { userId: true } },
+        post: { select: { userId: true, actorType: true, communityId: true } },
       },
     });
 
@@ -140,9 +140,17 @@ export async function POST(
 
     // 🔔 Notify the job post owner
     if (job_post.post?.userId && job_post.post.userId !== applicantId) {
+      const recipientActorType =
+        job_post.post.actorType === "COMMUNITY" && job_post.post.communityId
+          ? "COMMUNITY"
+          : "USER";
+
       await createNotification({
         userId: job_post.post.userId, // post owner receives notification
         fromUserId: applicantId, // applicant is the sender
+        recipientActorType,
+        recipientCommunityId:
+          recipientActorType === "COMMUNITY" ? job_post.post.communityId : null,
         type: "JOB_APPLICATION",
         entityId: job_post.postId,
       }).catch((err) =>

@@ -172,9 +172,14 @@ model Community {
   managers  CommunityManager[]
   followers CommunityFollow[]
   posts     Post[]
+  comments  Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  postInteractions            PostInteraction[]
+  notificationsReceivedAsPage Notification[]    @relation("NotificationRecipientCommunity")
+  notificationsSentAsPage     Notification[]    @relation("NotificationFromCommunity")
 }
 
 model CommunityManager {
@@ -304,6 +309,11 @@ model Comment {
   username   String
   profilePic String
 
+  actorType ActorType @default(USER)
+
+  communityId String?    @db.ObjectId
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
   // comment fields
   content String
   media   Json?
@@ -368,12 +378,18 @@ model PostInteraction {
   userId String @db.ObjectId
   postId String @db.ObjectId
 
+  actorType ActorType @default(USER)
+
+  communityId String?    @db.ObjectId
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
   type      PostInteractionType
   createdAt DateTime            @default(now())
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, postId, type])
+  @@index([actorType, userId, postId, type])
+  @@index([actorType, communityId, postId, type])
   @@index([postId, type])
 }
 
@@ -399,14 +415,25 @@ model Notification {
   userId     String @db.ObjectId
   fromUserId String @db.ObjectId
 
+  recipientActorType   ActorType @default(USER)
+  recipientCommunityId String?   @db.ObjectId
+
+  fromActorType   ActorType @default(USER)
+  fromCommunityId String?   @db.ObjectId
+
   type     NotificationType
   entityId String?
   isRead   Boolean          @default(false)
 
   createdAt DateTime @default(now())
 
-  user     User @relation("NotificationUser", fields: [userId], references: [id])
-  fromUser User @relation("NotificationFromUser", fields: [fromUserId], references: [id])
+  user               User       @relation("NotificationUser", fields: [userId], references: [id])
+  fromUser           User       @relation("NotificationFromUser", fields: [fromUserId], references: [id])
+  recipientCommunity Community? @relation("NotificationRecipientCommunity", fields: [recipientCommunityId], references: [id], onDelete: SetNull)
+  fromCommunity      Community? @relation("NotificationFromCommunity", fields: [fromCommunityId], references: [id], onDelete: SetNull)
+
+  @@index([recipientActorType, userId, isRead])
+  @@index([recipientActorType, recipientCommunityId, isRead])
 }
 
 model Conversation {

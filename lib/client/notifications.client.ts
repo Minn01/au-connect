@@ -1,5 +1,18 @@
+import { useActorStore } from "@/lib/stores/actorStore";
+
+function notificationActorQuery() {
+  const selectedActor = useActorStore.getState().selectedActor;
+  const params = new URLSearchParams({ actorType: selectedActor.type });
+
+  if (selectedActor.type === "COMMUNITY" && selectedActor.communityId) {
+    params.set("communityId", selectedActor.communityId);
+  }
+
+  return params.toString();
+}
+
 export async function fetchNotifications() {
-  const res = await fetch("/api/connect/v1/notifications", {
+  const res = await fetch(`/api/connect/v1/notifications?${notificationActorQuery()}`, {
     credentials: "include",
   });
 
@@ -20,7 +33,7 @@ export async function markNotificationRead(id: string) {
 
 export async function fetchUnreadCount() {
   const res = await fetch(
-    "/api/connect/v1/notifications/unread-count",
+    `/api/connect/v1/notifications/unread-count?${notificationActorQuery()}`,
     { credentials: "include" }
   );
 
@@ -33,7 +46,7 @@ export async function fetchUnreadCount() {
 
 export async function markAllNotificationsRead() {
   const res = await fetch(
-    "/api/connect/v1/notifications/mark-all-read",
+    `/api/connect/v1/notifications/mark-all-read?${notificationActorQuery()}`,
     {
       method: "PATCH",
       credentials: "include",

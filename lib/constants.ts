@@ -11,6 +11,7 @@ export const POST_DETAIL_PAGE_PATH = (
   index?: number,
   ref?: string,
   by?: string,
+  community?: string,
 ) => {
   const params = new URLSearchParams();
 
@@ -26,6 +27,10 @@ export const POST_DETAIL_PAGE_PATH = (
     params.set("by", by);
   }
 
+  if (community) {
+    params.set("community", community);
+  }
+
   const queryString = params.toString();
   return `/posts/${postId}${queryString ? `?${queryString}` : ""}`;
 };
@@ -39,6 +44,7 @@ export const SIGNIN_PAGE_PATH = "/auth/register";
 export const ONBOARD_PAGE_PATH = "/auth/onboarding";
 export const JOBS_PAGE_PATH = "/jobs";
 export const CONNECT_PAGE_PATH = "/connect";
+export const COMMUNITY_PAGE_PATH = "/community";
 export const MESSAGES_PAGE_PATH = "/messages";
 export const ACCOUNT_VERIFICATION_PAGE_PATH = "/verification";
 
@@ -150,6 +156,13 @@ export const DELETE_EDUCATION_API_PATH =
 
 export const MEDIA_UPLOAD_API_PATH = BASE_API_PATH + "/upload-media";
 export const ANNOUNCEMENTS_API_PATH = BASE_API_PATH + "/announcements";
+export const MY_MANAGED_COMMUNITIES_API_PATH =
+  BASE_API_PATH + "/communities/me";
+export const COMMUNITIES_API_PATH = BASE_API_PATH + "/communities";
+export const FOLLOW_COMMUNITY_API_PATH = (communityId: string) =>
+  `${COMMUNITIES_API_PATH}/${communityId}/follow`;
+export const COMMUNITY_PROFILE_API_PATH = (slug: string) =>
+  `${COMMUNITIES_API_PATH}/profile/${encodeURIComponent(slug)}`;
 
 export const REPORT_API_PATH = BASE_API_PATH + `/report`;
 

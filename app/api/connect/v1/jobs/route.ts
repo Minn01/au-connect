@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
       include: {
         // Added interactions array to prevent runtime crashes in .map()
         interactions: {
-          where: { userId },
+          where: { actorType: "USER", userId },
           select: { type: true },
         },
         jobPost: {

@@ -30,9 +30,10 @@ import { MediaType, MediaItem } from "@/types/Media";
 import JobDraft from "@/types/JobDraft";
 import { validateJobDraft } from "../(main)/profile/utils/validateJobPosts";
 import { useRouter } from "next/navigation";
-import { JOBS_PAGE_PATH } from "@/lib/constants";
-import { useQueryClient } from "@tanstack/react-query";
+import { JOBS_PAGE_PATH, MY_MANAGED_COMMUNITIES_API_PATH } from "@/lib/constants";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostType from "@/types/Post";
+import { useActorStore } from "@/lib/stores/actorStore";
 
 type JobsPagePost = Omit<PostType, "jobPost"> & {
   jobPost?: JobDraft & {
@@ -51,6 +52,15 @@ type JobsPageCache = {
     nextCursor?: string | null;
   }>;
   pageParams?: unknown[];
+};
+
+type ManagedCommunity = {
+  id: string;
+  name: string;
+  slug: string;
+  profilePic: string | null;
+  coverPhoto: string | null;
+  status: "ACTIVE" | "ARCHIVED";
 };
 
 type UploadJobPayload = Omit<UploadJob, "id" | "status" | "progress">;
@@ -147,6 +157,18 @@ export default function CreatePostModal({
   const [jobErrors, setJobErrors] = useState<Record<string, string>>({});
   const router = useRouter();
   const queryClient = useQueryClient();
+  const selectedActor = useActorStore((state) => state.selectedActor);
+
+  const { data: managedCommunities = [] } = useQuery<ManagedCommunity[]>({
+    queryKey: ["managed-communities"],
+    queryFn: async () => {
+      const res = await fetch(MY_MANAGED_COMMUNITIES_API_PATH);
+      if (!res.ok) return [];
+      const json = await res.json();
+      return Array.isArray(json.communities) ? json.communities : [];
+    },
+    enabled: isOpen && !editMode,
+  });
 
   const editPostMutation = useEditPost();
 
@@ -203,9 +225,20 @@ export default function CreatePostModal({
   };
 
   const resolvedProfilePicUrl = useResolvedMediaUrl(
-    user?.profilePic,
+    selectedActor.type === "COMMUNITY"
+      ? managedCommunities.find(
+          (community) => community.id === selectedActor.communityId,
+        )?.profilePic
+      : user?.profilePic,
     DEFAULT_PROFILE_PIC,
   );
+  const activeCommunity =
+    selectedActor.type === "COMMUNITY"
+      ? managedCommunities.find(
+          (community) => community.id === selectedActor.communityId,
+        )
+      : null;
+  const activeActorName = activeCommunity?.name ?? user.username;
 
   const { draft, saveDraft, clearDraft, hasDraft } = useDraftStore();
   const hasDraftFiles =
@@ -461,6 +494,11 @@ export default function CreatePostModal({
       } else {
         // CREATE POST (ALWAYS JOB)
         const jobData: UploadJobPayload = {
+          actorType: selectedActor.type,
+          communityId:
+            selectedActor.type === "COMMUNITY"
+              ? selectedActor.communityId
+              : null,
           postType,
           title,
           content: postContent,
@@ -549,6 +587,7 @@ export default function CreatePostModal({
               {/* header title */}
               <div className="text-base font-bold text-neutral-900">
                 {editMode ? "Edit Post" : user.username}
+                {editMode ? "" : activeCommunity ? ` as ${activeActorName}` : ""}
               </div>
 
               {/*  visibility option button */}

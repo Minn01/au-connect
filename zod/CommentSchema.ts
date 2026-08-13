@@ -13,4 +13,6 @@ export const CreateCommentSchema = z.object({
     .max(REPLY_CHARACTER_LIMIT, `Comment content cannot exceed ${REPLY_CHARACTER_LIMIT} characters`),
 
   parentCommentId: objectId.optional(),
+  actorType: z.enum(["USER", "COMMUNITY"]).optional().default("USER"),
+  communityId: objectId.optional().nullable(),
 });

@@ -8,8 +8,6 @@ export async function POST(
   context: { params: Promise<{ postId: string }> },
 ) {
   try {
-    // console.log("Server API is being called");
-    // user validation
     const [userEmail, userId] = getHeaderUserInfo(req);
 
     if (!userEmail || !userId) {
@@ -19,7 +17,21 @@ export async function POST(
       );
     }
 
-    // fetcing post id from params
+    let actorType: "USER" | "COMMUNITY" = "USER";
+    try {
+      const body = await req.json();
+      if (body?.actorType === "COMMUNITY") actorType = "COMMUNITY";
+    } catch {
+      // Allow empty body for existing save callers.
+    }
+
+    if (actorType === "COMMUNITY") {
+      return NextResponse.json(
+        { error: "Community pages cannot save posts" },
+        { status: 403 },
+      );
+    }
+
     const { postId } = await context.params;
 
     const visiblePost = await prisma.post.findUnique({
@@ -30,57 +42,45 @@ export async function POST(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    const existing = await prisma.postInteraction.findUnique({
+    const existing = await prisma.postInteraction.findFirst({
       where: {
-        userId_postId_type: {
-          userId,
-          postId,
-          type: PostInteractionType.SAVED,
-        },
+        actorType: "USER",
+        userId,
+        postId,
+        type: PostInteractionType.SAVED,
       },
+      select: { id: true },
     });
 
-    // UNSAVE
     if (existing) {
       await prisma.$transaction([
-        prisma.postInteraction.delete({
-          where: { id: existing.id },
-        }),
-
+        prisma.postInteraction.delete({ where: { id: existing.id } }),
         prisma.post.update({
           where: { id: postId },
-          data: {
-            savedCount: { decrement: 1 },
-          },
+          data: { savedCount: { decrement: 1 } },
         }),
       ]);
 
-      return NextResponse.json({
-        saved: false,
-      });
+      return NextResponse.json({ saved: false });
     }
 
-    // SAVE
     await prisma.$transaction([
       prisma.postInteraction.create({
         data: {
           userId,
           postId,
           type: PostInteractionType.SAVED,
+          actorType: "USER",
+          communityId: null,
         },
       }),
-
       prisma.post.update({
         where: { id: postId },
-        data: {
-          savedCount: { increment: 1 },
-        },
+        data: { savedCount: { increment: 1 } },
       }),
     ]);
 
-    return NextResponse.json({
-      saved: true,
-    });
+    return NextResponse.json({ saved: true });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

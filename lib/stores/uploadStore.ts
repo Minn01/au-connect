@@ -4,9 +4,13 @@ import { PostMediaWithUrl } from "@/types/PostMedia";
 import LinkEmbed from "@/types/LinkEmbeds";
 import JobDraft from "@/types/JobDraft";
 
+export type UploadActorType = "USER" | "COMMUNITY";
+
 export interface UploadJob {
   // core
   id: string;
+  actorType?: UploadActorType;
+  communityId?: string | null;
   postType: string;
   title: string;
   content: string;

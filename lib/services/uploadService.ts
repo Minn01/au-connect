@@ -118,6 +118,10 @@ export async function processUpload(jobId: string) {
       job.pollOptions,
       job.pollDuration,
       job.job,
+      {
+        actorType: job.actorType,
+        communityId: job.communityId,
+      },
     );
 
     // console.log("✅ Post created:", createdPost);

@@ -24,6 +24,12 @@ import PostType from "@/types/Post";
 import LinkEmbed from "@/types/LinkEmbeds";
 import JobDraft from "@/types/JobDraft";
 import CommentType from "@/types/CommentType";
+import { useActorStore } from "@/lib/stores/actorStore";
+
+type CreatePostActorPayload = {
+  actorType?: "USER" | "COMMUNITY";
+  communityId?: string | null;
+};
 
 // calls /me
 export async function fetchUser() {
@@ -84,6 +90,7 @@ export async function handleCreatePost(
   pollDuration?: number,
   // job
   job?: JobDraft,
+  actor?: CreatePostActorPayload,
 ) {
   try {
     const isPoll = postType === "poll";
@@ -106,6 +113,9 @@ export async function handleCreatePost(
         media: uploadedMedia,
         pollOptions: isPoll ? pollOptions : undefined,
         pollDuration: isPoll ? pollDuration : undefined,
+        actorType: actor?.actorType ?? "USER",
+        communityId:
+          actor?.actorType === "COMMUNITY" ? actor.communityId : null,
         ...(postType === "job_post" && job ? { job } : {}),
       }),
     });
@@ -130,9 +140,16 @@ export async function fetchPosts({
 }: {
   pageParam?: string | null;
 }) {
-  const url = pageParam
-    ? `${POST_API_PATH}?cursor=${pageParam}`
-    : POST_API_PATH;
+  const selectedActor = useActorStore.getState().selectedActor;
+  const params = new URLSearchParams();
+  if (pageParam) params.set("cursor", pageParam);
+  params.set("actorType", selectedActor.type);
+  if (selectedActor.type === "COMMUNITY" && selectedActor.communityId) {
+    params.set("actorCommunityId", selectedActor.communityId);
+  }
+
+  const queryString = params.toString();
+  const url = `${POST_API_PATH}${queryString ? `?${queryString}` : ""}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -307,7 +324,13 @@ export function useEditPost() {
 }
 
 export async function fetchSinglePost(postId: string) {
-  const res = await fetch(SINGLE_POST_API_PATH(postId));
+  const selectedActor = useActorStore.getState().selectedActor;
+  const params = new URLSearchParams({ actorType: selectedActor.type });
+  if (selectedActor.type === "COMMUNITY" && selectedActor.communityId) {
+    params.set("actorCommunityId", selectedActor.communityId);
+  }
+
+  const res = await fetch(`${SINGLE_POST_API_PATH(postId)}?${params.toString()}`);
 
   if (!res.ok) throw new Error("Failed to fetch post");
   return res.json();
@@ -326,10 +349,14 @@ export async function createComment({
   postId,
   content,
   parentCommentId,
+  actorType,
+  communityId,
 }: {
   postId: string;
   content: string;
   parentCommentId?: string;
+  actorType?: "USER" | "COMMUNITY";
+  communityId?: string | null;
 }) {
   const res = await fetch(COMMENT_API_PATH(postId), {
     method: "POST",
@@ -339,6 +366,8 @@ export async function createComment({
     body: JSON.stringify({
       content,
       parentCommentId,
+      actorType,
+      communityId,
     }),
   });
 
@@ -359,14 +388,20 @@ export function useToggleLike() {
   return useMutation<
     unknown,
     Error,
-    { postId: string; isLiked: boolean },
+    {
+      postId: string;
+      isLiked: boolean;
+      actorType?: "USER" | "COMMUNITY";
+      communityId?: string | null;
+    },
     {
       previousPosts?: PostsInfiniteData;
       previousProfilePosts?: [unknown, unknown][];
       previousProfileJobPosts?: [unknown, unknown][];
     }
   >({
-    mutationFn: ({ postId }) => callPostLikeUpdate({ postId }),
+    mutationFn: ({ postId, actorType, communityId }) =>
+      callPostLikeUpdate({ postId, actorType, communityId }),
 
     onMutate: async ({ postId, isLiked }) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
@@ -468,16 +503,30 @@ export function useToggleLike() {
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["community-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["community-profile-posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
       queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     },
   });
 }
 
-export async function callPostLikeUpdate({ postId }: { postId: string }) {
+export async function callPostLikeUpdate({
+  postId,
+  actorType,
+  communityId,
+}: {
+  postId: string;
+  actorType?: "USER" | "COMMUNITY";
+  communityId?: string | null;
+}) {
   const res = await fetch(LIKE_POST_API_PATH(postId), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      actorType: actorType ?? "USER",
+      communityId: actorType === "COMMUNITY" ? communityId : null,
+    }),
   });
 
   if (!res.ok) {
@@ -615,18 +664,27 @@ export const useFetchLinkPreview = () => {
 
 export function useToggleSave() {
   const queryClient = useQueryClient();
+  const selectedActor = useActorStore((state) => state.selectedActor);
 
   return useMutation({
     mutationFn: async (postId: string) => {
+      if (selectedActor.type === "COMMUNITY") {
+        throw new Error("Community pages cannot save posts");
+      }
       // console.log("Saving post:", postId);
       const res = await fetch(SAVE_POST_API_PATH(postId), {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actorType: "USER", communityId: null }),
       });
       if (!res.ok) throw new Error("Failed to toggle save");
       return res.json();
     },
 
     onMutate: async (postId: string) => {
+      if (selectedActor.type === "COMMUNITY") {
+        return {};
+      }
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: ["posts"] });
       await queryClient.cancelQueries({ queryKey: ["profilePosts"] });
@@ -734,6 +792,8 @@ export function useToggleSave() {
     onSettled: (_data, _error, postId) => {
       // Refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["community-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["community-profile-posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
       queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
     },

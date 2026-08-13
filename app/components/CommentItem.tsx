@@ -7,6 +7,7 @@ import parseDate from "../(main)/profile/utils/parseDate";
 import { useReplies } from "../(main)/profile/utils/fetchfunctions";
 import CommentType from "@/types/CommentType";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
+import { useActorStore } from "@/lib/stores/actorStore";
 
 const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
@@ -34,6 +35,8 @@ export default function CommentItem({
       postId: string;
       content: string;
       parentCommentId?: string;
+      actorType?: "USER" | "COMMUNITY";
+      communityId?: string | null;
     },
     unknown
   >;
@@ -42,6 +45,7 @@ export default function CommentItem({
 }) {
   const [isReplying, setIsReplying] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const selectedActor = useActorStore((state) => state.selectedActor);
 
   const avatarUrl = useResolvedMediaUrl(comment.profilePic, DEFAULT_PROFILE_PIC);
 
@@ -149,6 +153,11 @@ export default function CommentItem({
                 parentCommentId: replyTargetId,
                 // Prepend @mention when replying to a reply
                 content: replyPrefix + text,
+                actorType: selectedActor.type,
+                communityId:
+                  selectedActor.type === "COMMUNITY"
+                    ? selectedActor.communityId
+                    : null,
               });
               setIsReplying(false);
               // If we're at depth 0, open the replies panel so user sees it land.

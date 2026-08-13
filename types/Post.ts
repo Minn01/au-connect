@@ -13,6 +13,14 @@ type PostType = {
   image?: string;
   // ---------- real post fields ----------
   userId?: string;
+  actorType?: "USER" | "COMMUNITY";
+  communityId?: string | null;
+  community?: {
+    id: string;
+    name: string;
+    slug: string;
+    profilePic?: string | null;
+  } | null;
   username?: string;
   profilePic?: string | null;
   postType?: string;

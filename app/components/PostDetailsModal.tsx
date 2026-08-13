@@ -30,11 +30,14 @@ import ReportModal from "./ReportModal";
 import { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
 import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
 import { postReport } from "../(main)/profile/utils/reportFunctions";
+import { useActorStore } from "@/lib/stores/actorStore";
 
 type CreateCommentVariables = {
   postId: string;
   content: string;
   parentCommentId?: string;
+  actorType?: "USER" | "COMMUNITY";
+  communityId?: string | null;
 };
 
 type CachePost = {
@@ -71,8 +74,9 @@ export default function PostDetailsModal({
   onEdit,
 }: PostDetailsModalTypes) {
   const router = useRouter();
+  const selectedActor = useActorStore((state) => state.selectedActor);
   const { data: post, isLoading: postIsLoading } = useQuery({
-    queryKey: ["post", postInfo.id],
+    queryKey: ["post", postInfo.id, selectedActor],
     queryFn: async () => {
       const res = await fetch(SINGLE_POST_API_PATH(postInfo.id));
       if (!res.ok) throw new Error("Failed to fetch post");
@@ -89,11 +93,17 @@ export default function PostDetailsModal({
   );
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const displayPost = post ?? postInfo;
+  const displayUsername = displayPost.username ?? postInfo.username;
+  const displayProfilePic =
+    displayPost.actorType === "COMMUNITY"
+      ? displayPost.community?.profilePic || "/default_profile.jpg"
+      : displayPost.profilePic ?? postInfo.profilePic;
   const reportTarget: ReportTargetSnapshot = {
     type: "POST",
     id: postInfo.id,
-    username: postInfo.username,
-    profilePic: postInfo.profilePic,
+    username: displayUsername,
+    profilePic: displayProfilePic,
     title: postInfo.title,
     content: postInfo.content,
     media: postInfo.media,
@@ -129,7 +139,7 @@ export default function PostDetailsModal({
     hasMedia;
 
   const avatarUrl = useResolvedMediaUrl(
-    postInfo.profilePic,
+    displayProfilePic,
     "/default_profile.jpg",
   );
 
@@ -571,7 +581,7 @@ export default function PostDetailsModal({
 
           <div className="flex-1">
             <div className="font-semibold text-sm text-gray-900">
-              {postInfo.username}
+              {displayUsername}
             </div>
 
             <div className="text-xs text-gray-500">
@@ -756,6 +766,11 @@ export default function PostDetailsModal({
               createCommentMutation.mutate({
                 postId: postInfo.id,
                 content: text, // no parentId for top-level
+                actorType: selectedActor.type,
+                communityId:
+                  selectedActor.type === "COMMUNITY"
+                    ? selectedActor.communityId
+                    : null,
               });
             }}
           />

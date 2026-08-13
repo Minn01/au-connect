@@ -15,6 +15,8 @@ import {
 import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia } from "@/types/PostMedia";
 import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
+import { getManagedCommunity } from "@/lib/communityAuth";
+import type { Prisma } from "@/lib/generated/prisma";
 
 export async function getSinglePost(
   req: NextRequest,
@@ -32,6 +34,9 @@ export async function getSinglePost(
 
     // get postId from params
     const { postId } = params;
+    const interactionActorType = req.nextUrl.searchParams.get("actorType");
+    const interactionCommunityId =
+      req.nextUrl.searchParams.get("actorCommunityId");
 
     if (!postId) {
       return NextResponse.json(
@@ -40,10 +45,36 @@ export async function getSinglePost(
       );
     }
 
+    const interactionCommunity =
+      interactionActorType === "COMMUNITY" && interactionCommunityId
+        ? await getManagedCommunity(userId, interactionCommunityId)
+        : null;
+
+    const interactionWhere: Prisma.PostInteractionWhereInput =
+      interactionActorType === "COMMUNITY" && interactionCommunity
+        ? {
+            actorType: "COMMUNITY",
+            communityId: interactionCommunity.id,
+            type: { in: ["LIKE"] },
+          }
+        : {
+            actorType: "USER",
+            userId,
+            type: { in: ["LIKE", "SAVED"] },
+          };
+
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
         user: true,
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            profilePic: true,
+          },
+        },
 
         _count: {
           select: {
@@ -52,12 +83,7 @@ export async function getSinglePost(
         },
 
         interactions: {
-          where: {
-            userId: userId,
-            type: {
-              in: ["LIKE", "SAVED"],
-            },
-          },
+          where: interactionWhere,
           select: {
             id: true,
             type: true,
@@ -174,8 +200,14 @@ export async function getSinglePost(
       removedByModeration: post.moderationStatus === "REMOVED",
       media: mediaWithUrls,
 
-      username: post.user.username,
-      profilePic: post.user.profilePic,
+      username:
+        post.actorType === "COMMUNITY"
+          ? (post.community?.name ?? post.username)
+          : post.user.username,
+      profilePic:
+        post.actorType === "COMMUNITY"
+          ? post.community?.profilePic || "/default_profile.jpg"
+          : post.user.profilePic,
 
       isLiked,
       isSaved,

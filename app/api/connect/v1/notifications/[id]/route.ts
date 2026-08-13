@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
+import { canAccessNotification } from "@/lib/server/notificationActor.server";
 
 export async function PATCH(
   req: NextRequest,
@@ -9,11 +10,18 @@ export async function PATCH(
   try {
     const userId = getAuthUserIdFromReq(req);
     const { id: notificationId } = await params; 
+    const canAccess = await canAccessNotification(notificationId, userId);
+
+    if (!canAccess) {
+      return NextResponse.json(
+        { error: "Notification not found" },
+        { status: 404 },
+      );
+    }
 
     await prisma.notification.updateMany({
       where: {
         id: notificationId,
-        userId,
       },
       data: {
         isRead: true,

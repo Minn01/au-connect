@@ -40,8 +40,13 @@ export default function PostProfile({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const slug = buildSlug(post.username || "", post.userId || "");
+  const communitySlug = post.community?.slug;
+  const displayProfilePic =
+    post.actorType === "COMMUNITY"
+      ? post.community?.profilePic || DEFAULT_PROFILE_PIC
+      : post.profilePic || DEFAULT_PROFILE_PIC;
   const resolvedProfilePicUrl = useResolvedMediaUrl(
-    post.profilePic,
+    displayProfilePic,
     DEFAULT_PROFILE_PIC,
   );
 
@@ -50,7 +55,7 @@ export default function PostProfile({
     type: "POST",
     id: post.id,
     username: post.username,
-    profilePic: post.profilePic,
+    profilePic: displayProfilePic,
     title: post.title,
     content: post.content,
     media: post.media,
@@ -78,6 +83,11 @@ export default function PostProfile({
   }, [postMenuDropDownOpen, setPostMenuDropDownOpen]);
 
   const handleProfileClick = (slug: string) => {
+    if (post.actorType === "COMMUNITY" && communitySlug) {
+      router.push(`/community/${communitySlug}`);
+      return;
+    }
+
     if (!slug) return;
     router.push(`/profile/${slug}`);
   };

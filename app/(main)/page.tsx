@@ -12,10 +12,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { setInvalidatePosts } from "@/lib/services/uploadService";
+import { useActorStore } from "@/lib/stores/actorStore";
+import { MY_MANAGED_COMMUNITIES_API_PATH } from "@/lib/constants";
 
 export default function Home() {
   // Get query client and pass to upload service
   const queryClient = useQueryClient();
+  const selectedActor = useActorStore((state) => state.selectedActor);
 
   useEffect(() => {
     setInvalidatePosts(() => {
@@ -29,6 +32,24 @@ export default function Home() {
     queryFn: fetchUser,
   });
 
+  const { data: managedCommunities = [] } = useQuery({
+    queryKey: ["managed-communities"],
+    queryFn: async () => {
+      const res = await fetch(MY_MANAGED_COMMUNITIES_API_PATH);
+      if (!res.ok) return [];
+      const json = await res.json();
+      return Array.isArray(json.communities) ? json.communities : [];
+    },
+    enabled: !!user,
+  });
+  const activeCommunity =
+    selectedActor.type === "COMMUNITY"
+      ? managedCommunities.find(
+          (community: { id: string }) =>
+            community.id === selectedActor.communityId,
+        )
+      : null;
+
   // POSTS (infinite)
   const {
     data,
@@ -37,7 +58,7 @@ export default function Home() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["posts"],
+    queryKey: ["posts", selectedActor],
     queryFn: fetchPosts,
     enabled: !!user,
     initialPageParam: null,
@@ -52,7 +73,11 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="md:grid md:grid-cols-12 md:gap-6">
           <div className="lg:col-span-3 md:col-span-4 hidden md:block">
-            <LeftProfile user={user} loading={userLoading} />
+            <LeftProfile
+              user={user}
+              loading={userLoading}
+              community={activeCommunity}
+            />
           </div>
 
           <div className="lg:col-span-6 md:col-span-7">
@@ -60,6 +85,7 @@ export default function Home() {
               <MainFeed
                 user={user}
                 userLoading={userLoading}
+                community={activeCommunity}
                 posts={posts}
                 loading={postLoading}
                 fetchNextPage={fetchNextPage}
