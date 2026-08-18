@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { Pencil, Camera, Flag } from "lucide-react";
+import { Pencil, Camera, Flag, BadgeCheck, ShieldCheck, Clock3, ShieldAlert } from "lucide-react";
 
 import SectionCard from "./SectionCard";
 import ExperienceItem from "./ExperienceItem";
@@ -35,6 +35,7 @@ import ReportModal from "@/app/components/ReportModal";
 import { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
 import { postReport } from "../utils/reportFunctions";
 import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
+import { ACCOUNT_VERIFICATION_PAGE_PATH } from "@/lib/constants";
 
 type ConnectionUser = {
   id: string;
@@ -49,6 +50,13 @@ type ConnectionRequest = {
   fromUserId?: string;
   toUser?: { id?: string };
   fromUser?: { id?: string };
+};
+
+const VERIFICATION_ROLE_LABEL: Record<string, string> = {
+  STUDENT: "Verified Student",
+  ALUMNI: "Verified Alumni",
+  STAFF: "Verified Staff",
+  LECTURER: "Verified Lecturer",
 };
 
 function ConnectionPreviewItem({ user }: { user: ConnectionUser }) {
@@ -535,6 +543,14 @@ export default function ProfileView({
     }
   }
 
+  // Verification status (shown as a badge next to the name + owner CTA button)
+  const verificationStatus = userState.accountVerificationStatus ?? "UNSUBMITTED";
+  const isVerified = verificationStatus === "APPROVED";
+  const verifiedLabel =
+    (userState.accountVerificationRole &&
+      VERIFICATION_ROLE_LABEL[userState.accountVerificationRole]) ||
+    "Verified account";
+
   return (
     <>
       {/* ✅ ADDED: make this component a real scroll area under Header */}
@@ -593,13 +609,49 @@ export default function ProfileView({
                       <div className="z-20 flex flex-col items-end gap-2 flex-1 min-w-0 md:mb-0 md:absolute md:top-4 md:right-4 md:w-auto">
                         <div className="flex flex-wrap justify-end items-center gap-2 md:gap-3 w-full md:w-auto">
                           {isOwner ? (
-                            <button
-                              onClick={() => setOpenEditModal(true)}
-                              className="flex h-9 md:h-10 items-center gap-1.5 md:gap-2 px-3 md:px-4 border rounded-lg text-xs md:text-base text-gray-700 hover:bg-gray-50 shadow-sm bg-white cursor-pointer"
-                            >
-                              <Pencil size={14} className="md:w-4 md:h-4" />
-                              Edit Profile
-                            </button>
+                            <>
+                              {/* Verification CTA — easy to find on your own profile */}
+                              {verificationStatus === "APPROVED" ? (
+                                <button
+                                  onClick={() =>
+                                    router.push(ACCOUNT_VERIFICATION_PAGE_PATH)
+                                  }
+                                  className="flex h-9 md:h-10 items-center gap-1.5 md:gap-2 px-3 md:px-4 rounded-lg text-xs md:text-base font-medium text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 shadow-sm cursor-pointer"
+                                >
+                                  <ShieldCheck size={16} className="md:w-[18px] md:h-[18px]" />
+                                  Verified
+                                </button>
+                              ) : verificationStatus === "PENDING" ? (
+                                <button
+                                  onClick={() =>
+                                    router.push(ACCOUNT_VERIFICATION_PAGE_PATH)
+                                  }
+                                  className="flex h-9 md:h-10 items-center gap-1.5 md:gap-2 px-3 md:px-4 rounded-lg text-xs md:text-base font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 shadow-sm cursor-pointer"
+                                >
+                                  <Clock3 size={16} className="md:w-[18px] md:h-[18px]" />
+                                  Verification Pending
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() =>
+                                    router.push(ACCOUNT_VERIFICATION_PAGE_PATH)
+                                  }
+                                  className="flex h-9 md:h-10 items-center gap-1.5 md:gap-2 px-3 md:px-4 rounded-lg text-xs md:text-base font-medium text-white bg-blue-600 border border-blue-600 hover:bg-blue-700 shadow-sm cursor-pointer"
+                                >
+                                  <ShieldAlert size={16} className="md:w-[18px] md:h-[18px]" />
+                                  {verificationStatus === "REJECTED"
+                                    ? "Re-verify Account"
+                                    : "Verify Account"}
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setOpenEditModal(true)}
+                                className="flex h-9 md:h-10 items-center gap-1.5 md:gap-2 px-3 md:px-4 border rounded-lg text-xs md:text-base text-gray-700 hover:bg-gray-50 shadow-sm bg-white cursor-pointer"
+                              >
+                                <Pencil size={14} className="md:w-4 md:h-4" />
+                                Edit Profile
+                              </button>
+                            </>
                           ) : (
                             <>
                               {/* ✅ UPDATED: Show different UI based on connection state */}
@@ -700,8 +752,20 @@ export default function ProfileView({
                       </div>
                     </div>
 
-                    <h1 className="text-2xl font-bold text-gray-900 mt-2">
-                      {userState.username}
+                    <h1 className="flex items-center gap-1.5 text-2xl font-bold text-gray-900 mt-2">
+                      <span>{userState.username}</span>
+                      {isVerified && (
+                        <span
+                          className="inline-flex items-center"
+                          title={verifiedLabel}
+                          aria-label={verifiedLabel}
+                        >
+                          <BadgeCheck
+                            className="h-6 w-6 text-blue-600"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      )}
                     </h1>
                     <p className="text-gray-700">{userState.title}</p>
 

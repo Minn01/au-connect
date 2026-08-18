@@ -1,23 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ShieldCheck, X } from "lucide-react";
+import { ShieldCheck, Clock3, X } from "lucide-react";
 import { ACCOUNT_VERIFICATION_PAGE_PATH } from "@/lib/constants";
+
+type VerificationStatus = "UNSUBMITTED" | "PENDING" | "APPROVED" | "REJECTED";
 
 export default function VerificationRequiredModal({
   open,
   onClose,
   action,
+  status,
 }: {
   open: boolean;
   onClose: () => void;
   action?: string;
+  /** Current verification status of the user, used to tailor the message. */
+  status?: VerificationStatus;
 }) {
   const router = useRouter();
 
   if (!open) return null;
 
-  const handleVerifyNow = () => {
+  const isPending = status === "PENDING";
+
+  const handleGoToVerification = () => {
     onClose();
     router.push(ACCOUNT_VERIFICATION_PAGE_PATH);
   };
@@ -37,34 +44,53 @@ export default function VerificationRequiredModal({
         </button>
 
         <div className="flex flex-col items-center text-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
-            <ShieldCheck className="h-6 w-6 text-red-600" />
-          </div>
+          {isPending ? (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50">
+              <Clock3 className="h-6 w-6 text-amber-600" />
+            </div>
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+              <ShieldCheck className="h-6 w-6 text-red-600" />
+            </div>
+          )}
 
           <h2 className="text-lg font-bold text-neutral-950">
-            Verification required
+            {isPending ? "Verification under review" : "Verification required"}
           </h2>
 
           <p className="text-sm leading-relaxed text-neutral-600">
-            {action
-              ? `You need a verified AU Connect account to ${action}.`
-              : "You need a verified AU Connect account to perform this action."}
-            {" "}Submit your AU documents for a quick admin review.
+            {isPending ? (
+              <>
+                Your account verification is being reviewed by an admin. You’ll be
+                able to {action ?? "do this"} once it’s approved.
+              </>
+            ) : (
+              <>
+                {action
+                  ? `You need a verified AU Connect account to ${action}.`
+                  : "You need a verified AU Connect account to perform this action."}
+                {" "}Submit your AU documents for a quick admin review.
+              </>
+            )}
           </p>
         </div>
 
         <div className="mt-6 flex flex-col gap-2">
           <button
-            onClick={handleVerifyNow}
-            className="w-full rounded-lg bg-red-600 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+            onClick={handleGoToVerification}
+            className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white ${
+              isPending
+                ? "bg-amber-600 hover:bg-amber-700"
+                : "bg-red-600 hover:bg-red-700"
+            }`}
           >
-            Verify my account
+            {isPending ? "View verification status" : "Verify my account"}
           </button>
           <button
             onClick={onClose}
             className="w-full rounded-lg border border-neutral-200 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
           >
-            Maybe later
+            {isPending ? "Got it" : "Maybe later"}
           </button>
         </div>
       </div>

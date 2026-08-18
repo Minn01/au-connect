@@ -30,7 +30,11 @@ import { MediaType, MediaItem } from "@/types/Media";
 import JobDraft from "@/types/JobDraft";
 import { validateJobDraft } from "../(main)/profile/utils/validateJobPosts";
 import { useRouter } from "next/navigation";
-import { JOBS_PAGE_PATH, MY_MANAGED_COMMUNITIES_API_PATH } from "@/lib/constants";
+import {
+  JOBS_PAGE_PATH,
+  MY_MANAGED_COMMUNITIES_API_PATH,
+  SHARE_POST_PAGE_PATH,
+} from "@/lib/constants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostType from "@/types/Post";
 import { useActorStore } from "@/lib/stores/actorStore";
@@ -128,12 +132,15 @@ export default function CreatePostModal({
   initialType = "media",
   editMode = false,
   exisistingPost,
+  onPosted,
 }: CreatePostModalPropTypes) {
   const [selectedVisibility, setSelectedVisibility] = useState("everyone");
   const [postContent, setPostContent] = useState("");
   const [postType, setPostType] = useState(initialType);
   const [title, setTitle] = useState("");
   const [disableComments, setDisableComments] = useState(false);
+  // Option A: let the author cross-share to LinkedIn/Facebook right after posting.
+  const [shareAfterPost, setShareAfterPost] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -514,6 +521,7 @@ export default function CreatePostModal({
           jobData.pollDuration = pollDuration;
         }
 
+        const wantsShare = shareAfterPost && postType !== "job_post";
         const jobId = useUploadStore.getState().addJob(jobData);
         setIsOpen(false);
         void processUpload(jobId).then((createdPost) => {
@@ -521,6 +529,16 @@ export default function CreatePostModal({
             updateJobsCacheAfterCreate(createdPost, jobDraft);
           } else {
             queryClient.invalidateQueries({ queryKey: ["job-posts"] });
+          }
+
+          // Offer LinkedIn/Facebook sharing once the post is live and has a URL.
+          if (wantsShare && createdPost?.id && onPosted) {
+            onPosted(
+              `${window.location.origin}${SHARE_POST_PAGE_PATH(
+                createdPost.id,
+                user?.id,
+              )}`,
+            );
           }
         });
         clearDraft();
@@ -993,7 +1011,32 @@ export default function CreatePostModal({
             )}
           </div>
 
-          <div className="flex items-center justify-between px-6 py-4 border-t bg-neutral-50">
+          {/* Cross-share option (create mode, non-job posts only) */}
+          {!editMode && postType !== "job_post" && (
+            <div className="px-6 pt-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={shareAfterPost}
+                  onChange={(e) => setShareAfterPost(e.target.checked)}
+                  className="cursor-pointer mt-0.5 h-4 w-4"
+                />
+                <span className="text-sm text-neutral-700">
+                  Share to{" "}
+                  <span className="font-semibold text-[#0A66C2]">LinkedIn</span>{" "}
+                  &amp;{" "}
+                  <span className="font-semibold text-[#1877F2]">Facebook</span>{" "}
+                  after posting
+                  <span className="block text-xs text-neutral-400">
+                    Opens a share window once your post is live. You confirm the
+                    share on each platform.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between px-6 py-4 border-t bg-neutral-50 mt-4">
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"

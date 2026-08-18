@@ -7,6 +7,8 @@ import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 
 import Post from "./Post";
 import CreatePostModal from "./CreatePostModal";
+import VerificationRequiredModal from "./VerificationRequiredModal";
+import ShareModal from "@/app/(main)/profile/components/ShareModal";
 import { MainFeedPropTypes } from "@/types/FeedPagePropTypes";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 import { useFeedStore } from "@/lib/stores/feedStore";
@@ -24,6 +26,12 @@ export default function MainFeed({
 }: MainFeedPropTypes) {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState("media");
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  // URL of a just-created post to offer cross-sharing (LinkedIn/Facebook).
+  const [postShareUrl, setPostShareUrl] = useState<string | null>(null);
+
+  // Only APPROVED accounts may create posts.
+  const isApproved = user?.accountVerificationStatus === "APPROVED";
 
   const virtuosoRef = useRef<VirtuosoHandle>(null!);
   const setVirtuosoRef = useFeedStore((s) => s.setVirtuosoRef);
@@ -34,8 +42,22 @@ export default function MainFeed({
     }
   };
 
+  // Gate every "create post" entry point: unverified/pending users get the
+  // verification prompt instead of the composer (block before writing).
   const openModal = (postType: string) => {
+    if (!isApproved) {
+      setVerificationModalOpen(true);
+      return;
+    }
     setSelectedPostType(postType);
+    setIsCreatePostModalOpen(true);
+  };
+
+  const openComposer = () => {
+    if (!isApproved) {
+      setVerificationModalOpen(true);
+      return;
+    }
     setIsCreatePostModalOpen(true);
   };
 
@@ -76,7 +98,7 @@ export default function MainFeed({
               />
             </div>
             <button
-              onClick={() => setIsCreatePostModalOpen(true)}
+              onClick={openComposer}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-600 rounded-full focus:outline-none active:bg-gray-100 hover:bg-gray-200 text-left"
             >
               {"Share your ideas"}
@@ -119,8 +141,22 @@ export default function MainFeed({
           isOpen={isCreatePostModalOpen}
           setIsOpen={setIsCreatePostModalOpen}
           initialType={selectedPostType}
+          onPosted={(url) => setPostShareUrl(url)}
         />
       )}
+
+      <VerificationRequiredModal
+        open={verificationModalOpen}
+        onClose={() => setVerificationModalOpen(false)}
+        action="create posts"
+        status={user?.accountVerificationStatus}
+      />
+
+      <ShareModal
+        isOpen={!!postShareUrl}
+        onClose={() => setPostShareUrl(null)}
+        shareUrl={postShareUrl ?? ""}
+      />
 
       {/* EVERYTHING IN ONE SCROLLABLE LIST */}
       {loading ? (

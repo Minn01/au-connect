@@ -103,6 +103,9 @@ export default async function ProfilePage(props: {
 
     connections: user.connections ?? 0,
 
+    accountVerificationStatus: user.accountVerificationStatus,
+    accountVerificationRole: user.accountVerificationRole,
+
     experience: user.experience.map((exp) => ({
       ...exp,
       endMonth: exp.endMonth ?? undefined,
