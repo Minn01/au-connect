@@ -43,6 +43,7 @@ import PopupModal from "./PopupModal";
 import { fetchUnreadCount } from "@/lib/client/notifications.client";
 import { fetchUnreadMessagesCount } from "@/lib/headerMessaging";
 import { useActorStore } from "@/lib/stores/actorStore";
+import VerificationRequiredModal from "./VerificationRequiredModal";
 
 type SearchUser = {
   id: string;
@@ -122,6 +123,7 @@ export default function Header() {
   const [query, setQuery] = useState("");
   const [openResults, setOpenResults] = useState(false);
   const [actorMenuOpen, setActorMenuOpen] = useState(false);
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
 
   const pathnameRaw = usePathname();
   const pathname = pathnameRaw ?? "";
@@ -185,6 +187,20 @@ export default function Header() {
   const activeActorPic = activeCommunity
     ? activeCommunity.profilePic || "/default_profile.jpg"
     : user?.profilePic;
+  const isAccountVerified = user?.accountVerificationStatus === "APPROVED";
+
+  const handleSelectCommunityActor = (communityId: string) => {
+    if (!isAccountVerified) {
+      setActorMenuOpen(false);
+      setMobileMenuOpen(false);
+      setVerificationModalOpen(true);
+      return;
+    }
+
+    selectCommunityActor(communityId);
+    setActorMenuOpen(false);
+    setMobileMenuOpen(false);
+  };
 
   const navBarIndicatedPages = [
     MAIN_PAGE_PATH,
@@ -444,8 +460,7 @@ export default function Header() {
                         key={community.id}
                         type="button"
                         onClick={() => {
-                          selectCommunityActor(community.id);
-                          setActorMenuOpen(false);
+                          handleSelectCommunityActor(community.id);
                         }}
                         className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
                       >
@@ -605,8 +620,7 @@ export default function Header() {
                       key={community.id}
                       type="button"
                       onClick={() => {
-                        selectCommunityActor(community.id);
-                        setMobileMenuOpen(false);
+                        handleSelectCommunityActor(community.id);
                       }}
                       className="flex w-full items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50"
                     >
@@ -637,6 +651,12 @@ export default function Header() {
             setShowModal(false);
             handleLogout(() => router.push(SIGNIN_PAGE_PATH));
           }}
+        />
+
+        <VerificationRequiredModal
+          open={verificationModalOpen}
+          onClose={() => setVerificationModalOpen(false)}
+          action="switch to a community page"
         />
       </div>
     </header>
