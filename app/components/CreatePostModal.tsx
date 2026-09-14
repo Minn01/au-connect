@@ -534,7 +534,7 @@ export default function CreatePostModal({
           // Offer LinkedIn/Facebook sharing once the post is live and has a URL.
           if (wantsShare && createdPost?.id && onPosted) {
             onPosted(
-              `${window.location.origin}${SHARE_POST_PAGE_PATH(createdPost.id)}`,
+              `${process.env.NEXT_PUBLIC_BASE_URL ?? window.location.origin}${SHARE_POST_PAGE_PATH(createdPost.id)}`,
             );
           }
         });

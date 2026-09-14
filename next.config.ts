@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Served under the /connect sub-path of the life.au.edu super-app.
+  // Next auto-prefixes all pages, assets, <Link>s and the middleware matcher.
+  basePath: '/connect',
   images: {
     unoptimized: true,
     remotePatterns: [

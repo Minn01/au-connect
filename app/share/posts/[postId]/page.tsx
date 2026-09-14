@@ -35,26 +35,30 @@ export async function generateMetadata({
 
   const title = post.title?.trim() || `${post.username} on ${SITE_NAME}`;
   const description = snippet(post.content) || `See this post on ${SITE_NAME}.`;
-  const imagePath = SHARE_POST_OG_IMAGE_PATH(postId);
-  const pagePath = SHARE_POST_PAGE_PATH(postId);
+  // Build fully-absolute URLs. NEXT_PUBLIC_BASE_URL already includes the
+  // /connect basePath, so we concatenate rather than rely on metadataBase
+  // resolution (a leading-slash path would otherwise drop /connect).
+  const base = NEXT_PUBLIC_BASE_URL.replace(/\/$/, "");
+  const imageUrl = `${base}${SHARE_POST_OG_IMAGE_PATH(postId)}`;
+  const pageUrl = `${base}${SHARE_POST_PAGE_PATH(postId)}`;
 
   return {
-    metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
+    metadataBase: new URL(base),
     title,
     description,
     openGraph: {
       type: "article",
       siteName: SITE_NAME,
-      url: pagePath,
+      url: pageUrl,
       title,
       description,
-      images: [{ url: imagePath, width: 1200, height: 630, alt: title }],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [imagePath],
+      images: [imageUrl],
     },
   };
 }
@@ -73,13 +77,16 @@ export default async function SharePostPage({
 
   // Humans land here from a shared link; funnel them into the real (authed) post.
   const openInAppHref = POST_DETAIL_PAGE_PATH(postId, 0);
+  // Plain <img> is not basePath-prefixed, so use an absolute URL (base already
+  // includes /connect).
+  const imageSrc = `${NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}${SHARE_POST_OG_IMAGE_PATH(postId)}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={SHARE_POST_OG_IMAGE_PATH(postId)}
+          src={imageSrc}
           alt=""
           className="h-56 w-full bg-gray-100 object-cover"
         />

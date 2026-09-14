@@ -42,5 +42,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Bakes the production URL into the browser bundle. Set repo variable
+          # NEXT_PUBLIC_BASE_URL (Settings → Actions → Variables); falls back to
+          # localhost if unset.
+          build-args: |
+            NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
