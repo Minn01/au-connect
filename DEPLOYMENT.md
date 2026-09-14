@@ -1,13 +1,15 @@
 # Deploying AU Connect on life.au.edu
 
 These are the instructions for deploying **AU Connect** on the life.au.edu server.
-The stack runs three containers via Docker Compose:
+The stack runs two containers via Docker Compose:
 
 | Container | What it is | Port |
 |-----------|-----------|------|
 | `au-connect-app` | the Next.js app (pulled from Docker Hub) | 3000 (localhost only) |
-| `au-connect-mongo` | MongoDB (single-node replica set) | internal only |
 | `au-connect-watchtower` | continuous deployment — auto-updates the app | — |
+
+The **database is MongoDB Atlas** (managed cloud, not a container) — configured
+via `DATABASE_URL` in `.env`.
 
 ## Prerequisites
 
@@ -39,7 +41,7 @@ NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL (https!)
 NEXT_PUBLIC_APP_URL=https://life.au.edu/connect
 NODE_ENV=production
 JWT_SECRET=super_secure_jwt_secret                 # openssl rand -base64 32
-DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
+DATABASE_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/au_connect?retryWrites=true&w=majority
 
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
@@ -77,8 +79,9 @@ fail.
 make prod-up
 ```
 
-This pulls the image from Docker Hub and starts the app + MongoDB + Watchtower.
-The app listens on **127.0.0.1:3000** (not exposed publicly — nginx fronts it).
+This pulls the image from Docker Hub and starts the app + Watchtower. The app
+connects to your Atlas database via `DATABASE_URL` and listens on
+**127.0.0.1:3000** (not exposed publicly — nginx fronts it).
 
 ### 5. Put nginx in front
 
@@ -96,7 +99,7 @@ sudo nginx -t && sudo nginx -s reload
 make prod-down
 ```
 
-(The Mongo data volume is preserved across restarts.)
+(Your data lives in Atlas, so stopping the app never touches it.)
 
 ---
 
@@ -116,8 +119,7 @@ merge to main → GitHub Actions builds & pushes  tommyzizii/au-connect:latest
                     pulls it + recreates au-connect-app with the same .env
 ```
 
-- Watchtower only touches containers labelled `watchtower.enable=true` (the app),
-  never MongoDB.
+- Watchtower only touches containers labelled `watchtower.enable=true` (the app).
 - If your Docker Hub repo is **private**, run `docker login` on the server and
   uncomment the `config.json` volume line in `docker-compose.prod.yml`.
 - Watch it work: `docker logs -f au-connect-watchtower`.
