@@ -123,16 +123,21 @@ export default function AddEditEducationModal({
   const startYearNum = Number(form.startYear);
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 font-inter">
-      <div className="bg-white w-full max-w-xl rounded-xl p-6 border border-gray-200 shadow-xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 font-inter">
+      <div className="bg-white w-full max-w-xl max-h-[86vh] overflow-y-auto rounded-2xl p-6 border border-gray-100 shadow-2xl">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Education
-          </h2>
-          <button onClick={onClose} className="">
-            <X className="text-gray-500 hover:text-gray-700" />
+        <div className="-m-6 mb-5 flex justify-between items-center bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              Education
+            </h2>
+            <p className="mt-1 text-sm text-blue-100">
+              {initial ? "Update your school details" : "Add education to your profile"}
+            </p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white">
+            <X />
           </button>
         </div>
 

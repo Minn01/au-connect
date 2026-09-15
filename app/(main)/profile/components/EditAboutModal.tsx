@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { updateAbout } from "../[slug]/hook/updateAbout"; 
@@ -19,9 +21,10 @@ export default function EditAboutModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (open) {
-      setAbout(initialAbout || "");
+	  useEffect(() => {
+	    if (open) {
+	      // eslint-disable-next-line react-hooks/set-state-in-effect
+	      setAbout(initialAbout || "");
       setError("");
       setSaving(false);
     }
@@ -45,17 +48,22 @@ export default function EditAboutModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl border border-gray-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">Edit about</h2>
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-5 text-white">
+          <div>
+            <h2 className="text-xl font-bold text-white">Edit about</h2>
+            <p className="mt-1 text-sm text-blue-100">
+              Share a short intro for your profile.
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 "
+            className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white"
           >
-            <X className="h-5 w-5 text-gray-700" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -88,7 +96,7 @@ export default function EditAboutModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t">
+        <div className="flex justify-end gap-3 border-t border-gray-100 bg-slate-50 px-6 py-4">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-lg border border-gray-300 

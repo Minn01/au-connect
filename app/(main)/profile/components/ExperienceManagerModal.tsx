@@ -30,14 +30,19 @@ export default function ExperienceManagerModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center font-inter">
-        <div className="bg-white w-full max-w-2xl rounded-xl overflow-hidden border border-gray-200 shadow-xl">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-inter">
+        <div className="bg-white w-full max-w-2xl max-h-[86vh] rounded-2xl overflow-hidden border border-gray-100 shadow-2xl">
 
           {/* HEADER */}
-          <div className="flex justify-between items-center p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Experience
-            </h2>
+          <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+            <div>
+              <h2 className="text-2xl font-bold text-white">
+                Experience
+              </h2>
+              <p className="mt-1 text-sm text-blue-100">
+                {experiences.length} {experiences.length === 1 ? "item" : "items"}
+              </p>
+            </div>
 
             <div className="flex items-center gap-3">
               <button
@@ -45,7 +50,7 @@ export default function ExperienceManagerModal({
                   setEditing(null);
                   setOpenForm(true);
                 }}
-                className="flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-xs md:text-sm rounded-lg font-medium hover:bg-blue-700 "
+                className="flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-white/15 text-white text-xs md:text-sm rounded-lg font-medium ring-1 ring-white/25 hover:bg-white/25"
               >
                 <Plus size={14} className="md:w-4 md:h-4" />
                 Add experience
@@ -53,19 +58,19 @@ export default function ExperienceManagerModal({
 
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-gray-100 "
+                className="p-2 rounded-lg text-white/80 hover:bg-white/20 hover:text-white"
               >
-                <X className="text-gray-600 hover:text-gray-800" />
+                <X />
               </button>
             </div>
           </div>
 
           {/* LIST */}
-          <div className="p-6 space-y-3">
+          <div className="max-h-[calc(86vh-7.5rem)] overflow-y-auto bg-slate-50 p-6 space-y-3">
             {experiences.map((exp) => (
               <div
                 key={exp.id}
-                className={`border border-gray-200 rounded-lg p-4 flex justify-between hover:bg-gray-50 ${
+                className={`border border-gray-100 rounded-xl bg-white p-4 flex justify-between shadow-sm transition hover:border-blue-200 hover:shadow-md ${
                   deletingId === exp.id ? "opacity-60" : ""
                 }`}
               >

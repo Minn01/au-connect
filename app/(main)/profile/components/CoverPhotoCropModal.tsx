@@ -1,7 +1,10 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useCallback, useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
+import { X } from "lucide-react";
 
 import { ProfileCoverCrop } from "@/types/ProfileCoverCrop";
 import { getCroppedCoverFile } from "../utils/cropImage";
@@ -37,9 +40,10 @@ export default function CoverPhotoCropModal({
     height: number;
   } | null>(initialCrop?.croppedAreaPixels ?? null);
 
-  useEffect(() => {
-    if (!open) return;
-    setCrop(initialCrop?.crop ?? { x: 0, y: 0 });
+	  useEffect(() => {
+	    if (!open) return;
+	    // eslint-disable-next-line react-hooks/set-state-in-effect
+	    setCrop(initialCrop?.crop ?? { x: 0, y: 0 });
     setZoom(initialCrop?.zoom ?? 1);
     setCroppedAreaPixels(initialCrop?.croppedAreaPixels ?? null);
   }, [open, initialCrop]);
@@ -70,20 +74,24 @@ export default function CoverPhotoCropModal({
   }
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
 
-      <div className="relative z-10 w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="relative z-10 w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* HEADER */}
-        <div className="px-4 py-3 border-b flex items-center justify-between">
-          <div className="font-semibold text-gray-900">Edit cover photo</div>
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-4 text-white">
+          <div>
+            <div className="font-bold text-white">Edit cover photo</div>
+            <p className="text-sm text-blue-100">Adjust crop and zoom.</p>
+          </div>
           <button
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="text-gray-600 hover:text-gray-900 disabled:opacity-50 "
+            className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white disabled:opacity-50"
+            aria-label="Close cover crop editor"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </div>
 

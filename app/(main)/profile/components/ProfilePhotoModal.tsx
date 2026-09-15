@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import Image from "next/image";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { X, Trash2, Pencil } from "lucide-react";
@@ -339,10 +341,10 @@ export default function ProfilePhotoModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* BACKDROP */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => {
           if (!busy) {
             resetSelection();
@@ -352,10 +354,13 @@ export default function ProfilePhotoModal({
       />
 
       {/* MODAL */}
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-white shadow-lg p-6 text-gray-900">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl">
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Profile photo</h2>
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-4 text-white">
+          <div>
+            <h2 className="text-lg font-bold text-white">Profile photo</h2>
+            <p className="text-sm text-blue-100">Preview, upload, or crop your avatar.</p>
+          </div>
           <button
             onClick={() => {
               if (!busy) {
@@ -363,14 +368,15 @@ export default function ProfilePhotoModal({
                 onClose();
               }
             }}
-            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 "
+            className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white disabled:opacity-50"
             aria-label="Close"
             type="button"
             disabled={busy}
           >
-            <X size={18} className="text-gray-700" />
+            <X size={18} />
           </button>
         </div>
+        <div className="p-6">
 
         {/* AVATAR PREVIEW */}
         <div className="flex justify-center mb-6">
@@ -451,6 +457,7 @@ export default function ProfilePhotoModal({
           onSave={handleSaveCropped}
           busy={busy}
         />
+        </div>
       </div>
     </div>
   );

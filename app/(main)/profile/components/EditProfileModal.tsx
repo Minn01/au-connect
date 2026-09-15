@@ -1,7 +1,10 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import { updateMyProfile } from "../[slug]/hook/updateMyProfile";
 import type User from "@/types/User";
 
@@ -125,9 +128,27 @@ export default function EditProfileModal({
   const readOnlyEmail = (user.email ?? "").trim();
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 font-inter">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-xl p-6 border border-gray-200">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900">Edit Profile</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 font-inter backdrop-blur-sm">
+      <div className="max-h-[86vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-100 bg-white shadow-2xl">
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-5 text-white">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
+            <p className="mt-1 text-sm text-blue-100">
+              Update your public profile details.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white disabled:opacity-50"
+            aria-label="Close edit profile"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="p-6">
 
         {error && <p className="text-red-600 text-sm mb-2 font-medium">{error}</p>}
 
@@ -239,6 +260,7 @@ export default function EditProfileModal({
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
+        </div>
         </div>
       </div>
     </div>
