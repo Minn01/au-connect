@@ -13,6 +13,7 @@ import { MainFeedPropTypes } from "@/types/FeedPagePropTypes";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 import { useFeedStore } from "@/lib/stores/feedStore";
 import LeftProfile from "./Feed_LeftProfile";
+import MobileAnnouncementsEntry from "./MobileAnnouncementsEntry";
 
 export default function MainFeed({
   user,
@@ -136,6 +137,7 @@ export default function MainFeed({
             )}
           </div>
         </div>
+        <MobileAnnouncementsEntry />
       </>
     );
   };

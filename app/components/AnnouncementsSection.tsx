@@ -22,7 +22,15 @@ function AnnouncementSkeleton() {
   );
 }
 
-export default function AnnouncementsSection() {
+type AnnouncementsSectionProps = {
+  className?: string;
+  listClassName?: string;
+};
+
+export default function AnnouncementsSection({
+  className = "mt-4",
+  listClassName = "max-h-[calc(100vh-19rem)] overflow-y-auto pr-2 space-y-3",
+}: AnnouncementsSectionProps) {
   const [previewingAnnouncement, setPreviewingAnnouncement] =
     useState<Announcement | null>(null);
   const {
@@ -53,7 +61,7 @@ export default function AnnouncementsSection() {
 
   return (
     <>
-      <section className="mt-4">
+      <section className={className}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-neutral-900">
             Announcements
@@ -67,7 +75,7 @@ export default function AnnouncementsSection() {
 
         <div
           onScroll={handleAnnouncementsScroll}
-          className="max-h-[calc(100vh-19rem)] overflow-y-auto pr-2 space-y-3"
+          className={listClassName}
         >
           {isLoading ? (
             <>

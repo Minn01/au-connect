@@ -11,12 +11,12 @@ export default function AnnouncementPreviewSkeleton({
 }: AnnouncementPreviewSkeletonProps) {
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-lg bg-white"
+        className="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
         style={{ display: "flex", maxWidth: "1100px" }}
       >
         <div className="hidden h-full min-h-0 w-full md:flex">
@@ -29,16 +29,16 @@ export default function AnnouncementPreviewSkeleton({
           </div>
 
           <div className="flex min-w-0 flex-1 animate-pulse flex-col overflow-hidden border-l border-slate-200">
-            <div className="flex items-center gap-3 border-b border-slate-200 p-4">
-              <div className="h-10 w-10 rounded-full bg-slate-200" />
+            <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 p-4">
+              <div className="h-10 w-10 rounded-full bg-white/20" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-36 rounded bg-slate-200" />
-                <div className="h-3 w-28 rounded bg-slate-200" />
+                <div className="h-4 w-36 rounded bg-white/25" />
+                <div className="h-3 w-28 rounded bg-white/20" />
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                className="rounded-md p-2 text-white/80 transition hover:bg-white/20 hover:text-white"
                 aria-label="Close announcement preview"
               >
                 <X className="h-5 w-5" />
@@ -57,16 +57,16 @@ export default function AnnouncementPreviewSkeleton({
         </div>
 
         <div className="flex h-full animate-pulse flex-col md:hidden">
-          <div className="flex items-center gap-3 border-b border-slate-200 p-4">
-            <div className="h-10 w-10 rounded-full bg-slate-200" />
+          <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 p-4">
+            <div className="h-10 w-10 rounded-full bg-white/20" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-36 rounded bg-slate-200" />
-              <div className="h-3 w-28 rounded bg-slate-200" />
+              <div className="h-4 w-36 rounded bg-white/25" />
+              <div className="h-3 w-28 rounded bg-white/20" />
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              className="rounded-md p-2 text-white/80 transition hover:bg-white/20 hover:text-white"
               aria-label="Close announcement preview"
             >
               <X className="h-5 w-5" />

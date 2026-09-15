@@ -63,12 +63,12 @@ export default function AnnouncementPreviewModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-lg bg-white shadow-xl"
+        className="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
         style={{ display: "flex", maxWidth: "1100px" }}
       >
         <div className="relative hidden min-w-0 flex-[0_0_65%] items-center justify-center bg-black md:flex">
@@ -111,20 +111,22 @@ export default function AnnouncementPreviewModal({
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden border-l border-slate-200">
-          <div className="flex items-center gap-3 border-b border-slate-200 p-4">
-            <Image
-              src="/au-connect-logo.png"
-              alt="AU Connect"
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded-full object-contain"
-            />
+          <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
+              <Image
+                src="/au-connect-logo.png"
+                alt="AU Connect"
+                width={40}
+                height={40}
+                className="h-8 w-8 rounded-full object-contain"
+              />
+            </span>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-950">
+              <p className="truncate text-sm font-semibold text-white">
                 AU ANNOUNCEMENT
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-blue-100">
                 {formatDate(announcement.startDate)}
               </p>
             </div>
@@ -132,7 +134,7 @@ export default function AnnouncementPreviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              className="rounded-md p-2 text-white/80 transition hover:bg-white/20 hover:text-white"
               aria-label="Close announcement preview"
             >
               <X className="h-5 w-5" />
