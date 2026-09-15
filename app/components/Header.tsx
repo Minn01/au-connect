@@ -316,8 +316,23 @@ export default function Header() {
       hideInCommunityMode: true,
     },
     {
+      href: JOBS_PAGE_PATH,
+      icon: <BriefcaseBusiness className="w-5 h-5" />,
+      label: "Jobs",
+      hideInCommunityMode: true,
+    },
+    {
       href: MESSAGES_PAGE_PATH,
-      icon: <MessageCircleMore className="w-5 h-5" />,
+      icon: (
+        <div className="relative">
+          <MessageCircleMore className="w-5 h-5" />
+          {msgUnreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+              {msgUnreadCount > 9 ? "9+" : msgUnreadCount}
+            </span>
+          )}
+        </div>
+      ),
       label: "Messaging",
     },
     {
@@ -327,7 +342,16 @@ export default function Header() {
     },
     {
       href: NOTIFICATION_PAGE_PATH,
-      icon: <Bell className="w-5 h-5" />,
+      icon: (
+        <div className="relative">
+          <Bell className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </div>
+      ),
       label: "Notifications",
     },
   ].filter((item) => !(activeCommunity && item.hideInCommunityMode));
@@ -341,8 +365,8 @@ export default function Header() {
   if (hidden) return null;
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-3">
+    <header className="sticky top-0 z-50 shrink-0 border-b border-gray-200 bg-white">
+      <div className="max-w-7xl mx-auto px-3 py-3 sm:px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div
@@ -353,19 +377,22 @@ export default function Header() {
                 router.push(MAIN_PAGE_PATH);
               }
             }}
-            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-1"
+            className="flex min-w-0 items-center gap-2 cursor-pointer rounded-lg px-1 py-1 hover:bg-gray-50 sm:gap-3 sm:px-3"
           >
             <Image
               src="/au-connect-logo.png"
-              width={45}
-              height={45}
+              width={40}
+              height={40}
               alt="logo"
+              className="h-10 w-10 shrink-0 sm:h-[45px] sm:w-[45px]"
             />
-            <h1 className="text-2xl font-bold text-gray-900">AU Connect</h1>
+            <h1 className="truncate text-xl font-bold text-gray-900 sm:text-2xl">
+              AU Connect
+            </h1>
           </div>
 
           {/* 🔍 DESKTOP SEARCH */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <div className="mx-4 hidden max-w-sm flex-1 lg:flex xl:mx-8 xl:max-w-md">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -414,7 +441,7 @@ export default function Header() {
           </div>
 
           {/* NAV */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden items-center gap-4 lg:flex xl:gap-6">
             {desktopNavItems.map((item, i) => (
               <Link
                 key={i}
@@ -545,7 +572,8 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-red-600"
+            className="rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-red-600 lg:hidden"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -557,7 +585,7 @@ export default function Header() {
 
         {/* Mobile Search */}
         {pathname !== MESSAGES_PAGE_PATH && (
-          <div className="md:hidden mt-3">
+          <div className="mt-3 lg:hidden">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -607,7 +635,7 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
+          <nav className="mt-4 max-h-[calc(100vh-9rem)] overflow-y-auto border-t border-gray-200 pb-4 pt-4 lg:hidden">
             <div className="flex flex-col gap-3">
               {mobileNavItems.map((item, i) => (
                 <Link
@@ -624,7 +652,9 @@ export default function Header() {
                   } hover:bg-red-50 hover:text-red-600`}
                 >
                   {item.icon}
-                  <span className="font-medium">{item.label}</span>
+                  <span className="min-w-0 truncate font-medium">
+                    {item.label}
+                  </span>
                 </Link>
               ))}
 
@@ -636,7 +666,7 @@ export default function Header() {
                 className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 "
               >
                 <LogOut className="w-5 h-5" />
-                <span className="font-medium">Logout</span>
+                <span className="min-w-0 truncate font-medium">Logout</span>
               </button>
 
               {managedCommunities.length > 0 && (
@@ -657,7 +687,7 @@ export default function Header() {
                       alt={user?.username ?? "Profile"}
                       className="h-8 w-8"
                     />
-                    <span className="font-medium">
+                    <span className="min-w-0 flex-1 truncate font-medium">
                       {user?.username ?? "My profile"}
                     </span>
                     {!activeCommunity && (
@@ -678,7 +708,9 @@ export default function Header() {
                         alt={community.name}
                         className="h-8 w-8"
                       />
-                      <span className="font-medium">{community.name}</span>
+                      <span className="min-w-0 flex-1 truncate font-medium">
+                        {community.name}
+                      </span>
                       {activeCommunity?.id === community.id && (
                         <Check className="ml-auto h-4 w-4 text-red-500" />
                       )}

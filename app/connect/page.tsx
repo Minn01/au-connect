@@ -127,15 +127,15 @@ export default function ConnectPage() {
 
   return (
     <div className="h-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 py-6 h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto h-full overflow-y-auto px-3 py-5 sm:px-4 sm:py-6">
         <section className="w-full">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-lg font-bold text-neutral-800">
+          <div className="mb-4 flex items-center gap-3 sm:mb-6">
+            <h2 className="text-base font-bold text-neutral-800 sm:text-lg">
               Connect Requests
             </h2>
 
             {requests.length > 0 && (
-              <span className="ml-auto bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="ml-auto rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 sm:px-3">
                 {requests.length} new
               </span>
             )}
@@ -159,44 +159,44 @@ export default function ConnectPage() {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {requests.map((req) => {
               const u = req.fromUser;
 
               return (
                 <div
                   key={req.id}
-                  className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-neutral-50 to-neutral-100/50 p-6 border border-neutral-200/50 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                  className="group relative overflow-hidden rounded-lg border border-neutral-200/70 bg-white p-4 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-md sm:rounded-2xl sm:bg-linear-to-br sm:from-neutral-50 sm:to-neutral-100/50 sm:p-6 lg:hover:scale-[1.02] lg:hover:shadow-xl"
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex flex-col justify-between gap-3 sm:gap-4 lg:flex-row lg:items-center">
                     {/* LEFT — clickable profile */}
                     <div
-                      className="flex items-start lg:items-center gap-4 cursor-pointer hover:opacity-90"
+                      className="flex min-w-0 cursor-pointer items-center gap-3 hover:opacity-90 sm:gap-4"
                       onClick={() => {
                         if (!u?.id) return;
                         const slug = buildSlug(u.username || "", u.id);
                         router.push(`/profile/${slug}`);
                       }}
                     >
-                      <div className="relative">
-                        <div className="relative h-20 w-20 rounded-2xl overflow-hidden ring-2 ring-neutral-200 group-hover:ring-blue-400 transition-all">
+                      <div className="relative shrink-0">
+                        <div className="relative h-12 w-12 overflow-hidden rounded-xl ring-1 ring-neutral-200 transition-all group-hover:ring-blue-400 sm:h-20 sm:w-20 sm:rounded-2xl sm:ring-2">
                           <RequestAvatar
                             profilePic={u?.profilePic}
                             username={u?.username}
                           />
                         </div>
-                        <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-green-500 rounded-full border-4 border-white" />
+                        <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 border-white bg-green-500 sm:-bottom-1 sm:-right-1 sm:h-6 sm:w-6 sm:border-4" />
                       </div>
 
-                      <div className="text-sm space-y-1">
-                        <div className="font-bold text-neutral-900 text-base hover:underline">
+                      <div className="min-w-0 space-y-0.5 text-sm sm:space-y-1">
+                        <div className="truncate text-sm font-bold text-neutral-900 hover:underline sm:text-base">
                           {u?.username || "Unknown user"}
                         </div>
-                        <div className="text-neutral-600 font-medium">
+                        <div className="truncate text-xs font-medium text-neutral-600 sm:text-sm">
                           {u?.title || "AU Member"}
                         </div>
                         {u?.location && (
-                          <div className="text-neutral-500 text-xs">
+                          <div className="truncate text-xs text-neutral-500">
                             {u.location}
                           </div>
                         )}
@@ -204,14 +204,14 @@ export default function ConnectPage() {
                     </div>
 
                     {/* RIGHT — actions */}
-                    <div className="flex w-full sm:w-auto items-center justify-end gap-3 lg:ml-auto">
+                    <div className="ml-[3.75rem] flex items-center justify-end gap-2 sm:ml-0 sm:w-auto sm:gap-3 lg:ml-auto">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleAccept(req.id);
                         }}
                         disabled={actingId === req.id}
-                        className="rounded-xl bg-blue-100 hover:bg-blue-200 px-4 sm:px-5 lg:px-6 py-2.5 text-sm font-semibold text-blue-700 disabled:opacity-60"
+                        className="rounded-lg bg-blue-100 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-200 disabled:opacity-60 sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-sm lg:px-6"
                       >
                         {actingId === req.id ? "Accepting..." : "Accept"}
                       </button>
@@ -222,7 +222,7 @@ export default function ConnectPage() {
                           handleDecline(req.id);
                         }}
                         disabled={actingId === req.id}
-                        className="rounded-xl bg-neutral-200 hover:bg-neutral-300 px-4 sm:px-5 lg:px-6 py-2.5 text-sm font-semibold text-neutral-700 disabled:opacity-60"
+                        className="rounded-lg bg-neutral-200 px-3 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-300 disabled:opacity-60 sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-sm lg:px-6"
                       >
                         {actingId === req.id ? "Declining..." : "Decline"}
                       </button>

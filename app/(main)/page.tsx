@@ -70,9 +70,9 @@ export default function Home() {
 
   return (
     <div className="h-full">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="md:grid md:grid-cols-12 md:gap-6">
-          <div className="lg:col-span-3 md:col-span-4 hidden md:block">
+      <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
+        <div className="md:grid md:grid-cols-[minmax(14rem,18rem)_minmax(0,1fr)] md:gap-6 lg:grid-cols-12">
+          <div className="hidden min-w-0 md:block lg:col-span-3">
             <LeftProfile
               user={user}
               loading={userLoading}
@@ -80,7 +80,7 @@ export default function Home() {
             />
           </div>
 
-          <div className="lg:col-span-6 md:col-span-7">
+          <div className="min-w-0 lg:col-span-6">
             {user && (
               <MainFeed
                 user={user}
@@ -95,8 +95,8 @@ export default function Home() {
             )}
           </div>
 
-          <div className="hidden lg:block col-span-3">
-            <div className="sticky top-20">
+          <div className="hidden min-w-0 lg:col-span-3 lg:block">
+            <div className="sticky top-4">
               <div className="bg-white border-l-4 border-red-600 rounded-xl p-6 shadow-sm flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <h3 className="text-lg font-serif italic text-neutral-900">
