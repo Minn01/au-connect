@@ -14,9 +14,11 @@ import CreatePostModal from "./CreatePostModal";
 export default function PostModalClient({
   post,
   initialIndex,
+  initialMobileView = "content",
 }: {
   post: PostArg;
   initialIndex: number;
+  initialMobileView?: "content" | "comments";
 }) {
   const router = useRouter();
 
@@ -72,6 +74,7 @@ export default function PostModalClient({
           title={post.title}
           content={post.content}
           clickedIndex={initialIndex}
+          initialMobileView={initialMobileView}
           onClose={() => router.back()}
           onEdit={(selectedPost) => {
             setEditingPost(selectedPost);

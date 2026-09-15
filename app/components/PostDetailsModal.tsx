@@ -72,6 +72,7 @@ export default function PostDetailsModal({
   postInfo,
   media,
   clickedIndex,
+  initialMobileView = "content",
   onClose,
   onEdit,
 }: PostDetailsModalTypes) {
@@ -91,7 +92,7 @@ export default function PostDetailsModal({
   const saveMutation = useToggleSave();
   const applyMutation = useApplyJob();
   const [mobileView, setMobileView] = useState<"content" | "comments">(
-    "content",
+    initialMobileView,
   );
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -187,6 +188,10 @@ export default function PostDetailsModal({
         (comment, index, self) =>
           index === self.findIndex((c) => c.id === comment.id),
       ) ?? [];
+  const totalCommentCount = displayPost.numOfComments ?? comments.length;
+  const mobileCommentLabel = commentsDisabled
+    ? "Comments off"
+    : `${totalCommentCount} comment${totalCommentCount === 1 ? "" : "s"}`;
 
   // Drop-in replacement for the createCommentMutation in PostDetailsModal.tsx
 
@@ -352,7 +357,7 @@ export default function PostDetailsModal({
         onClick={(e) => e.stopPropagation()}
         className={`bg-white w-full ${
           isJobPost ? "max-w-[1100px]" : hasMedia ? "max-w-6xl" : "max-w-xl"
-        } h-[calc(100vh-5rem)] rounded-lg flex overflow-hidden md:h-[calc(100vh-4rem)]`}
+        } h-[calc(100dvh-5rem)] rounded-lg flex overflow-hidden md:h-[calc(100vh-4rem)]`}
         style={{
           display: "flex",
           maxWidth: isJobPost ? "1300px" : hasMedia ? "1100px" : "576px",
@@ -471,7 +476,7 @@ export default function PostDetailsModal({
         </div>
 
         {/* ================= MOBILE ================= */}
-        <div className="flex flex-col md:hidden w-full h-full">
+        <div className="flex flex-col md:hidden w-full h-full min-h-0">
           {isJobPost ? (
             <>
               {/* Toggle (ONLY for job posts) */}
@@ -519,39 +524,77 @@ export default function PostDetailsModal({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col flex-1 min-h-0">
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                   <Header />
                   <CommentsSection />
                 </div>
               )}
             </>
-          ) : (
+          ) : showLeftPane ? (
             /* Normal posts = stacked layout */
-            <div className="flex flex-col flex-1 overflow-y-auto">
-              {/* Content first */}
-              {postInfo.postType === "poll" ? (
-                <MediaCarousel
-                  postType={postInfo.postType}
-                  pollOptions={postInfo.pollOptions ?? []}
-                  pollVotes={postInfo.pollVotes}
-                  pollEndsAt={postInfo.pollEndsAt}
-                  mediaList={mediaList}
-                  clickedIndex={clickedIndex}
-                  onClose={onClose}
-                />
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              {mobileView === "comments" ? (
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                  <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setMobileView("content")}
+                      className="text-sm font-semibold text-slate-700 hover:text-red-600"
+                    >
+                      Post
+                    </button>
+                    <p className="text-sm font-semibold text-slate-950">
+                      Comments
+                    </p>
+                    <span className="w-8" aria-hidden="true" />
+                  </div>
+                  <Header />
+                  <CommentsSection />
+                </div>
               ) : (
-                hasMedia && (
-                  <MediaCarousel
-                    postType={postInfo.postType ?? "media"}
-                    mediaList={mediaList}
-                    clickedIndex={clickedIndex}
-                    onClose={onClose}
-                  />
-                )
-              )}
+                <>
+                  <div className="flex min-h-0 flex-1 bg-black">
+                    {postInfo.postType === "poll" ? (
+                      <MediaCarousel
+                        postType={postInfo.postType}
+                        pollOptions={postInfo.pollOptions ?? []}
+                        pollVotes={postInfo.pollVotes}
+                        pollEndsAt={postInfo.pollEndsAt}
+                        mediaList={mediaList}
+                        clickedIndex={clickedIndex}
+                        onClose={onClose}
+                      />
+                    ) : (
+                      hasMedia && (
+                        <MediaCarousel
+                          postType={postInfo.postType ?? "media"}
+                          mediaList={mediaList}
+                          clickedIndex={clickedIndex}
+                          onClose={onClose}
+                        />
+                      )
+                    )}
+                  </div>
 
-              {/* Then comments below */}
-              <div className="border-t">
+                  <div className="shrink-0 border-t bg-white">
+                    <Header />
+                    {!commentsDisabled && (
+                      <button
+                        type="button"
+                        onClick={() => setMobileView("comments")}
+                        className="flex w-full items-center justify-between border-t px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-red-600"
+                      >
+                        <span>{mobileCommentLabel}</span>
+                        <span>View</span>
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t">
                 <Header />
                 <CommentsSection />
               </div>
@@ -592,7 +635,7 @@ export default function PostDetailsModal({
 
   function Header() {
     return (
-      <div className="border-b">
+      <div className="shrink-0 border-b">
         <div className="flex items-center gap-3 p-4">
           <img
             src={avatarUrl}
@@ -730,7 +773,7 @@ export default function PostDetailsModal({
 
     return (
       <>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 space-y-4">
           {/* Initial loading */}
           {isLoading && (
             <div className="text-sm text-gray-500">Loading comments...</div>
@@ -782,7 +825,7 @@ export default function PostDetailsModal({
           )}
         </div>
         {/* Comment input */}
-        <div className="border-t p-3">
+        <div className="shrink-0 border-t bg-white p-3">
           <CommentInput
             isLoading={createCommentMutation.isPending}
             onSubmit={(text) => {

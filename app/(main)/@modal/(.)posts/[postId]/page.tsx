@@ -8,10 +8,10 @@ export default async function PostModalPage({
   searchParams,
 }: {
   params: Promise<{ postId: string }>;
-  searchParams: Promise<{ media?: string }>;
+  searchParams: Promise<{ media?: string; view?: string }>;
 }) {
   const { postId } = await params;
-  const { media } = await searchParams;
+  const { media, view } = await searchParams;
 
   const auth = await getCurrentUser();
   if (!auth) {
@@ -42,6 +42,7 @@ export default async function PostModalPage({
     <PostModalClient
       post={post}
       initialIndex={media ? parseInt(media, 10) : 0}
+      initialMobileView={view === "comments" ? "comments" : "content"}
     />
   );
 }

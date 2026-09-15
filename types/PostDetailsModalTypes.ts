@@ -7,6 +7,7 @@ type PostDetailsModalTypes = {
   title?: string | null;
   content: string | undefined;
   clickedIndex: number;
+  initialMobileView?: "content" | "comments";
   onClose: () => void;
   onEdit?: (post: PostType) => void;
 };

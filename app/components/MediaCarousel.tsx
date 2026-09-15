@@ -32,6 +32,7 @@ export default function MediaCarousel({
 
   const [currentIndex, setCurrentIndex] = useState(clickedIndex);
   const [direction, setDirection] = useState<"left" | "right">("right");
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -88,16 +89,32 @@ export default function MediaCarousel({
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight" && currentIndex < totalSlides - 1) {
-        slideNext();
+        setDirection("right");
+        const newIndex = Math.min(totalSlides - 1, currentIndex + 1);
+        setCurrentIndex(newIndex);
+
+        const params = new URLSearchParams(window.location.search);
+        params.set("media", newIndex.toString());
+        router.replace(`${window.location.pathname}?${params.toString()}`, {
+          scroll: false,
+        });
       }
       if (e.key === "ArrowLeft" && currentIndex > 0) {
-        slidePrev();
+        setDirection("left");
+        const newIndex = Math.max(0, currentIndex - 1);
+        setCurrentIndex(newIndex);
+
+        const params = new URLSearchParams(window.location.search);
+        params.set("media", newIndex.toString());
+        router.replace(`${window.location.pathname}?${params.toString()}`, {
+          scroll: false,
+        });
       }
     };
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentIndex, totalSlides, onClose]);
+  }, [currentIndex, onClose, router, totalSlides]);
 
   // Preload adjacent images (media only, not poll)
   useEffect(() => {
@@ -121,6 +138,10 @@ export default function MediaCarousel({
    */
   const isPollSlide = hasPollSlide && currentIndex === 0;
   const mediaIndex = hasPollSlide ? currentIndex - 1 : currentIndex;
+  const currentMedia = mediaList[mediaIndex];
+  const isImageSlide = !isPollSlide && currentMedia?.type === "image";
+  const currentMediaUrl = currentMedia?.url ?? "";
+  const imageLoaded = isImageSlide && loadedImageUrl === currentMediaUrl;
 
   return (
     <div
@@ -148,10 +169,10 @@ export default function MediaCarousel({
         )}
 
         {/* Video */}
-        {!isPollSlide && mediaList[mediaIndex]?.type === "video" && (
+        {!isPollSlide && currentMedia?.type === "video" && (
           <VideoPlayer
-            src={mediaList[mediaIndex]?.url}
-            poster={mediaList[mediaIndex]?.thumbnailUrl}
+            src={currentMedia?.url}
+            poster={currentMedia?.thumbnailUrl}
             loadOnPlay
             showControls
             className="w-full h-full"
@@ -159,15 +180,27 @@ export default function MediaCarousel({
         )}
 
         {/* Image */}
-        {!isPollSlide && mediaList[mediaIndex]?.type === "image" && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={mediaList[mediaIndex]?.url}
-            alt=""
-            loading="eager"
-            decoding="async"
-            className="max-h-full max-w-full object-contain"
-          />
+        {isImageSlide && (
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="h-3/4 w-3/4 max-w-2xl animate-pulse rounded-xl bg-neutral-800" />
+              </div>
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={currentMediaUrl}
+              src={currentMediaUrl}
+              alt=""
+              loading="eager"
+              decoding="async"
+              onLoad={() => setLoadedImageUrl(currentMediaUrl)}
+              onError={() => setLoadedImageUrl(currentMediaUrl)}
+              className={`max-h-full max-w-full object-contain transition-opacity duration-200 ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </>
         )}
       </div>
 

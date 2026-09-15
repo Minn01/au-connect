@@ -45,8 +45,13 @@ export default function Post({
 }) {
   const router = useRouter();
   const selectedActor = useActorStore((state) => state.selectedActor);
-  const openPostModal = (postId: string, index: number) => {
-    router.push(POST_DETAIL_PAGE_PATH(postId, index));
+  const openPostModal = (
+    postId: string,
+    index: number,
+    view: "content" | "comments" = "content",
+  ) => {
+    const href = POST_DETAIL_PAGE_PATH(postId, index);
+    router.push(view === "comments" ? `${href}&view=comments` : href);
   };
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -184,7 +189,7 @@ export default function Post({
                 { onError: (err) => { if (err instanceof VerificationRequiredError) requireVerification("like posts"); } },
               );
             }}
-            onCommentClicked={() => openPostModal(post.id, 0)}
+            onCommentClicked={() => openPostModal(post.id, 0, "comments")}
             onShareClicked={() => setShareModalOpen(true)}
           />
         </div>
@@ -279,7 +284,7 @@ export default function Post({
               { onError: (err) => { if (err instanceof VerificationRequiredError) requireVerification("like posts"); } },
             );
           }}
-          onCommentClicked={() => openPostModal(post.id, 0)}
+          onCommentClicked={() => openPostModal(post.id, 0, "comments")}
           onShareClicked={() => setShareModalOpen(true)}
         />
 
