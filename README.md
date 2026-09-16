@@ -12,6 +12,25 @@
 
 ---
 
+## Recommendation service configuration
+
+Profile changes that affect recommendations ask the recommendation service to
+refresh the user's embedding. Configure these server-side variables for the AU
+Connect process:
+
+```env
+RECOMMENDATION_SERVICE_URL=http://127.0.0.1:8000
+RECOMMENDATION_SERVICE_API_KEY=replace-with-shared-secret
+```
+
+`RECOMMENDATION_SERVICE_API_KEY` contains the shared internal-service secret
+and must have the same value as the recommendation service's `INTERNAL_API_KEY`.
+Do not prefix either variable with `NEXT_PUBLIC_`. When AU Connect runs in
+Docker and the recommendation service runs on the host, use
+`http://host.docker.internal:8000`, as shown in `compose.example.yml`.
+
+---
+
 ## ✨ Features
 
 - 👤 **Professional Profile**

@@ -66,6 +66,10 @@ export const ACCOUNT_VERIFICATION_API_PATH =
   BASE_API_PATH + "/account-verification";
 export const MY_CONNECTIONS_API_PATH =
   BASE_API_PATH + "/connect/my-connections";
+export const CONNECTION_RECOMMENDATIONS_API_PATH =
+  BASE_API_PATH + "/connect/recommendations";
+export const CONNECTION_REQUEST_API_PATH =
+  BASE_API_PATH + "/connect/request";
 export const MESSAGES_INBOX_API_PATH = BASE_API_PATH + "/messages/inbox";
 
 // POST create comments/replies

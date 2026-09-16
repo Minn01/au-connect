@@ -26,6 +26,8 @@ services:
       - AZURE_STORAGE_CONTAINER_NAME=
       - NEXT_PUBLIC_BASE_URL=http://localhost:3000
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - RECOMMENDATION_SERVICE_URL=http://host.docker.internal:8000
+      - RECOMMENDATION_SERVICE_API_KEY=replace-with-shared-secret
       - GMAIL_USER=
       - GMAIL_APP_PASSWORD=
       - NODE_ENV=development

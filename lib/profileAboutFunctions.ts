@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
+import { requestUserEmbeddingRefresh } from "@/lib/server/userEmbeddingRefresh.server";
+
+type EmbeddingRefreshRequester = (userId: string) => Promise<unknown>;
 
 /* =========================
    VALIDATION
@@ -26,7 +29,11 @@ function validateAbout(body: any) {
 /* =========================
    UPDATE ABOUT
 ========================= */
-export async function updateAbout(req: NextRequest) {
+export async function updateAbout(
+  req: NextRequest,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  userStore: typeof prisma.user = prisma.user,
+) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
 
@@ -44,12 +51,21 @@ export async function updateAbout(req: NextRequest) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    const updatedUser = await prisma.user.update({
+    const previousUser = await userStore.findUnique({
+      where: { id: userId },
+      select: { about: true },
+    });
+
+    const updatedUser = await userStore.update({
       where: { id: userId },
       data: {
         about: body.about,
       },
     });
+
+    if (previousUser?.about !== body.about) {
+      await refreshEmbedding(userId);
+    }
 
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (err) {

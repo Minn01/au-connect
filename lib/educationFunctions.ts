@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
+import { requestUserEmbeddingRefresh } from "@/lib/server/userEmbeddingRefresh.server";
+
+type EmbeddingRefreshRequester = (userId: string) => Promise<unknown>;
 
 /* =========================
    VALIDATION
@@ -97,7 +100,11 @@ function validateEducation(
 /* =========================
    ADD EDUCATION
 ========================= */
-export async function addEducation(req: NextRequest) {
+export async function addEducation(
+  req: NextRequest,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  educationStore: typeof prisma.education = prisma.education,
+) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
 
@@ -115,12 +122,14 @@ export async function addEducation(req: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const edu = await prisma.education.create({
+    const edu = await educationStore.create({
       data: {
         ...result.data,
         userId,
       },
     });
+
+    await refreshEmbedding(userId);
 
     return NextResponse.json(edu, { status: 201 });
   } catch (err) {
@@ -137,7 +146,9 @@ export async function addEducation(req: NextRequest) {
 ========================= */
 export async function updateEducation(
   req: NextRequest,
-  eduId: string
+  eduId: string,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  educationStore: typeof prisma.education = prisma.education,
 ) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
@@ -156,7 +167,7 @@ export async function updateEducation(
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const existing = await prisma.education.findFirst({
+    const existing = await educationStore.findFirst({
       where: { id: eduId, userId },
     });
 
@@ -167,10 +178,14 @@ export async function updateEducation(
       );
     }
 
-    const updated = await prisma.education.update({
+    const updated = await educationStore.update({
       where: { id: eduId },
       data: result.data,
     });
+
+    if (existing.fieldOfStudy !== result.data.fieldOfStudy) {
+      await refreshEmbedding(userId);
+    }
 
     return NextResponse.json(updated, { status: 200 });
   } catch (err) {
@@ -187,7 +202,9 @@ export async function updateEducation(
 ========================= */
 export async function deleteEducation(
   req: NextRequest,
-  eduId: string
+  eduId: string,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  educationStore: typeof prisma.education = prisma.education,
 ) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
@@ -199,7 +216,7 @@ export async function deleteEducation(
       );
     }
 
-    const existing = await prisma.education.findFirst({
+    const existing = await educationStore.findFirst({
       where: { id: eduId, userId },
     });
 
@@ -210,9 +227,11 @@ export async function deleteEducation(
       );
     }
 
-    await prisma.education.delete({
+    await educationStore.delete({
       where: { id: eduId },
     });
+
+    await refreshEmbedding(userId);
 
     return NextResponse.json(
       { message: "Education deleted successfully" },

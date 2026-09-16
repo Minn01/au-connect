@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
+import { requestUserEmbeddingRefresh } from "@/lib/server/userEmbeddingRefresh.server";
+
+type EmbeddingRefreshRequester = (userId: string) => Promise<unknown>;
 
 /* =========================
    VALIDATION
@@ -76,7 +79,11 @@ function validateExperience(body: any) {
 /* =========================
    ADD EXPERIENCE
 ========================= */
-export async function addExperience(req: NextRequest) {
+export async function addExperience(
+  req: NextRequest,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  experienceStore: typeof prisma.experience = prisma.experience,
+) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
 
@@ -94,7 +101,7 @@ export async function addExperience(req: NextRequest) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    const exp = await prisma.experience.create({
+    const exp = await experienceStore.create({
       data: {
         title: body.title,
         employmentType: body.employmentType,
@@ -107,6 +114,8 @@ export async function addExperience(req: NextRequest) {
         userId,
       },
     });
+
+    await refreshEmbedding(userId);
 
     return NextResponse.json(exp, { status: 201 });
   } catch (err) {
@@ -123,7 +132,9 @@ export async function addExperience(req: NextRequest) {
 ========================= */
 export async function updateExperience(
   req: NextRequest,
-  expId: string
+  expId: string,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  experienceStore: typeof prisma.experience = prisma.experience,
 ) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
@@ -142,7 +153,7 @@ export async function updateExperience(
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    const existing = await prisma.experience.findFirst({
+    const existing = await experienceStore.findFirst({
       where: { id: expId, userId },
     });
 
@@ -153,7 +164,7 @@ export async function updateExperience(
       );
     }
 
-    const updated = await prisma.experience.update({
+    const updated = await experienceStore.update({
       where: { id: expId },
       data: {
         title: body.title,
@@ -166,6 +177,10 @@ export async function updateExperience(
         isCurrent: Boolean(body.isCurrent),
       },
     });
+
+    if (existing.title !== body.title) {
+      await refreshEmbedding(userId);
+    }
 
     return NextResponse.json(updated, { status: 200 });
   } catch (err) {
@@ -182,7 +197,9 @@ export async function updateExperience(
 ========================= */
 export async function deleteExperience(
   req: NextRequest,
-  expId: string
+  expId: string,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  experienceStore: typeof prisma.experience = prisma.experience,
 ) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
@@ -194,7 +211,7 @@ export async function deleteExperience(
       );
     }
 
-    const existing = await prisma.experience.findFirst({
+    const existing = await experienceStore.findFirst({
       where: { id: expId, userId },
     });
 
@@ -205,9 +222,11 @@ export async function deleteExperience(
       );
     }
 
-    await prisma.experience.delete({
+    await experienceStore.delete({
       where: { id: expId },
     });
+
+    await refreshEmbedding(userId);
 
     return NextResponse.json(
       { message: "Experience deleted successfully" },

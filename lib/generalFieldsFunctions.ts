@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "./prisma";
 import { getHeaderUserInfo } from "./authFunctions";
 import { safeUserSelect } from "@/lib/safeUserCall";
+import { requestUserEmbeddingRefresh } from "@/lib/server/userEmbeddingRefresh.server";
+
+type EmbeddingRefreshRequester = (userId: string) => Promise<unknown>;
 
 /* =========================
    VALIDATION
@@ -27,7 +30,11 @@ function validateGeneralFields(body: any) {
 /* =========================
    UPDATE GENERAL PROFILE FIELDS
 ========================= */
-export async function updateGeneralFields(req: NextRequest) {
+export async function updateGeneralFields(
+  req: NextRequest,
+  refreshEmbedding: EmbeddingRefreshRequester = requestUserEmbeddingRefresh,
+  userStore: typeof prisma.user = prisma.user,
+) {
   try {
     const [userEmail, userId] = getHeaderUserInfo(req);
 
@@ -45,7 +52,12 @@ export async function updateGeneralFields(req: NextRequest) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    const updatedUser = await prisma.user.update({
+    const previousUser = await userStore.findUnique({
+      where: { id: userId },
+      select: { title: true, about: true },
+    });
+
+    const updatedUser = await userStore.update({
       where: { id: userId },
       data: {
         username: body.username.trim(),
@@ -58,6 +70,14 @@ export async function updateGeneralFields(req: NextRequest) {
       },
       select: safeUserSelect,
     });
+
+    const embeddingFieldsChanged =
+      (body.title !== undefined && previousUser?.title !== body.title) ||
+      (body.about !== undefined && previousUser?.about !== body.about);
+
+    if (embeddingFieldsChanged) {
+      await refreshEmbedding(userId);
+    }
 
     return NextResponse.json(
       { success: true, user: updatedUser },
