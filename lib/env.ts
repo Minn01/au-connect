@@ -40,3 +40,10 @@ export const LINKEDIN_REDIRECT_URI =
 export const MICROSOFT_REDIRECT_URI =
   NEXT_PUBLIC_BASE_URL + "/api/connect/v1/auth/azure-ad/callback";
 export const JWT_SECRET = required("JWT_SECRET");
+
+export const RECOMMENDATION_SERVICE_URL = required(
+  "RECOMMENDATION_SERVICE_URL",
+);
+export const RECOMMENDATION_SERVICE_API_KEY = required(
+  "RECOMMENDATION_SERVICE_API_KEY",
+);

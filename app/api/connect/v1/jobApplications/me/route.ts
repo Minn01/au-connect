@@ -52,9 +52,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    console.log("My Applications");
-    console.log(myApplications);
-
     return NextResponse.json({
       applications: myApplications,
     });
