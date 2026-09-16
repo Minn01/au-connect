@@ -16,7 +16,7 @@ import {
   Check,
   UsersRound,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -112,6 +112,8 @@ type ManagedCommunity = {
   status: "ACTIVE" | "ARCHIVED";
 };
 
+const COMMUNITY_RESTRICTED_PAGES = [CONNECT_PAGE_PATH, JOBS_PAGE_PATH];
+
 const ActorAvatar = ({
   src,
   alt,
@@ -141,6 +143,7 @@ export default function Header() {
   const [openResults, setOpenResults] = useState(false);
   const [actorMenuOpen, setActorMenuOpen] = useState(false);
   const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const actorMenuRef = useRef<HTMLDivElement | null>(null);
 
   const pathnameRaw = usePathname();
   const pathname = pathnameRaw ?? "";
@@ -206,6 +209,36 @@ export default function Header() {
     : user?.profilePic;
   const isAccountVerified = user?.accountVerificationStatus === "APPROVED";
 
+  useEffect(() => {
+    if (!actorMenuOpen) return;
+
+    function handlePointerDown(event: MouseEvent | TouchEvent) {
+      if (
+        actorMenuRef.current &&
+        !actorMenuRef.current.contains(event.target as Node)
+      ) {
+        setActorMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [actorMenuOpen]);
+
+  useEffect(() => {
+    if (
+      selectedActor.type === "COMMUNITY" &&
+      COMMUNITY_RESTRICTED_PAGES.includes(pathname)
+    ) {
+      router.replace(MAIN_PAGE_PATH);
+    }
+  }, [pathname, router, selectedActor.type]);
+
   const handleSelectCommunityActor = (communityId: string) => {
     if (!isAccountVerified) {
       setActorMenuOpen(false);
@@ -217,6 +250,10 @@ export default function Header() {
     selectCommunityActor(communityId);
     setActorMenuOpen(false);
     setMobileMenuOpen(false);
+
+    if (COMMUNITY_RESTRICTED_PAGES.includes(pathname)) {
+      router.push(MAIN_PAGE_PATH);
+    }
   };
 
   const navBarIndicatedPages = [
@@ -463,7 +500,7 @@ export default function Header() {
 
             {/* PROFILE + LOGOUT */}
             <div className="flex items-center gap-2">
-              <div className="relative flex items-center">
+              <div ref={actorMenuRef} className="relative flex items-center">
                 <button
                   onClick={() => {
                     if (activeCommunity) {
