@@ -8,20 +8,6 @@ import type { Announcement } from "@/types/Announcement";
 import AnnouncementCard from "./AnnouncementCard";
 import AnnouncementPreviewModal from "./AnnouncementPreviewModal";
 
-function AnnouncementSkeleton() {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm animate-pulse">
-      <div className="h-28 bg-neutral-200" />
-      <div className="p-4">
-        <div className="h-3 bg-neutral-200 rounded w-24 mb-3" />
-        <div className="h-4 bg-neutral-200 rounded w-4/5 mb-2" />
-        <div className="h-3 bg-neutral-200 rounded w-full mb-2" />
-        <div className="h-3 bg-neutral-200 rounded w-2/3" />
-      </div>
-    </div>
-  );
-}
-
 type AnnouncementsSectionProps = {
   className?: string;
   listClassName?: string;
@@ -79,8 +65,8 @@ export default function AnnouncementsSection({
         >
           {isLoading ? (
             <>
-              <AnnouncementSkeleton />
-              <AnnouncementSkeleton />
+              <AnnouncementCard isLoading />
+              <AnnouncementCard isLoading />
             </>
           ) : announcements.length > 0 ? (
             announcements.map((announcement) => (
@@ -101,7 +87,7 @@ export default function AnnouncementsSection({
             </div>
           )}
 
-          {isFetchingNextPage && <AnnouncementSkeleton />}
+          {isFetchingNextPage && <AnnouncementCard isLoading />}
         </div>
       </section>
 
