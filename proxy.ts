@@ -33,6 +33,15 @@ const PUBLIC_API_ROUTES = [BASE_API_PATH + "/auth"];
 // Public, no-auth pages so Facebook/LinkedIn crawlers can read OG tags.
 const PUBLIC_PAGE_ROUTES = ["/share"];
 
+// Build a redirect URL that respects Next's basePath (/connect). Cloning
+// req.nextUrl keeps the basePath; `new URL(path, req.url)` would drop it and 404.
+function redirectTo(req: NextRequest, pathname: string) {
+  const url = req.nextUrl.clone();
+  url.pathname = pathname;
+  url.search = "";
+  return url;
+}
+
 export const proxy: NextProxy = async (req: NextRequest) => {
   const sessionToken = req.cookies.get(JWT_COOKIE)?.value;
   const pathname = req.nextUrl.pathname;
@@ -71,7 +80,7 @@ export const proxy: NextProxy = async (req: NextRequest) => {
       }
 
       // Pages → redirect
-      return NextResponse.redirect(new URL(SIGNIN_PAGE_PATH, req.url));
+      return NextResponse.redirect(redirectTo(req, SIGNIN_PAGE_PATH));
     }
 
     return NextResponse.next();
@@ -107,10 +116,10 @@ async function verifySession(
       }
 
       if (!pathname.startsWith(ACCOUNT_RESTRICTED_PAGE_PATH)) {
-        return NextResponse.redirect(new URL(ACCOUNT_RESTRICTED_PAGE_PATH, req.url));
+        return NextResponse.redirect(redirectTo(req, ACCOUNT_RESTRICTED_PAGE_PATH));
       }
     } else if (pathname.startsWith(ACCOUNT_RESTRICTED_PAGE_PATH)) {
-      return NextResponse.redirect(new URL(MAIN_PAGE_PATH, req.url));
+      return NextResponse.redirect(redirectTo(req, MAIN_PAGE_PATH));
     }
 
     const headers = new Headers(req.headers);
@@ -119,14 +128,14 @@ async function verifySession(
 
     // If user visits login while authenticated → redirect home
     if (pathname.startsWith(SIGNIN_PAGE_PATH)) {
-      return NextResponse.redirect(new URL(MAIN_PAGE_PATH, req.url));
+      return NextResponse.redirect(redirectTo(req, MAIN_PAGE_PATH));
     }
 
     return NextResponse.next({
       request: { headers },
     });
   } catch {
-    const response = NextResponse.redirect(new URL(SIGNIN_PAGE_PATH, req.url));
+    const response = NextResponse.redirect(redirectTo(req, SIGNIN_PAGE_PATH));
     response.cookies.delete(JWT_COOKIE);
     return response;
   }
