@@ -23,14 +23,37 @@ function formatAnnouncementDate(startDate: string, endDate: string | null) {
 export default function AnnouncementCard({
   announcement,
   onPreview,
+  isLoading = false,
 }: {
-  announcement: Announcement;
-  onPreview: (announcement: Announcement) => void;
+  announcement?: Announcement;
+  onPreview?: (announcement: Announcement) => void;
+  isLoading?: boolean;
 }) {
   const thumbnailUrl = useResolvedMediaUrl(
-    announcement.thumbnailBlobName,
+    announcement?.thumbnailBlobName,
     ""
   );
+
+  if (isLoading) {
+    return (
+      <article className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm animate-pulse">
+        <div className="grid w-full grid-cols-[88px_1fr] gap-3">
+          <div className="relative h-24 overflow-hidden rounded-md bg-gray-200">
+            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/20 to-transparent" />
+          </div>
+
+          <div className="min-w-0">
+            <div className="h-4 w-4/5 rounded bg-gray-200" />
+            <div className="mt-2 h-4 w-3/5 rounded bg-gray-200" />
+            <div className="mt-4 h-3 w-28 rounded bg-gray-200" />
+            <div className="mt-4 h-4 w-4 rounded bg-gray-200" />
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  if (!announcement || !onPreview) return null;
 
   return (
     <article className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-red-400 hover:shadow-md">

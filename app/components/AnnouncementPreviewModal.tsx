@@ -43,7 +43,9 @@ export default function AnnouncementPreviewModal({
     },
   ].filter(Boolean) as { src: string; alt: string }[];
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [loadedMediaSrc, setLoadedMediaSrc] = useState<string | null>(null);
   const currentMedia = mediaItems[mediaIndex] ?? mediaItems[0];
+  const currentMediaLoaded = loadedMediaSrc === currentMedia?.src;
   const hasMultipleMedia = mediaItems.length > 1;
   const isMediaLoading =
     !thumbnailSrc ||
@@ -73,14 +75,28 @@ export default function AnnouncementPreviewModal({
       >
         <div className="relative hidden min-w-0 flex-[0_0_65%] items-center justify-center bg-black md:flex">
           {currentMedia ? (
-            <Image
-              src={currentMedia.src}
-              alt={currentMedia.alt}
-              fill
-              className="object-contain"
-              sizes="65vw"
-              unoptimized
-            />
+            <>
+              {!currentMediaLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                  <div className="h-3/4 w-3/4 max-w-2xl animate-pulse rounded-xl bg-neutral-800">
+                    <div className="h-full w-full -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/10 to-transparent" />
+                  </div>
+                </div>
+              )}
+              <Image
+                key={currentMedia.src}
+                src={currentMedia.src}
+                alt={currentMedia.alt}
+                fill
+                className={`object-contain transition-opacity duration-200 ${
+                  currentMediaLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                sizes="65vw"
+                onLoad={() => setLoadedMediaSrc(currentMedia.src)}
+                onError={() => setLoadedMediaSrc(currentMedia.src)}
+                unoptimized
+              />
+            </>
           ) : (
             <div className="flex h-full w-full items-center justify-center text-slate-400">
               <Megaphone className="h-12 w-12" />
@@ -151,12 +167,24 @@ export default function AnnouncementPreviewModal({
             <div className="block bg-black md:hidden">
               {currentMedia && (
                 <div className="relative h-[55vh] max-h-[55vh] w-full">
+                  {!currentMediaLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black">
+                      <div className="h-3/4 w-3/4 animate-pulse rounded-xl bg-neutral-800">
+                        <div className="h-full w-full -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/10 to-transparent" />
+                      </div>
+                    </div>
+                  )}
                   <Image
+                    key={currentMedia.src}
                     src={currentMedia.src}
                     alt={currentMedia.alt}
                     fill
-                    className="object-contain"
+                    className={`object-contain transition-opacity duration-200 ${
+                      currentMediaLoaded ? "opacity-100" : "opacity-0"
+                    }`}
                     sizes="100vw"
+                    onLoad={() => setLoadedMediaSrc(currentMedia.src)}
+                    onError={() => setLoadedMediaSrc(currentMedia.src)}
                     unoptimized
                   />
                 </div>
