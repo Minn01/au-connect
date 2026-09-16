@@ -2,9 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  // Served under the /connect sub-path of the life.au.edu super-app.
-  // Next auto-prefixes all pages, assets, <Link>s and the middleware matcher.
-  basePath: '/connect',
+  // NOTE: serving under the /connect sub-path needs `basePath: '/connect'`, but
+  // that breaks every hardcoded `/api/...` fetch (Next doesn't prefix fetch),
+  // which 404s the whole app. Left off until we either prefix all API calls or
+  // switch to a dedicated sub-domain (connect.au.edu) — see DEPLOYMENT.md.
+  // basePath: '/connect',
   images: {
     unoptimized: true,
     remotePatterns: [
