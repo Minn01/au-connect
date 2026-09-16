@@ -1,47 +1,49 @@
 # Deploying AU Connect on life.au.edu
 
-These are the instructions for deploying **AU Connect** on the life.au.edu server.
-The stack runs two containers via Docker Compose:
+This is how to deploy AU Connect on the life.au.edu server. It runs the app and
+MongoDB as containers with Docker Compose:
 
-| Container | What it is | Port |
-|-----------|-----------|------|
-| `au-connect-app` | the Next.js app (pulled from Docker Hub) | 3000 (localhost only) |
-| `au-connect-watchtower` | continuous deployment — auto-updates the app | — |
+- `au-connect-app` — the Next.js app, pulled from Docker Hub, listening on port 3000 (localhost only)
+- `au-connect-mongo` — MongoDB, running as its own container (single-node replica set)
 
-The **database is MongoDB Atlas** (managed cloud, not a container) — configured
-via `DATABASE_URL` in `.env`.
+Redeployment and the reverse proxy are handled by the AU team's own setup
+(their Watchtower and nginx), so this repo doesn't run its own.
+
+One thing to keep in mind: the Mongo data lives in a Docker volume
+(`ac-mongo-data`) on the server, and nothing backs it up for you. Set up a
+regular `mongodump` so you don't lose the data if the server goes down.
 
 ## Prerequisites
 
-- Docker and Docker Compose installed on the server
-- `make` installed
-- Access to the server + permission to edit the nginx config
+- Docker and Docker Compose on the server
+- `make`
+- Access to the server and permission to edit its nginx config
 
 ## Steps
 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/<your-org>/au-connect.git
+git clone https://github.com/Tommyzizii/au-connect.git
 cd au-connect
 ```
 
-### 2. Create `.env` from the template
+### 2. Create the `.env` file
 
 ```bash
 cp .env.template .env
 ```
 
-### 3. Fill in the required values
+### 3. Fill in the values
 
-Edit `.env`. The important ones:
+Open `.env` and fill in the values. The main ones:
 
 ```dotenv
-NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL (https!)
+NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL, use https
 NEXT_PUBLIC_APP_URL=https://life.au.edu/connect
 NODE_ENV=production
-JWT_SECRET=super_secure_jwt_secret                 # openssl rand -base64 32
-DATABASE_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/au_connect?retryWrites=true&w=majority
+JWT_SECRET=                                        # openssl rand -base64 32
+DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
 
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
@@ -59,9 +61,9 @@ GMAIL_USER=
 GMAIL_APP_PASSWORD=
 ```
 
-**OAuth redirect URIs** — register these with each provider (Google Cloud
-Console, LinkedIn, Microsoft Entra ID), replacing the host with your real
-`NEXT_PUBLIC_BASE_URL`:
+For the OAuth logins to work, register these redirect URIs with each provider
+(Google Cloud Console, LinkedIn, and Microsoft Entra ID), using your real
+`NEXT_PUBLIC_BASE_URL` as the host:
 
 ```
 <NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/google/callback
@@ -69,9 +71,8 @@ Console, LinkedIn, Microsoft Entra ID), replacing the host with your real
 <NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/azure-ad/callback
 ```
 
-Since the final URL is decided by the AU team, **tell us the website URL** so
-the redirect URIs can be added — otherwise Microsoft/Google/LinkedIn login will
-fail.
+The AU team decides the final URL, so let us know what it is and we'll add the
+redirect URIs. Until that's done, Google/LinkedIn/Microsoft login won't work.
 
 ### 4. Start it
 
@@ -79,79 +80,72 @@ fail.
 make prod-up
 ```
 
-This pulls the image from Docker Hub and starts the app + Watchtower. The app
-connects to your Atlas database via `DATABASE_URL` and listens on
-**127.0.0.1:3000** (not exposed publicly — nginx fronts it).
+This pulls the app image from Docker Hub and starts the app and MongoDB. The app
+listens on 127.0.0.1:3000 — it isn't exposed to the internet directly; the AU
+team's nginx sits in front of it.
 
-### 5. Put nginx in front
+### 5. Set up nginx
 
-An example config is in [`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example).
-It proxies `life.au.edu/connect` → `127.0.0.1:3000`. Copy it into the server's
-nginx config, then:
+There's an example config at
+[`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example)
+that proxies `life.au.edu/connect` to `127.0.0.1:3000`. Copy it into the
+server's nginx config and reload:
 
 ```bash
 sudo nginx -t && sudo nginx -s reload
 ```
 
-### 6. Stop it
+### 6. Stopping it
 
 ```bash
 make prod-down
 ```
 
-(Your data lives in Atlas, so stopping the app never touches it.)
+The `ac-mongo-data` volume sticks around, so your data is safe across restarts.
 
----
+## How updates get deployed
 
-## Continuous deployment (Watchtower)
-
-Watchtower is already part of `docker-compose.prod.yml`. It watches Docker Hub
-and, whenever a new image is published, pulls it and restarts the app — **no
-manual redeploy needed.**
-
-The full pipeline:
+We don't run our own Watchtower — the AU team handles redeployment on their side.
+From our end, all we do is publish a new image, and their setup picks it up. The
+flow is:
 
 ```
-merge to main → GitHub Actions builds & pushes  tommyzizii/au-connect:latest
-                                                        │
-                    Watchtower on the server sees the new image (checks every 5 min)
-                                                        │
-                    pulls it + recreates au-connect-app with the same .env
+merge to main  ->  GitHub Actions builds and pushes tommyzizii/au-connect:latest
+                                  |
+               the AU team's Watchtower notices the new image and redeploys
+                                  |
+               (or they pull and restart the container manually)
 ```
 
-- Watchtower only touches containers labelled `watchtower.enable=true` (the app).
-- If your Docker Hub repo is **private**, run `docker login` on the server and
-  uncomment the `config.json` volume line in `docker-compose.prod.yml`.
-- Watch it work: `docker logs -f au-connect-watchtower`.
+The app container carries the `watchtower.enable=true` label, so if their
+Watchtower filters by label it will pick ours up automatically. If you ever need
+to redeploy by hand, `make prod-pull` followed by `make prod-up` does it.
 
-### ⚠ One-time CI setup (important for Next.js)
+### One-time CI setup
 
-`NEXT_PUBLIC_BASE_URL` is compiled into the browser bundle **at build time**, so
-the image Watchtower pulls must be built with the real URL. In the GitHub repo,
-set an **Actions variable** (Settings → Secrets and variables → Actions →
-Variables):
+`NEXT_PUBLIC_BASE_URL` gets compiled into the browser code when the image is
+built, not when it runs. So the image has to be built with the real URL. In the
+GitHub repo, under Settings > Secrets and variables > Actions, add a variable:
 
 ```
 NEXT_PUBLIC_BASE_URL = https://life.au.edu/connect
 ```
 
-Also set the two secrets the build already uses: `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN`. Without the variable, the image is built pointing at
-`localhost` and links/logins/social-previews break in production.
+And add the two secrets the build uses: `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN`. If you skip the variable, the image gets built pointing at
+localhost, and the links, logins, and social-share previews break in production.
 
----
+## About the /connect path
 
-## Serving under `/connect` (sub-path) vs a sub-domain
+The app is set up to live under `life.au.edu/connect`. `basePath: "/connect"` is
+set in `next.config.ts`, and the share links are built from
+`NEXT_PUBLIC_BASE_URL`. Use Option A in the nginx example.
 
-The app is **already configured for the sub-path** `life.au.edu/connect`:
-`basePath: "/connect"` is set in `next.config.ts`, the middleware redirects are
-basePath-aware, and the social-share URLs are built from `NEXT_PUBLIC_BASE_URL`.
-Use **Option A** in the nginx example.
+The main thing is to build and run with
+`NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect` (both the GitHub Actions
+variable and the `.env`). That value has to include the `/connect` part, or the
+links and logins won't line up.
 
-The only requirement: build/run with `NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect`
-(both the GitHub Actions variable and `.env`). That value must include the
-`/connect` suffix so links, logins, and social previews resolve correctly.
-
-If the AU team instead gives you a dedicated sub-domain (e.g. `connect.au.edu`),
-remove the `basePath` line from `next.config.ts`, use **Option B** in the nginx
+If the AU team gives you a separate subdomain instead (like `connect.au.edu`),
+remove the `basePath` line from `next.config.ts`, use Option B in the nginx
 example, and set `NEXT_PUBLIC_BASE_URL=https://connect.au.edu`.
