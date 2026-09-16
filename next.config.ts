@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   // that breaks every hardcoded `/api/...` fetch (Next doesn't prefix fetch),
   // which 404s the whole app. Left off until we either prefix all API calls or
   // switch to a dedicated sub-domain (connect.au.edu) — see DEPLOYMENT.md.
-  // basePath: '/connect',
+  //basePath: '/connect',
   images: {
     unoptimized: true,
     remotePatterns: [
