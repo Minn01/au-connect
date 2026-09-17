@@ -41,9 +41,9 @@ export const MICROSOFT_REDIRECT_URI =
   NEXT_PUBLIC_BASE_URL + "/api/connect/v1/auth/azure-ad/callback";
 export const JWT_SECRET = required("JWT_SECRET");
 
-export const RECOMMENDATION_SERVICE_URL = required(
-  "RECOMMENDATION_SERVICE_URL",
-);
-export const RECOMMENDATION_SERVICE_API_KEY = required(
-  "RECOMMENDATION_SERVICE_API_KEY",
-);
+// Optional: the recommendation service is read via process.env directly by its
+// consumers, which degrade gracefully when it's unset. Using required() here
+// crashed `next build` in CI/Docker (no env provided at build time).
+export const RECOMMENDATION_SERVICE_URL = process.env.RECOMMENDATION_SERVICE_URL;
+export const RECOMMENDATION_SERVICE_API_KEY =
+  process.env.RECOMMENDATION_SERVICE_API_KEY;
