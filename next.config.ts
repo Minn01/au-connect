@@ -2,11 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  // NOTE: serving under the /connect sub-path needs `basePath: '/connect'`, but
-  // that breaks every hardcoded `/api/...` fetch (Next doesn't prefix fetch),
-  // which 404s the whole app. Left off until we either prefix all API calls or
-  // switch to a dedicated sub-domain (connect.au.edu) — see DEPLOYMENT.md.
-  //basePath: '/connect',
+  // Served under the /connect sub-path of life.au.edu. Next prefixes pages,
+  // assets, <Link>, <Image> and the router automatically; client fetch() calls
+  // are prefixed by installApiBasePath() in lib/client/apiBasePath.ts (keep the
+  // BASE_PATH there in sync with this value).
+  basePath: '/connect',
   images: {
     unoptimized: true,
     remotePatterns: [

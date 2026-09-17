@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { asset } from "@/lib/basePath";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Megaphone, X } from "lucide-react";
 
@@ -130,7 +131,7 @@ export default function AnnouncementPreviewModal({
           <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
               <Image
-                src="/au-connect-logo.png"
+                src={asset("/au-connect-logo.png")}
                 alt="AU Connect"
                 width={40}
                 height={40}

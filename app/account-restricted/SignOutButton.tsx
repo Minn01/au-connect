@@ -1,7 +1,8 @@
 "use client";
 
-import { LOGOUT_API_PATH } from "@/lib/constants";
+import { LOGOUT_API_PATH, SIGNIN_PAGE_PATH } from "@/lib/constants";
 import { clearClientSessionStorage } from "@/lib/client/logoutCleanup";
+import { BASE_PATH } from "@/lib/client/apiBasePath";
 import { useState } from "react";
 
 export default function SignOutButton() {
@@ -11,7 +12,8 @@ export default function SignOutButton() {
     setLoading(true);
     await fetch(LOGOUT_API_PATH, { method: "DELETE" });
     clearClientSessionStorage();
-    window.location.href = "/auth/register";
+    // Hard navigation isn't basePath-prefixed by Next, so add it manually.
+    window.location.href = `${BASE_PATH}${SIGNIN_PAGE_PATH}`;
   }
 
   return (

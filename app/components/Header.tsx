@@ -45,6 +45,7 @@ import PopupModal from "./PopupModal";
 import { fetchUnreadCount } from "@/lib/client/notifications.client";
 import { fetchUnreadMessagesCount } from "@/lib/headerMessaging";
 import { useActorStore } from "@/lib/stores/actorStore";
+import { asset } from "@/lib/basePath";
 import VerificationRequiredModal from "./VerificationRequiredModal";
 
 type SearchUser = {
@@ -417,7 +418,7 @@ export default function Header() {
             className="flex min-w-0 items-center gap-2 cursor-pointer rounded-lg px-1 py-1 hover:bg-gray-50 sm:gap-3 sm:px-3"
           >
             <Image
-              src="/au-connect-logo.png"
+              src={asset("/au-connect-logo.png")}
               width={40}
               height={40}
               alt="logo"

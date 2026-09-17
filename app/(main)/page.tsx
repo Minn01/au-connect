@@ -4,6 +4,7 @@ import LeftProfile from "../components/Feed_LeftProfile";
 import MainFeed from "../components/Feed_MainFeed";
 import Image from "next/image";
 import AnnouncementsSection from "../components/AnnouncementsSection";
+import { asset } from "@/lib/basePath";
 import { fetchPosts, fetchUser } from "./profile/utils/fetchfunctions";
 import PostType from "@/types/Post";
 import {
@@ -111,7 +112,7 @@ export default function Home() {
                 <div className="shrink-0">
                   <div className="h-16 w-16 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center overflow-hidden">
                     <Image
-                      src="/au-logo.png"
+                      src={asset("/au-logo.png")}
                       alt="Assumption University of Thailand"
                       width={64}
                       height={64}

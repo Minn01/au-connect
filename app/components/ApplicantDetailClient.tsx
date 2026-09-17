@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { asset } from "@/lib/basePath";
 import {
   useApplicationDetail,
   useUpdateApplicationStatus,
@@ -111,10 +112,10 @@ export default function ApplicantDetailClient({
               {/* Profile Picture */}
               <div className="relative">
                 <img
-                  src={applicant.profilePic || "/default_profile.jpg"}
+                  src={applicant.profilePic || asset("/default_profile.jpg")}
                   alt={applicant.username}
                   onError={(e) => {
-                    e.currentTarget.src = "/default_profile.jpg";
+                    e.currentTarget.src = asset("/default_profile.jpg");
                   }}
                   className="w-20 h-20 rounded-full object-cover ring-4 ring-gray-100"
                 />

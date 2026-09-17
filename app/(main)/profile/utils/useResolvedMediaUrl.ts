@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { asset } from "@/lib/basePath";
 
 const DEFAULT_FALLBACK = "/default_profile.jpg";
 
@@ -59,8 +60,10 @@ export function useResolvedMediaUrl(
   // If there was an error fetching, return fallback
   if (error) {
     console.warn("Using fallback due to error:", error);
-    return fallback;
+    return asset(fallback);
   }
 
-  return immediate ?? data ?? fallback;
+  // asset() prefixes local /public paths with the basePath and leaves
+  // absolute (http) URLs — like the Azure blob URLs — untouched.
+  return asset(immediate ?? data ?? fallback);
 }

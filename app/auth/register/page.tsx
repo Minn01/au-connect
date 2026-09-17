@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { asset } from "@/lib/basePath";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -44,7 +45,7 @@ export default function SignUpPage() {
       <div className="relative w-full lg:w-1/2 h-64 sm:h-80 lg:h-full flex items-end overflow-hidden">
         {/* Background Image */}
         <Image
-          src="/signUp.png"
+          src={asset("/signUp.png")}
           alt="AU signup background"
           fill
           className="object-cover object-center lg:object-left"
@@ -77,7 +78,7 @@ export default function SignUpPage() {
           <div className="text-center mb-8">
             <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg overflow-hidden">
               <Image
-                src="/au-connect-logo.png"
+                src={asset("/au-connect-logo.png")}
                 alt="AU Connect logo"
                 width={64}
                 height={64}
@@ -106,7 +107,7 @@ export default function SignUpPage() {
               className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:border-gray-300 hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image
-                src="/google-icon.png"
+                src={asset("/google-icon.png")}
                 width={20}
                 height={20}
                 alt="Google"
@@ -122,7 +123,7 @@ export default function SignUpPage() {
               className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-xl bg-[#0A66C2] text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-[#004182] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image
-                src="/linkedin-icon.png"
+                src={asset("/linkedin-icon.png")}
                 width={20}
                 height={20}
                 alt="LinkedIn"
@@ -138,7 +139,7 @@ export default function SignUpPage() {
               className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-xl bg-linear-to-r from-gray-800 to-gray-900 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:from-gray-900 hover:to-black hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image
-                src="/microsoft-icon.png"
+                src={asset("/microsoft-icon.png")}
                 width={20}
                 height={20}
                 alt="Microsoft"
