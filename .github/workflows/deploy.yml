@@ -44,8 +44,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           # Bakes the production URL into the browser bundle. Set repo variable
           # NEXT_PUBLIC_BASE_URL (Settings → Actions → Variables); falls back to
-          # localhost if unset.
+          # the /connect production URL if unset.
           build-args: |
-            NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000' }}
+            NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL || 'https://life.au.edu/connect' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

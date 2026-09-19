@@ -2,10 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  // Served under the /connect sub-path of life.au.edu. Next prefixes pages,
-  // assets, <Link>, <Image> and the router automatically; client fetch() calls
-  // are prefixed by installApiBasePath() in lib/client/apiBasePath.ts (keep the
-  // BASE_PATH there in sync with this value).
+  // Served under /connect everywhere — locally (localhost:3000/connect) and in
+  // production (life.au.edu/connect) — so dev mirrors prod exactly. Client
+  // fetch() calls and /public assets are prefixed via lib/basePath.ts.
   basePath: '/connect',
   images: {
     unoptimized: true,

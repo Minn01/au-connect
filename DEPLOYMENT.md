@@ -1,13 +1,18 @@
 # Deploying AU Connect on life.au.edu
 
-This is how to deploy AU Connect on the life.au.edu server. It runs the app and
-MongoDB as containers with Docker Compose:
+This is how to deploy the AU Connect system on the life.au.edu server. It runs
+three app images (pulled from Docker Hub) + MongoDB as containers with Docker
+Compose, all on one private network:
 
-- `au-connect-app` — the Next.js app, pulled from Docker Hub, listening on port 3000 (localhost only)
-- `au-connect-mongo` — MongoDB, running as its own container (single-node replica set)
+- `au-connect-app` — the main Next.js app · `127.0.0.1:3000` → `life.au.edu/connect`
+- `au-connect-admin` — the admin app · `127.0.0.1:3001` → `life.au.edu/connect-admin`
+- `au-connect-reco` — the recommendation API (FastAPI) · **internal only**, no host port
+- `au-connect-mongo` — MongoDB (single-node replica set) · **internal only**
 
-Redeployment and the reverse proxy are handled by the AU team's own setup
-(their Watchtower and nginx), so this repo doesn't run its own.
+Only the two app ports are exposed (through nginx). The recommendation API and
+MongoDB are reachable only inside the private network. The reverse proxy (nginx)
+and redeployment are handled by the AU team's own setup, so this repo doesn't
+run its own.
 
 One thing to keep in mind: the Mongo data lives in a Docker volume
 (`ac-mongo-data`) on the server, and nothing backs it up for you. Set up a
@@ -28,15 +33,21 @@ git clone https://github.com/Tommyzizii/au-connect.git
 cd au-connect
 ```
 
-### 2. Create the `.env` file
+### 2. Create the three env files
+
+Each app gets its own env file (all gitignored — never commit real secrets):
 
 ```bash
-cp .env.template .env
+cp .env.template .env                                # main app
+cp .env.admin.example .env.admin                     # admin app
+cp .env.recommendation.example .env.recommendation   # recommendation api
 ```
 
 ### 3. Fill in the values
 
-Open `.env` and fill in the values. The main ones:
+Open each file and fill it in. The `.env.admin` and `.env.recommendation`
+variables come from those repos' own READMEs. For the main app's `.env`, the
+key ones:
 
 ```dotenv
 NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL, use https
@@ -80,16 +91,22 @@ redirect URIs. Until that's done, Google/LinkedIn/Microsoft login won't work.
 make prod-up
 ```
 
-This pulls the app image from Docker Hub and starts the app and MongoDB. The app
-listens on 127.0.0.1:3000 — it isn't exposed to the internet directly; the AU
-team's nginx sits in front of it.
+This pulls the three images from Docker Hub and starts them plus MongoDB. The
+main app listens on `127.0.0.1:3000` and the admin app on `127.0.0.1:3001` —
+neither is exposed to the internet directly; the AU team's nginx sits in front.
+The recommendation API and MongoDB have no host port at all.
 
 ### 5. Set up nginx
 
-There's an example config at
-[`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example)
-that proxies `life.au.edu/connect` to `127.0.0.1:3000`. Copy it into the
-server's nginx config and reload:
+The AU team adds two routes to their existing nginx (example in
+[`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example)):
+
+```
+life.au.edu/connect        ->  127.0.0.1:3000   (main app)
+life.au.edu/connect-admin  ->  127.0.0.1:3001   (admin app)
+```
+
+Then reload:
 
 ```bash
 sudo nginx -t && sudo nginx -s reload
@@ -105,21 +122,21 @@ The `ac-mongo-data` volume sticks around, so your data is safe across restarts.
 
 ## How updates get deployed
 
-We don't run our own Watchtower — the AU team handles redeployment on their side.
-From our end, all we do is publish a new image, and their setup picks it up. The
-flow is:
+Each of the three repos builds and pushes its **own** image; the server just
+pulls them. The AU team handles the redeploy on their side. The flow is:
 
 ```
-merge to main  ->  GitHub Actions builds and pushes tommyzizii/au-connect:latest
+merge to main in a repo  ->  its GitHub Actions builds & pushes its image
+   (au-connect, admin, recommendation → 3 images on Docker Hub)
                                   |
-               the AU team's Watchtower notices the new image and redeploys
-                                  |
-               (or they pull and restart the container manually)
+               the AU team pulls the new image and restarts the container
 ```
 
-The app container carries the `watchtower.enable=true` label, so if their
-Watchtower filters by label it will pick ours up automatically. If you ever need
-to redeploy by hand, `make prod-pull` followed by `make prod-up` does it.
+To redeploy by hand on the server: `make prod-pull` then `make prod-up`.
+
+Each of the three repos owns its own `Dockerfile` + push workflow
+(`.github/workflows/deploy.yml`). This repo (au-connect) also holds the shared
+`docker-compose.prod.yml` that runs all three images together.
 
 ### One-time CI setup
 
@@ -132,20 +149,25 @@ NEXT_PUBLIC_BASE_URL = https://life.au.edu/connect
 ```
 
 And add the two secrets the build uses: `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN`. If you skip the variable, the image gets built pointing at
-localhost, and the links, logins, and social-share previews break in production.
+`DOCKERHUB_TOKEN`. (The workflow defaults it to the `/connect` production URL, so
+it works even if you don't set it — but set it explicitly if the URL differs.)
 
 ## About the /connect path
 
-The app is set up to live under `life.au.edu/connect`. `basePath: "/connect"` is
-set in `next.config.ts`, and the share links are built from
-`NEXT_PUBLIC_BASE_URL`. Use Option A in the nginx example.
+The app is served under `/connect` **everywhere** — `basePath: "/connect"` is set
+in `next.config.ts`, both locally (`localhost:3000/connect`) and in production
+(`life.au.edu/connect`), so dev mirrors prod. Use Option A in the nginx example.
 
-The main thing is to build and run with
-`NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect` (both the GitHub Actions
-variable and the `.env`). That value has to include the `/connect` part, or the
-links and logins won't line up.
+`NEXT_PUBLIC_BASE_URL` must **end with `/connect`** (local
+`http://localhost:3000/connect`, prod `https://life.au.edu/connect`) — it feeds
+the share links and the OAuth redirect URIs. Register the resulting `/connect`
+callback URLs with each provider (Google / LinkedIn / Microsoft):
 
-If the AU team gives you a separate subdomain instead (like `connect.au.edu`),
-remove the `basePath` line from `next.config.ts`, use Option B in the nginx
-example, and set `NEXT_PUBLIC_BASE_URL=https://connect.au.edu`.
+```
+<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/google/callback
+<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/linkedin/callback
+<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/azure-ad/callback
+```
+
+For a dedicated subdomain (e.g. `connect.au.edu`), remove the `basePath` line
+from `next.config.ts` and set `NEXT_PUBLIC_BASE_URL=https://connect.au.edu`.

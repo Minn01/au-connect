@@ -1,10 +1,9 @@
 /**
- * Single source of truth for the app's basePath (see next.config.ts).
- *
- * Keep BASE_PATH in sync with `basePath` in next.config.ts. Client fetch() calls
- * are prefixed by installApiBasePath() (lib/client/apiBasePath.ts); local
- * /public asset paths are prefixed by asset() below, because next/Image with
- * `unoptimized: true` does not add the basePath to a string src.
+ * Single source of truth for the app's basePath — must match `basePath` in
+ * next.config.ts. It is "/connect" everywhere (dev and prod alike). Client
+ * fetch() calls are prefixed by installApiBasePath() (lib/client/apiBasePath.ts);
+ * local /public asset paths are prefixed by asset() below, because next/Image
+ * with `unoptimized: true` does not add the basePath to a string src.
  */
 export const BASE_PATH = "/connect";
 

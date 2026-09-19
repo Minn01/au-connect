@@ -1,11 +1,17 @@
-# Production stack for AU Connect on the life.au.edu server.
+# Production stack for the AU Connect system on the life.au.edu server.
 #
-#   cp .env.template .env   # then fill in .env
+#   cp .env.template .env                                # main app
+#   cp .env.admin.example .env.admin                     # admin app
+#   cp .env.recommendation.example .env.recommendation   # recommendation api
 #   make prod-up
 #
-# Runs the app (pulled from Docker Hub) + MongoDB (self-hosted container,
-# single-node replica set). Redeployment and the reverse proxy are handled by
-# the AU team's own setup (their Watchtower + nginx), not by this file.
+# Runs the three app images (pulled from Docker Hub) + MongoDB on one private
+# network. The reverse proxy (nginx) and redeploys are handled by the AU team.
+#
+# nginx routes the AU team add to their existing config:
+#   life.au.edu/connect        -> 127.0.0.1:3000   (main)
+#   life.au.edu/connect-admin  -> 127.0.0.1:3001   (admin)
+# The recommendation api and MongoDB have no host port — internal only.
 services:
   au-connect:
     image: ${AU_CONNECT_IMAGE:-tommyzizii/au-connect:latest}
@@ -20,12 +26,41 @@ services:
       mongo-init:
         condition: service_completed_successfully
     ports:
-      # Bind to localhost only — the AU team's nginx proxies public traffic to it.
       - "127.0.0.1:3000:3000"
-    labels:
-      # Left in place so the AU team's Watchtower can auto-update the app if it
-      # filters by this label. Harmless if they don't.
-      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - au-network
+
+  admin:
+    image: ${ADMIN_IMAGE:-tommyzizii/au-connect-admin:latest}
+    container_name: au-connect-admin
+    platform: linux/amd64
+    restart: unless-stopped
+    env_file:
+      - .env.admin
+    depends_on:
+      mongo:
+        condition: service_started
+    ports:
+      # Different host port than main; both listen on :3000 inside the container.
+      - "127.0.0.1:3001:3000"
+    networks:
+      - au-network
+
+  recommendation:
+    image: ${RECO_IMAGE:-tommyzizii/au-connect-recommendation:latest}
+    container_name: au-connect-reco
+    platform: linux/amd64
+    restart: unless-stopped
+    env_file:
+      - .env.recommendation
+    depends_on:
+      # Only needed if the service reads MongoDB directly. Harmless otherwise.
+      mongo:
+        condition: service_started
+    # INTERNAL ONLY — no host port. The main app reaches it on the private
+    # network at  http://recommendation:8000  (see RECOMMENDATION_SERVICE_URL).
+    expose:
+      - "8000"
     networks:
       - au-network
 
