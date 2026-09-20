@@ -68,6 +68,11 @@ export const MY_CONNECTIONS_API_PATH =
   BASE_API_PATH + "/connect/my-connections";
 export const CONNECTION_RECOMMENDATIONS_API_PATH =
   BASE_API_PATH + "/connect/recommendations";
+export const SKILL_SEARCH_API_PATH = BASE_API_PATH + "/skills/search";
+export const PROFILE_SKILLS_API_PATH = (userId: string) =>
+  `${BASE_API_PATH}/profile/${encodeURIComponent(userId)}/skills`;
+export const MY_PROFILE_SKILLS_API_PATH = BASE_API_PATH + "/profile/me/skills";
+export const RECOMMENDED_JOBS_API_PATH = BASE_API_PATH + "/jobs/recommended";
 export const CONNECTION_REQUEST_API_PATH =
   BASE_API_PATH + "/connect/request";
 export const MESSAGES_INBOX_API_PATH = BASE_API_PATH + "/messages/inbox";
@@ -216,6 +221,8 @@ export const OAUTH_STATE_RANDOM_BYTES_LENGTH = 32;
 
 // accessable image url duration for SAS token
 export const SAS_TOKEN_EXPIRE_DURATION = 10 * 60 * 1000; // 10 min
+export const MAX_PROFILE_SKILLS = 8;
+export const MAX_SKILL_SEARCH_RESULTS = 20;
 
 // number of posts displayed before needing a refresh/another fetch
 export const POST_REFRESH_LIMIT = 10;

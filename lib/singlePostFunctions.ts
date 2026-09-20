@@ -14,7 +14,10 @@ import {
 } from "./env";
 import { SAS_TOKEN_EXPIRE_DURATION } from "./constants";
 import { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
-import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
+import {
+  getSkillNamesFromJobSkills,
+  getSkillOptionsFromJobSkills,
+} from "@/lib/jobSkillFunctions";
 import { getManagedCommunity } from "@/lib/communityAuth";
 import type { Prisma } from "@/lib/generated/prisma";
 
@@ -107,6 +110,7 @@ export async function getSinglePost(
               select: {
                 skill: {
                   select: {
+                    id: true,
                     name: true,
                   },
                 },
@@ -194,6 +198,7 @@ export async function getSinglePost(
       ? {
           ...post.jobPost,
           jobRequirements: getSkillNamesFromJobSkills(post.jobPost.jobSkills),
+          skills: getSkillOptionsFromJobSkills(post.jobPost.jobSkills),
           jobSkills: undefined,
 
           positionsFilled: post.jobPost.positionsFilled,

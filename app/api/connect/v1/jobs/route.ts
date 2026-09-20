@@ -5,7 +5,10 @@ import {
   JobLocationType,
   Prisma,
 } from "@/lib/generated/prisma";
-import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
+import {
+  getSkillNamesFromJobSkills,
+  getSkillOptionsFromJobSkills,
+} from "@/lib/jobSkillFunctions";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -119,6 +122,7 @@ export async function GET(req: NextRequest) {
               select: {
                 skill: {
                   select: {
+                    id: true,
                     name: true,
                   },
                 },
@@ -177,6 +181,7 @@ export async function GET(req: NextRequest) {
               jobRequirements: getSkillNamesFromJobSkills(
                 post.jobPost.jobSkills,
               ),
+              skills: getSkillOptionsFromJobSkills(post.jobPost.jobSkills),
               jobSkills: undefined,
             }
           : null,

@@ -10,7 +10,11 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "test:content": "NODE_OPTIONS=--conditions=react-server tsx --test tests/*.test.ts"
+    "test:content": "NODE_OPTIONS=--conditions=react-server tsx --test tests/*.test.ts",
+    "skills:normalize:dry": "tsx scripts/normalize-existing-skills.ts --dry-run",
+    "skills:normalize": "tsx scripts/normalize-existing-skills.ts",
+    "skills:import:dry": "tsx scripts/import-esco-skills.ts --dry-run",
+    "skills:import": "tsx scripts/import-esco-skills.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -21,6 +25,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@vidstack/react": "^1.12.13",
     "bcrypt": "^6.0.0",
+    "csv-parse": "^7.0.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "jsdom": "^28.0.0",

@@ -37,6 +37,8 @@ RUN DATABASE_URL="mongodb://placeholder" \
     AZURE_STORAGE_ACCOUNT_NAME="placeholder" \
     AZURE_STORAGE_CONNECTION_STRING="placeholder" \
     AZURE_STORAGE_CONTAINER_NAME="placeholder" \
+    RECOMMENDATION_SERVICE_URL="http://placeholder" \
+    RECOMMENDATION_SERVICE_API_KEY="placeholder" \
     NEXT_PUBLIC_BASE_URL="${NEXT_PUBLIC_BASE_URL}" \
     JWT_SECRET="placeholder" \
     pnpm build

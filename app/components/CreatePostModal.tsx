@@ -332,6 +332,8 @@ export default function CreatePostModal({
           status: job.status || "OPEN",
           deadline: job.deadline || "",
           jobDetails: job.jobDetails || "",
+          skills: job.skills || [],
+          skillIds: job.skills?.map((skill) => skill.id) || [],
           jobRequirements: job.jobRequirements || [],
           applyUrl: job.applyUrl || "",
           allowExternalApply: job.allowExternalApply ?? false,

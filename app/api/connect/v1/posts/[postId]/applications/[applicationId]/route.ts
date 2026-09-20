@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
+import { refreshJobEmbedding } from "@/lib/server/jobRecommendations.server";
 
 import {
   StorageSharedKeyCredential,
@@ -188,6 +189,7 @@ export async function PATCH(
     }
 
     // Use transaction to ensure consistency
+    let changedJobPostId: string | null = null;
     const result = await prisma.$transaction(async (tx) => {
       // Get existing application
       const existingApplication = await tx.jobApplication.findUnique({
@@ -242,6 +244,7 @@ export async function PATCH(
 
       // Update positionsFilled if needed
       if (increment !== 0) {
+        changedJobPostId = existingApplication.jobPostId;
         const updatedJobPost = await tx.jobPost.update({
           where: { id: existingApplication.jobPostId },
           data: {
@@ -275,6 +278,8 @@ export async function PATCH(
 
       return updatedApplication;
     });
+
+    if (changedJobPostId) await refreshJobEmbedding(changedJobPostId);
 
     return NextResponse.json(result);
   } catch (err) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
+import { refreshJobEmbedding } from "@/lib/server/jobRecommendations.server";
 
 export async function PATCH(
   req: NextRequest,
@@ -42,6 +43,7 @@ export async function PATCH(
         status: "OPEN",
       },
     });
+    await refreshJobEmbedding(updated.id);
 
     return NextResponse.json(updated);
 

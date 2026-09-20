@@ -36,6 +36,7 @@ type User = {
   experience?: Experience[];
   education?: Education[];
   posts?: PostType[];
+  skills?: Array<{ id: string; name: string }>;
 };
 
 export default User;

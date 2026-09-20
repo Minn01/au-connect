@@ -11,6 +11,7 @@ import EditProfileModal from "./EditProfileModal";
 import ExperienceManagerModal from "./ExperienceManagerModal";
 import EducationManagerModal from "./EducationManagerModal";
 import EditAboutModal from "./EditAboutModal";
+import ProfileSkillsSection from "./ProfileSkillsSection";
 import ProfilePhotoModal from "./ProfilePhotoModal";
 import CoverPhotoModal from "./CoverPhotoModal";
 import ContactInfoModal from "./ContactInfoModal";
@@ -97,12 +98,10 @@ function ConnectionPreviewItem({ user }: { user: ConnectionUser }) {
 export default function ProfileView({
   user,
   isOwner,
-  sessionUserId,
   sessionUser,
 }: {
   user: User;
   isOwner: boolean;
-  sessionUserId: string | null;
   sessionUser: Pick<User, "id" | "username" | "slug" | "profilePic"> | null;
 }) {
   const queryClient = useQueryClient();
@@ -903,6 +902,12 @@ export default function ProfileView({
                     {about || "This user has not added an about section yet."}
                   </p>
                 </SectionCard>
+
+                <ProfileSkillsSection
+                  userId={user.id}
+                  initialSkills={user.skills ?? []}
+                  canEdit={canUsePersonalActions}
+                />
 
                 {/* ACTIVITY */}
                 <SectionCard title="Activities">

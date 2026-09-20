@@ -71,6 +71,7 @@ model User {
   accountStatus  UserAccountStatus @default(ACTIVE)
   suspendedUntil DateTime?
   warningCount   Int               @default(0)
+  userSkills     UserSkill[]
 }
 
 enum UserAccountStatus {
@@ -662,10 +663,50 @@ model JobApplication {
   @@index([applicantId])
 }
 
+// model Skill {
+//  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+//  name      String     @unique
+//  jobSkills JobSkill[]
+// }
+
+enum SkillSource {
+  ESCO
+  USER_CREATED
+}
+
 model Skill {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String     @unique
-  jobSkills JobSkill[]
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name              String
+  normalizedName    String?
+  aliases           String[]    @default([])
+  normalizedAliases String[]    @default([])
+  source            SkillSource @default(USER_CREATED)
+
+  externalId  String?
+  escoVersion String?
+
+  jobSkills  JobSkill[]
+  userSkills UserSkill[]
+
+  @@index([normalizedName])
+  @@index([normalizedAliases])
+  @@index([externalId])
+}
+
+model UserSkill {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId  String @db.ObjectId
+  skillId String @db.ObjectId
+  order   Int    @default(0)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId, order])
+  @@index([skillId])
 }
 
 model JobSkill {

@@ -9,9 +9,10 @@ import {
   Globe,
   ExternalLink,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import JobDraft from "@/types/JobDraft";
+import SkillSelector from "./SkillSelector";
 
 export default function JobPostCreationSection({
   value,
@@ -37,8 +38,6 @@ export default function JobPostCreationSection({
     allowExternalApply,
   } = value;
 
-  const jobRequirements = value.jobRequirements ?? [];
-
   const minDeadline = useMemo(() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -48,7 +47,6 @@ export default function JobPostCreationSection({
   const update = <K extends keyof JobDraft>(key: K, val: JobDraft[K]) => {
     onChange({ ...value, [key]: val });
   };
-  const [skillInput, setSkillInput] = useState("");
 
   return (
     <div className="px-6 py-4 bg-blue-50/30 border-y border-blue-100">
@@ -340,56 +338,18 @@ export default function JobPostCreationSection({
             Required Skills
           </label>
 
-          <div
-            className={`border rounded-xl px-3 py-3 focus-within:ring-2 transition ${
-              errors.jobRequirements
-                ? "border-red-500 focus-within:ring-red-100"
-                : "border-neutral-200 focus-within:border-blue-500 focus-within:ring-blue-100"
-            }`}
-          >
-            <div className="flex flex-wrap gap-2 mb-2">
-              {value.jobRequirements?.map((skill, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 bg-neutral-100 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700"
-                >
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = jobRequirements.filter(
-                        (_, i) => i !== index,
-                      );
-                      update("jobRequirements", updated);
-                    }}
-                    className="text-neutral-500 hover:text-red-500"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <input
-              type="text"
-              value={skillInput}
-              onChange={(e) => setSkillInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && skillInput.trim() !== "") {
-                  e.preventDefault();
-                  if (!jobRequirements.includes(skillInput.trim())) {
-                    update("jobRequirements", [
-                      ...jobRequirements,
-                      skillInput.trim(),
-                    ]);
-                  }
-                  setSkillInput("");
-                }
-              }}
-              placeholder="Type a skill and press Enter"
-              className="w-full text-sm outline-none text-gray-700"
-            />
-          </div>
+          <SkillSelector
+            selected={value.skills ?? []}
+            onChange={(skills) =>
+              onChange({
+                ...value,
+                skills,
+                skillIds: skills.map(({ id }) => id),
+                jobRequirements: skills.map(({ name }) => name),
+              })
+            }
+            label="Search required skills"
+          />
           {errors.jobRequirements && (
             <p className="text-xs text-red-500 mt-1">
               {errors.jobRequirements}
@@ -397,7 +357,7 @@ export default function JobPostCreationSection({
           )}
 
           <p className="text-xs text-neutral-500 mt-1.5">
-            Press Enter to add each skill
+            Search and select skills from the shared catalogue.
           </p>
         </div>
 

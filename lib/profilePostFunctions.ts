@@ -13,7 +13,11 @@ import {
 } from "@/lib/env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "@/lib/constants";
 import type { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
-import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
+import type { Prisma } from "@/lib/generated/prisma/client";
+import {
+  getSkillNamesFromJobSkills,
+  getSkillOptionsFromJobSkills,
+} from "@/lib/jobSkillFunctions";
 
 // Validate Mongo ObjectId
 function isValidObjectId(id: string) {
@@ -73,7 +77,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
             : null;
 
     // ✅ Build where clause
-    const whereClause: any = {
+    const whereClause: Prisma.PostWhereInput = {
       userId: normalizedProfileUserId,
       actorType: "USER",
       moderationStatus: "VISIBLE",
@@ -137,6 +141,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
               select: {
                 skill: {
                   select: {
+                    id: true,
                     name: true,
                   },
                 },
@@ -175,6 +180,7 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
               jobRequirements: getSkillNamesFromJobSkills(
                 post.jobPost.jobSkills,
               ),
+              skills: getSkillOptionsFromJobSkills(post.jobPost.jobSkills),
               jobSkills: undefined,
               remainingPositions:
                 post.jobPost.positionsAvailable - post.jobPost.positionsFilled,

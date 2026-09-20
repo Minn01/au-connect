@@ -11,7 +11,8 @@ type JobDraft = {
   status: "OPEN" | "CLOSED" | "FILLED";
   positionsAvailable?: number;
   deadline?: string;
-  jobSkills?: string[];
+  skillIds?: string[];
+  skills?: Array<{ id: string; name: string }>;
   jobDetails?: string;
   jobRequirements?: string[];
   allowExternalApply: boolean;
