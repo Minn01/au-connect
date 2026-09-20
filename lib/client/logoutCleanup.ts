@@ -33,6 +33,18 @@ export function clearClientSessionStorage() {
     for (const key of keysToRemove) {
       window.localStorage.removeItem(key);
     }
+
+    const pendingSessionKeys: string[] = [];
+    for (let index = 0; index < window.sessionStorage.length; index += 1) {
+      const key = window.sessionStorage.key(index);
+      if (key?.startsWith("auconnect:pending:")) {
+        pendingSessionKeys.push(key);
+      }
+    }
+
+    for (const key of pendingSessionKeys) {
+      window.sessionStorage.removeItem(key);
+    }
   } catch {
     // Storage can be unavailable in private mode; logout should still continue.
   }

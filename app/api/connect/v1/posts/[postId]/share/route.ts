@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/lib/generated/prisma";
 import prisma from "@/lib/prisma";
+import { encryptMessageText } from "@/lib/server/messageEncryption";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
 import { requireAccountVerification } from "@/lib/accountVerification";
 
@@ -171,7 +172,7 @@ export async function POST(
           where: { id: conversation.id },
           data: {
             lastMessageAt: message.createdAt,
-            lastMessageText: "Shared a post",
+            lastMessageText: encryptMessageText("Shared a post"),
             lastMessageSenderId: senderId,
             [unreadField]: { increment: 1 },
           },

@@ -47,7 +47,7 @@ function mergePrepend(prev: ChatMessage[], incoming: ChatMessage[]) {
   return dedupeById([...incoming, ...prev]);
 }
 
-/** localStorage pending key per conversation (REAL conv only) */
+/** sessionStorage pending key per conversation (REAL conv only) */
 function pendingKey(convId: string) {
   return `auconnect:pending:${convId}`;
 }
@@ -55,7 +55,16 @@ function pendingKey(convId: string) {
 function safeReadPending(convId: string): ChatMessage[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(pendingKey(convId));
+    const key = pendingKey(convId);
+    let raw = sessionStorage.getItem(key);
+
+    // Move pending messages left by older versions out of persistent storage.
+    if (!raw) {
+      raw = localStorage.getItem(key);
+      if (raw) sessionStorage.setItem(key, raw);
+    }
+    localStorage.removeItem(key);
+
     if (!raw) return [];
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return [];
@@ -74,7 +83,10 @@ function safeReadPending(convId: string): ChatMessage[] {
 function safeWritePending(convId: string, list: ChatMessage[]) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(pendingKey(convId), JSON.stringify(list));
+    const key = pendingKey(convId);
+    if (list.length) sessionStorage.setItem(key, JSON.stringify(list));
+    else sessionStorage.removeItem(key);
+    localStorage.removeItem(key);
   } catch {}
 }
 
@@ -963,6 +975,8 @@ export function useMessaging() {
     });
 
     if (!res.ok) return;
+
+    safeWritePending(convId, []);
 
     // Clear local messages
     setMessagesByConv((prev) => ({

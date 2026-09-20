@@ -4,6 +4,10 @@ import { getManagedCommunity, isValidObjectId } from "@/lib/communityAuth";
 import { getAuthUserIdFromReq } from "@/lib/getAuthUserIdFromReq";
 import prisma from "@/lib/prisma";
 import { enforceMessageSendRateLimit } from "@/lib/server/messageRateLimit";
+import {
+  decryptMessageText,
+  encryptMessageText,
+} from "@/lib/server/messageEncryption";
 import type { ActorType, Prisma } from "@/lib/generated/prisma";
 
 
@@ -75,7 +79,11 @@ async function hideUnavailableSharedPosts(messages: SelectedMessage[], viewerId:
       (post.visibility === "friends" &&
         post.userId !== viewerId &&
         !connectedAuthorIds.has(post.userId));
-    return { ...message, sharedPost: unavailable ? null : post };
+    return {
+      ...message,
+      text: decryptMessageText(message.text),
+      sharedPost: unavailable ? null : post,
+    };
   });
 }
 
@@ -337,8 +345,8 @@ export async function getMyInbox(req: NextRequest) {
           userId: conversation.lastMessageSenderId ?? null,
           communityId: conversation.lastMessageSenderCommunityId ?? null,
         };
-        const lastPrefix =
-          conversation.lastMessageText && sameActor(actor, lastSender) ? "You: " : "";
+        const lastMessageText = decryptMessageText(conversation.lastMessageText);
+        const lastPrefix = lastMessageText && sameActor(actor, lastSender) ? "You: " : "";
 
         if (peer.type === "COMMUNITY" && peer.communityId) {
           const community = communityMap.get(peer.communityId);
@@ -354,8 +362,8 @@ export async function getMyInbox(req: NextRequest) {
             },
             conversationId: conversation.id,
             lastMessageAt: conversation.lastMessageAt,
-            lastMessageText: conversation.lastMessageText
-              ? `${lastPrefix}${conversation.lastMessageText}`
+            lastMessageText: lastMessageText
+              ? `${lastPrefix}${lastMessageText}`
               : null,
             unreadCount: unreadCount ?? 0,
             conversationUpdatedAt: conversation.updatedAt
@@ -377,8 +385,8 @@ export async function getMyInbox(req: NextRequest) {
             },
             conversationId: conversation.id,
             lastMessageAt: conversation.lastMessageAt,
-            lastMessageText: conversation.lastMessageText
-              ? `${lastPrefix}${conversation.lastMessageText}`
+            lastMessageText: lastMessageText
+              ? `${lastPrefix}${lastMessageText}`
               : null,
             unreadCount: unreadCount ?? 0,
             conversationUpdatedAt: conversation.updatedAt
@@ -701,6 +709,7 @@ export async function sendMessage(req: NextRequest, conversationId: string) {
     if (text.length > MAX_MESSAGE_TEXT_LENGTH) {
       return jsonError(`Message text is too long. Limit is ${MAX_MESSAGE_TEXT_LENGTH} characters`, 400);
     }
+    const encryptedText = encryptMessageText(text);
 
     const rateLimitResponse = await enforceMessageSendRateLimit(access.currentActor);
     if (rateLimitResponse) return rateLimitResponse;
@@ -718,7 +727,7 @@ export async function sendMessage(req: NextRequest, conversationId: string) {
           senderCommunityId: access.currentActor.communityId,
           receiverActorType: access.peerActor.type,
           receiverCommunityId: access.peerActor.communityId,
-          text,
+          text: encryptedText,
         },
         select: messageSelect,
       });
@@ -727,7 +736,7 @@ export async function sendMessage(req: NextRequest, conversationId: string) {
         where: { id: conversationId },
         data: {
           lastMessageAt: msg.createdAt,
-          lastMessageText: msg.text ?? null,
+          lastMessageText: encryptedText,
           lastMessageSenderId: authUserId,
           lastMessageSenderActorType: access.currentActor.type,
           lastMessageSenderCommunityId: access.currentActor.communityId,
@@ -738,7 +747,9 @@ export async function sendMessage(req: NextRequest, conversationId: string) {
       return msg;
     });
 
-    return NextResponse.json({ data: result });
+    return NextResponse.json({
+      data: { ...result, text: decryptMessageText(result.text) },
+    });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Server error";
     const status = errorStatus(msg);
@@ -853,7 +864,10 @@ export async function deleteMessageForEveryone(
 
     const data: Prisma.ConversationUpdateInput = {
       lastMessageAt: latest?.createdAt ?? null,
-      lastMessageText: latest?.kind === "SHARED_POST" ? "Shared a post" : (latest?.text ?? null),
+      lastMessageText:
+        latest?.kind === "SHARED_POST"
+          ? encryptMessageText("Shared a post")
+          : (latest?.text ?? null),
       lastMessageSenderId: latest?.senderId ?? null,
       lastMessageSenderActorType: latest?.senderActorType ?? "USER",
       lastMessageSenderCommunityId: latest?.senderCommunityId ?? null,
