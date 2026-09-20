@@ -1,81 +1,132 @@
-# Skill maintenance
+# Skill catalogue pipeline
 
-These commands use `lib/generated/prisma`, as configured in `prisma/schema.prisma`.
-No script pushes the schema or creates database indexes automatically.
+AU Connect's skill catalogue is built locally from three checked-in sources. The
+pipeline makes no network requests and does not use ESCO.
 
-Database selection: an explicitly set `DATABASE_URL` takes precedence over the
-repository's `.env.local`, then `.env`. Paths are resolved relative to this
-repository, not the shell's current directory. Empty/invalid overrides fail
-instead of falling back. Connection strings and raw Prisma errors are never
-printed. Both dry runs read the selected database but do not write.
+## Files
 
-Run these commands manually, in order:
+- `data/skills/source/technology.json`: Stack Overflow technology survey data.
+- `data/skills/source/devicon.json`: Devicon names, alternate names, tags, and
+  icon keys.
+- `data/skills/source/curated-skills.json`: a compact, reviewed set of
+  professional skills for technical and nontechnical work.
+- `data/skills/catalogue.json`: deterministic prepared artifact committed with
+  the source files.
+
+Only the main worked-with datasets at `Language.datasets.Language.data`,
+`Database.datasets.Database.data`, `Platform.datasets.Platform.data`,
+`Webframe.datasets.Webframe.data`, and `DevEnvs.datasets.DevEnvs.data` are
+selected. They map to `LANGUAGE`, `DATABASE`, `PLATFORM`, `FRAMEWORK`, and
+`TOOL`. All audience-specific, learning, professional, `WW_*`, `DA_*`, and
+unlisted sections are ignored.
+
+Devicon never adds a skill. It enriches a selected Stack Overflow record with
+an icon key and useful alternate names/tags when a unique normalized match is
+found. Generic terms such as `framework`, `tool`, and `programming` are
+discarded. A small explicit alias table covers common spellings such as AWS,
+Node.js, C#, C++, PostgreSQL, React, Vue, Next.js, and .NET.
+
+Curated records use `CURATED` as their source and have null survey metrics and
+icon keys. They cover soft skills, business, management, marketing, design,
+data, finance, sales, human resources, operations, writing/media, and research.
+Explicit curated aliases such as SEO, SEM, CRM, UI, and UX take precedence over
+ambiguous Devicon tags. Other aliases that collide with a different skill name
+or more than one catalogue record are removed during preparation.
+
+## New database bootstrap
+
+The bootstrap is the normal deployment path. It validates all sources,
+regenerates and validates the deterministic combined catalogue, prints total
+and per-category counts, and then plans or applies normalized-name upserts.
+
+```sh
+pnpm install
+pnpm prisma generate
+pnpm prisma db push
+
+pnpm skills:bootstrap:dry
+pnpm skills:bootstrap
+```
+
+`skills:bootstrap:dry` is the default-safe form and performs no database
+writes. `skills:bootstrap` passes the required `--write` flag. Before write
+mode, operators must confirm that `DATABASE_URL` identifies the intended
+database. Bootstrap never calls the reset script, deletes skills or junctions,
+deactivates records, or replaces a collection wholesale.
+
+## Lower-level commands
+
+```sh
+pnpm skills:prepare
+pnpm skills:prepare:check
+pnpm skills:import:dry
+```
+
+Preparation validates all source shapes, merges equal normalized names,
+unions their categories, and retains the maximum survey frequency/popularity
+instead of double-counting the same respondent across sections. Output order is
+popularity descending, frequency descending, then name. Atomic file replacement
+makes regeneration safe.
+
+Search ranking is exact normalized name, exact alias, name prefix, alias
+prefix, then name substring. Survey popularity is only a tie-breaker, followed
+by display name, so curated skills are not displaced by unrelated technologies.
+
+Normalization lives in `lib/skill-normalization.ts` and is also used by search
+and catalogue import. It applies Unicode NFKC, trimming, lowercasing, whitespace
+collapse, punctuation removal, symbol-aware C#/C++ handling, and a narrow set
+of technology equivalences. Display labels remain unchanged.
+
+## Replacing an obsolete catalogue
+
+If a database still contains the previous ESCO catalogue, reset it before
+applying the unique `normalizedName` index. The reset is dry-run by default,
+preserves User and JobPost documents, and writes a local backup before a
+confirmed deletion:
+
+```sh
+pnpm skills:reset:dry
+pnpm skills:reset
+```
+
+Review the dry-run counts and backup policy before confirming. Then apply the
+Prisma schema using the project's normal deployment procedure. Prisma 6.19 with
+MongoDB validates the `SkillCategory[]` enum list used by this schema.
 
 ```sh
 pnpm exec prisma validate
 pnpm exec prisma generate
-pnpm skills:normalize:dry
-# Review the planned changes before running the next command (writes).
-pnpm skills:normalize
 pnpm skills:import:dry
-# Review the planned changes before running the next command (writes).
-pnpm skills:import
+# Review totals, then write:
+pnpm skills:bootstrap
 ```
 
-Use a MongoDB replica set for normalization, which moves relations in
-transactions. Pause app writes and other skill maintenance processes until
-finished. The importer uses individual atomic MongoDB reads and writes and does
-not open interactive transactions. The current schema has a non-unique
-`normalizedName` index, so import remains idempotent for serial runs but cannot
-guarantee uniqueness against concurrent inserts. Normalize successfully first.
+`DATABASE_URL` is loaded from the explicit environment, `.env.local`, then
+`.env`. The importer validates every prepared record before connecting. It
+matches by unique `normalizedName`, updates existing documents in place (so
+UserSkill and JobSkill IDs remain valid), and inserts missing records. It never
+deletes or deactivates catalogue or junction documents. A repeat import reports
+all records unchanged. Pause other
+catalogue writers while importing; rerunning after an interruption is safe.
 
-Normalization uses Unicode NFKC, trimmed/collapsed whitespace and lowercase.
-Canonical selection prefers an ESCO record, then the lowest ObjectId. Every
-group is atomic: both relation types move before duplicate skills are deleted.
-When a relation already exists, its duplicate is removed; overlapping UserSkill
-relations retain the lowest `order`. Existing aliases are merged. Groups with
-conflicting external IDs or blank names require manual resolution and fail
-preflight. Totals distinguish moved and deduplicated relations. Earlier groups
-remain committed if a later transaction fails; rerunning is safe.
-
-Import streams `data/esco/skills_en.csv` with a real CSV parser and validates the
-actual headers: `preferredLabel`, `conceptUri`, `altLabels`. Quoted multiline
-fields, escaped quotes, commas, CRLF and a BOM are supported. Alternative labels
-are split on newlines, normalized and deduplicated. Existing aliases are retained.
-The preferred label supplies `name`; the URI supplies `externalId`. Records are
-marked `source: ESCO`, `escoVersion: 1.2.1`.
-
-The importer streams records sequentially. Matching uses `normalizedName` and
-the ESCO URI; updates preserve the Skill ID and never edit JobSkill or UserSkill
-records. Unchanged rows count as skipped. A transient Prisma `P2028` is retried
-up to three times after 100, 200 and 400 ms. Each attempt starts with a fresh
-read, so a write that committed before an ambiguous error becomes an idempotent
-skip or update. Validation failures, raw-query `P2010` errors and duplicate-key
-errors are recorded immediately without blind retries.
-
-Every failed attempt is logged as JSON with Prisma code, message, metadata, CSV
-record number, concept URI and preferred label. Final failures are written with
-their original CSV fields to `data/esco/skills_en.failed.json` using an atomic
-file replacement. Import only those records with:
+An alternate prepared file can be inspected without writes:
 
 ```sh
-pnpm skills:import -- --retry-file data/esco/skills_en.failed.json
+pnpm skills:import:dry -- --input path/to/catalogue.json
 ```
 
-The retry run replaces that file with any records still failing; an empty
-`records` array means all retries succeeded. Use `--failed-file <path>` to choose
-another output. Dry-run reads either source but writes no retry file. Completion
-prints inserted, updated, skipped, retried and failed totals. Any remaining
-record, input-stream, or retry-file failure exits with status 1. Earlier writes
-remain committed, and rerunning safely skips them.
+The separate reset command is destructive and remains dry-run by default. It
+backs up skill and junction documents before a confirmed reset; see its CLI
+help and package scripts before use.
 
-Tests (in-memory database double and local CSV only):
+## Tests
 
 ```sh
-pnpm exec tsx --test tests/skillMaintenance.test.ts
+pnpm test
+pnpm typecheck
 ```
 
-The existing application helper `lib/jobSkillFunctions.ts` and legacy migration
-`migration_scripts/migrate-job-requirements-to-skills.ts` still upsert by unique
-`name`. The current schema removes that uniqueness, so those existing call sites
-need a separate compatibility update before deploying the schema/application.
+The catalogue tests cover required normalization equivalences, selected-section
+filtering, Devicon enrichment, deterministic generation against the real local
+files, validation, dry-run behavior, updates that preserve IDs, deactivation,
+and rerun idempotency.

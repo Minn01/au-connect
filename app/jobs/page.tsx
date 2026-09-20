@@ -122,11 +122,6 @@ export default function JobsPage() {
     salaryRange: salaryRangeParam,
   });
 
-  useEffect(() => {
-    console.log("Job posts data updated:", data);
-  }, [data]);
-
-
   const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
@@ -145,6 +140,7 @@ export default function JobsPage() {
     queryFn: async (): Promise<{
       jobs: RecommendedJob[];
       hasProfileSkills: boolean;
+      available: boolean;
     }> => {
       const response = await fetch(`${RECOMMENDED_JOBS_API_PATH}?limit=6`, {
         credentials: "include",
@@ -155,6 +151,23 @@ export default function JobsPage() {
     },
     retry: 1,
   });
+
+  useEffect(() => {
+    if (recommendations.data?.available === false) {
+      console.warn("Job recommendations are unavailable; hiding the section.");
+    } else if (recommendations.isError) {
+      console.warn("Job recommendations are unavailable; hiding the section.", {
+        error:
+          recommendations.error instanceof Error
+            ? recommendations.error.message
+            : "Unknown recommendation error",
+      });
+    }
+  }, [
+    recommendations.data?.available,
+    recommendations.error,
+    recommendations.isError,
+  ]);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null!);
   const setVirtuosoRef = useFeedStore((s) => s.setVirtuosoRef);
@@ -229,7 +242,9 @@ export default function JobsPage() {
 
     return (
       <>
-        {!successfullyEmpty && (
+        {!recommendations.isError &&
+          recommendations.data?.available !== false &&
+          !successfullyEmpty && (
           <>
             {/* Recommendations */}
             <div className="bg-white border border-zinc-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl">
@@ -253,11 +268,6 @@ export default function JobsPage() {
                   Array.from({ length: 2 }).map((_, index) => (
                     <div key={index} className="h-36 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100" />
                   ))
-                ) : recommendations.isError ? (
-                  <div className="col-span-full rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-500">
-                    Recommendations are temporarily unavailable.{" "}
-                    <button type="button" onClick={() => recommendations.refetch()} className="font-medium text-blue-600 hover:underline">Retry</button>
-                  </div>
                 ) : recommendations.data?.jobs.map((job) => (
                   <button
                     type="button"

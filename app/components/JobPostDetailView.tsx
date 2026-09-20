@@ -3,7 +3,6 @@
 import { AlertTriangle } from "lucide-react";
 import parseDate from "../(main)/profile/utils/parseDate";
 import JobDraft from "@/types/JobDraft";
-import { useEffect } from "react";
 
 interface JobPostContentViewProps {
   jobData: JobDraft;
@@ -48,9 +47,6 @@ export default function JobPostDetailView({
   onSave,
   onViewApplicants,
 }: JobPostContentViewProps) {
-  useEffect(() => {
-    console.log("jobData:\n", jobData);
-  }, [jobData])
   const formatSalary = () => {
     const currency = jobData.salaryCurrency || "USD";
     if (jobData.salaryMin && jobData.salaryMax) {

@@ -30,12 +30,13 @@ const row = (
   aliases: string[] = [],
   users = 0,
   jobs = 0,
+  popularity: number | null = null,
 ) => ({
   id,
   name,
   normalizedName: name.toLowerCase(),
   normalizedAliases: aliases,
-  source: "ESCO" as const,
+  popularity,
   _count: { userSkills: users, jobSkills: jobs },
 });
 
@@ -47,13 +48,13 @@ test("skill search rejects unauthenticated requests", async () => {
   assert.equal(response.status, 401);
 });
 
-test("skill search enforces query length, clamps limits, and never requests the catalogue", async () => {
+test("skill search enforces query length, clamps limits, and bounds catalogue reads", async () => {
   let calls = 0;
   const store = {
     async findMany(args: unknown) {
       calls++;
       const take = (args as { take?: number }).take;
-      assert.ok(take !== undefined && take <= 120);
+      assert.ok(take !== undefined && take <= 500);
       return [row("a", "React")];
     },
   };
@@ -64,21 +65,22 @@ test("skill search enforces query length, clamps limits, and never requests the 
   assert.equal(calls, 1);
 });
 
-test("skill search ranks exact, prefix, alias, usage, and escapes regex characters", async () => {
+test("skill search ranks exact name, exact alias, prefixes, substring, then popularity", async () => {
   const store = {
     async findMany() {
       return [
         row("contains", "Using React", [], 100),
         row("alias", "ECMAScript library", ["react"], 50),
-        row("prefix-low", "React Native", [], 0),
-        row("prefix-high", "Reactive programming", [], 4),
+        row("prefix-low", "React Native", [], 0, 0, 0.1),
+        row("prefix-high", "Reactive programming", [], 0, 0, 0.2),
+        row("alias-prefix", "UI library", ["react tooling"]),
         row("exact", "React", [], 0),
       ];
     },
   };
   const results = await searchSkills("  REACT  ", 10, store);
   assert.deepEqual(results.map(({ id }) => id), [
-    "exact", "prefix-high", "prefix-low", "alias", "contains",
+    "exact", "alias", "prefix-high", "prefix-low", "alias-prefix", "contains",
   ]);
   assert.equal(escapeRegex("c++ [web].*"), "c\\+\\+ \\[web\\]\\.\\*");
 });

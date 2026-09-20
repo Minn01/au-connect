@@ -2,11 +2,12 @@ import "server-only";
 
 import { MAX_SKILL_SEARCH_RESULTS } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+import { normalizeSkillName } from "@/lib/skill-normalization";
 
 export type SkillSearchResult = { id: string; name: string };
 
 export function normalizeSkillQuery(value: string) {
-  return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+  return normalizeSkillName(value);
 }
 
 export function escapeRegex(value: string) {
@@ -22,10 +23,9 @@ export function clampSkillSearchLimit(value: number) {
 type SearchRow = {
   id: string;
   name: string;
-  normalizedName: string | null;
+  normalizedName: string;
   normalizedAliases: string[];
-  source: "ESCO" | "USER_CREATED";
-  _count: { userSkills: number; jobSkills: number };
+  popularity: number | null;
 };
 
 type SkillStore = {
@@ -33,15 +33,23 @@ type SkillStore = {
 };
 
 function rank(row: SearchRow, query: string) {
-  const name = row.normalizedName ?? "";
-  const aliasMatch = row.normalizedAliases.some(
-    (alias) => alias === query || alias.startsWith(query),
-  );
-  const matchRank = name === query ? 0 : name.startsWith(query) ? 1 : aliasMatch ? 2 : 3;
+  const name = row.normalizedName;
+  const exactAlias = row.normalizedAliases.includes(query);
+  const aliasPrefix = row.normalizedAliases.some((alias) => alias.startsWith(query));
+  const matchRank = name === query
+    ? 0
+    : exactAlias
+      ? 1
+      : name.startsWith(query)
+        ? 2
+        : aliasPrefix
+          ? 3
+          : name.includes(query)
+            ? 4
+            : Number.POSITIVE_INFINITY;
   return {
     matchRank,
-    usage: row._count.userSkills + row._count.jobSkills,
-    sourceRank: row.source === "ESCO" ? 1 : 0,
+    popularity: row.popularity ?? -1,
   };
 }
 
@@ -57,35 +65,32 @@ export async function searchSkills(
 
   let rows: SearchRow[];
   if (query.length >= 2) {
-    // Prisma parameterizes these filters, so user text never becomes executable
-    // Mongo syntax. Alias lookup is exact/prefix-ranked among bounded candidates.
+    // The catalogue is intentionally compact. Reading its active comparison
+    // keys allows correct alias-prefix ranking, which Mongo scalar-list filters
+    // cannot express through Prisma.
     rows = await store.findMany({
-      where: {
-        OR: [
-          { normalizedName: { contains: query, mode: "insensitive" } },
-          { normalizedAliases: { has: query } },
-        ],
-      },
+      where: { active: true },
       select: {
         id: true,
         name: true,
         normalizedName: true,
         normalizedAliases: true,
-        source: true,
-        _count: { select: { userSkills: true, jobSkills: true } },
+        popularity: true,
       },
-      take: Math.min(limit * 8, 120),
+      take: 500,
     });
   } else {
     rows = await store.findMany({
-      where: { OR: [{ userSkills: { some: {} } }, { jobSkills: { some: {} } }] },
+      where: {
+        active: true,
+        OR: [{ userSkills: { some: {} } }, { jobSkills: { some: {} } }],
+      },
       select: {
         id: true,
         name: true,
         normalizedName: true,
         normalizedAliases: true,
-        source: true,
-        _count: { select: { userSkills: true, jobSkills: true } },
+        popularity: true,
       },
       take: 80,
     });
@@ -93,6 +98,7 @@ export async function searchSkills(
     if (rows.length === 0) {
       rows = await store.findMany({
         where: {
+          active: true,
           normalizedName: {
             in: [
               "communication",
@@ -108,21 +114,20 @@ export async function searchSkills(
           name: true,
           normalizedName: true,
           normalizedAliases: true,
-          source: true,
-          _count: { select: { userSkills: true, jobSkills: true } },
+          popularity: true,
         },
       });
     }
   }
 
   return rows
+    .filter((row) => query.length === 0 || Number.isFinite(rank(row, query).matchRank))
     .sort((left, right) => {
       const a = rank(left, query);
       const b = rank(right, query);
       return (
         a.matchRank - b.matchRank ||
-        b.usage - a.usage ||
-        a.sourceRank - b.sourceRank ||
+        b.popularity - a.popularity ||
         left.name.localeCompare(right.name)
       );
     })

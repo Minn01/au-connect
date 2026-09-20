@@ -34,6 +34,7 @@ yarn-error.log*
 .env*
 !.env.template
 data/esco/*.failed.json
+data/backups/
 compose.yml
 docker-compose.yml
 

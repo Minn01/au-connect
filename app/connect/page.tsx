@@ -68,6 +68,8 @@ export default function ConnectPage() {
     ConnectionRecommendation[]
   >([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+  const [recommendationsUnavailable, setRecommendationsUnavailable] =
+    useState(false);
   const [recommendationsLoadingMore, setRecommendationsLoadingMore] =
     useState(false);
   const [recommendationsError, setRecommendationsError] = useState<
@@ -129,17 +131,21 @@ export default function ConnectPage() {
         }
 
         if (!ignore) {
+          setRecommendationsUnavailable(false);
           setRecommendations(json?.data?.recommendations || []);
           setRecommendationsNextCursor(json?.data?.nextCursor ?? null);
           setRecommendationsHasMore(json?.data?.hasMore === true);
         }
       } catch (e: unknown) {
         if (!ignore) {
-          setRecommendationsError(
-            e instanceof Error
-              ? e.message
-              : "Failed to load connection recommendations",
+          console.warn(
+            "Connection recommendations are unavailable; hiding the section.",
+            e instanceof Error ? e.message : "Unknown recommendation error",
           );
+          setRecommendationsUnavailable(true);
+          setRecommendations([]);
+          setRecommendationsNextCursor(null);
+          setRecommendationsHasMore(false);
         }
       } finally {
         if (!ignore) setRecommendationsLoading(false);
@@ -188,11 +194,12 @@ export default function ConnectPage() {
       setRecommendationsNextCursor(json?.data?.nextCursor ?? null);
       setRecommendationsHasMore(json?.data?.hasMore === true);
     } catch (e: unknown) {
-      setRecommendationsError(
-        e instanceof Error
-          ? e.message
-          : "Failed to load more connection recommendations",
+      console.warn(
+        "Connection recommendations became unavailable; hiding the section.",
+        e instanceof Error ? e.message : "Unknown recommendation error",
       );
+      setRecommendationsUnavailable(true);
+      setRecommendationsError(null);
     } finally {
       setRecommendationsLoadingMore(false);
     }
@@ -383,15 +390,16 @@ export default function ConnectPage() {
           </div>
         </section>
 
-        <section className="mt-10 pb-8">
-          <div className="mb-5">
-            <h2 className="text-lg font-bold text-neutral-800">
-              People you may know
-            </h2>
-            <p className="mt-1 text-sm text-neutral-500">
-              Members with experience and interests similar to yours.
-            </p>
-          </div>
+        {!recommendationsUnavailable && (
+          <section className="mt-10 pb-8">
+            <div className="mb-5">
+              <h2 className="text-lg font-bold text-neutral-800">
+                People you may know
+              </h2>
+              <p className="mt-1 text-sm text-neutral-500">
+                Members with experience and interests similar to yours.
+              </p>
+            </div>
 
           {recommendationsError && (
             <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -502,7 +510,8 @@ export default function ConnectPage() {
               </p>
             </div>
           )}
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,5895 @@
+[
+  {
+    "name": "Visual Studio Code",
+    "normalizedName": "visual studio code",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.7591,
+    "frequency": 19846,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Docker",
+    "normalizedName": "docker",
+    "aliases": [
+      "deploy",
+      "docker"
+    ],
+    "normalizedAliases": [
+      "deploy"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.7107,
+    "frequency": 17394,
+    "iconKey": "docker",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "JavaScript",
+    "normalizedName": "javascript",
+    "aliases": [
+      "ecmascript",
+      "javascript"
+    ],
+    "normalizedAliases": [
+      "ecmascript"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.6604,
+    "frequency": 20982,
+    "iconKey": "javascript",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "HTML/CSS",
+    "normalizedName": "htmlcss",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.6193,
+    "frequency": 19676,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "SQL",
+    "normalizedName": "sql",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.5858,
+    "frequency": 18610,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Python",
+    "normalizedName": "python",
+    "aliases": [
+      "python"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.5785,
+    "frequency": 18381,
+    "iconKey": "python",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "npm",
+    "normalizedName": "npm",
+    "aliases": [
+      "nodepackagemanager",
+      "npmjs"
+    ],
+    "normalizedAliases": [
+      "nodepackagemanager",
+      "npmjs"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.5676,
+    "frequency": 13891,
+    "iconKey": "npm",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "PostgreSQL",
+    "normalizedName": "postgres",
+    "aliases": [
+      "postgres",
+      "postgresql"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.5565,
+    "frequency": 14515,
+    "iconKey": "postgresql",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Bash/Shell",
+    "normalizedName": "bashshell",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.4873,
+    "frequency": 15482,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Node.js",
+    "normalizedName": "nodejs",
+    "aliases": [
+      "nodejs"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.487,
+    "frequency": 11532,
+    "iconKey": "nodejs",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "React",
+    "normalizedName": "react",
+    "aliases": [
+      "react",
+      "React.js",
+      "reactjs"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.4468,
+    "frequency": 10579,
+    "iconKey": "react",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "TypeScript",
+    "normalizedName": "typescript",
+    "aliases": [
+      "transpiler",
+      "ts",
+      "typescript"
+    ],
+    "normalizedAliases": [
+      "transpiler",
+      "ts"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.4359,
+    "frequency": 13850,
+    "iconKey": "typescript",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Amazon Web Services (AWS)",
+    "normalizedName": "aws",
+    "aliases": [
+      "amazonwebservices",
+      "AWS"
+    ],
+    "normalizedAliases": [
+      "amazonwebservices"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.4333,
+    "frequency": 10604,
+    "iconKey": "amazonwebservices",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Pip",
+    "normalizedName": "pip",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.4092,
+    "frequency": 10014,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "MySQL",
+    "normalizedName": "mysql",
+    "aliases": [
+      "mysql",
+      "mystructuredquerylanguage"
+    ],
+    "normalizedAliases": [
+      "mystructuredquerylanguage"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.4051,
+    "frequency": 10565,
+    "iconKey": "mysql",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "SQLite",
+    "normalizedName": "sqlite",
+    "aliases": [
+      "sqlite"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.3751,
+    "frequency": 9784,
+    "iconKey": "sqlite",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Microsoft SQL Server",
+    "normalizedName": "microsoft sql server",
+    "aliases": [
+      "microsoftsqlserver",
+      "msql",
+      "mssql"
+    ],
+    "normalizedAliases": [
+      "microsoftsqlserver",
+      "msql",
+      "mssql"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.3015,
+    "frequency": 7864,
+    "iconKey": "microsoftsqlserver",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Java",
+    "normalizedName": "java",
+    "aliases": [
+      "java"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.294,
+    "frequency": 9341,
+    "iconKey": "java",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Visual Studio",
+    "normalizedName": "visual studio",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.29,
+    "frequency": 7581,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Kubernetes",
+    "normalizedName": "kubernetes",
+    "aliases": [
+      "kubernetes"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2855,
+    "frequency": 6986,
+    "iconKey": "kubernetes",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Redis",
+    "normalizedName": "redis",
+    "aliases": [
+      "redis",
+      "remotedictionaryserver"
+    ],
+    "normalizedAliases": [
+      "remotedictionaryserver"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.2803,
+    "frequency": 7310,
+    "iconKey": "redis",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "C#",
+    "normalizedName": "csharp",
+    "aliases": [
+      "C Sharp",
+      "c#",
+      "csharp"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.2783,
+    "frequency": 8842,
+    "iconKey": "csharp",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Notepad++",
+    "normalizedName": "notepad plus plus",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.2742,
+    "frequency": 7169,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "IntelliJ IDEA",
+    "normalizedName": "intellij idea",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.2714,
+    "frequency": 7094,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Microsoft Azure",
+    "normalizedName": "microsoft azure",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2631,
+    "frequency": 6440,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Homebrew",
+    "normalizedName": "homebrew",
+    "aliases": [
+      "homebrew",
+      "linux",
+      "os"
+    ],
+    "normalizedAliases": [
+      "linux",
+      "os"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2567,
+    "frequency": 6282,
+    "iconKey": "homebrew",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Vite",
+    "normalizedName": "vite",
+    "aliases": [
+      "blockchain",
+      "DAG",
+      "vite",
+      "web3"
+    ],
+    "normalizedAliases": [
+      "blockchain",
+      "dag",
+      "web3"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2537,
+    "frequency": 6209,
+    "iconKey": "vite",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Google Cloud",
+    "normalizedName": "google cloud",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2457,
+    "frequency": 6013,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Vim",
+    "normalizedName": "vim",
+    "aliases": [
+      "viimproved",
+      "vim"
+    ],
+    "normalizedAliases": [
+      "viimproved"
+    ],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.2428,
+    "frequency": 6348,
+    "iconKey": "vim",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "MongoDB",
+    "normalizedName": "mongodb",
+    "aliases": [
+      "mongodb"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.2402,
+    "frequency": 6264,
+    "iconKey": "mongodb",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "C++",
+    "normalizedName": "cplusplus",
+    "aliases": [
+      "C Plus Plus",
+      "c++",
+      "cplusplus",
+      "CPP"
+    ],
+    "normalizedAliases": [
+      "cpp"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.2353,
+    "frequency": 7477,
+    "iconKey": "cplusplus",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "jQuery",
+    "normalizedName": "jquery",
+    "aliases": [
+      "jquery",
+      "jqueryjs"
+    ],
+    "normalizedAliases": [
+      "jqueryjs"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.2338,
+    "frequency": 5536,
+    "iconKey": "jquery",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Make",
+    "normalizedName": "make",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2318,
+    "frequency": 5674,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "PowerShell",
+    "normalizedName": "powershell",
+    "aliases": [
+      "cli",
+      "cmdlets",
+      "command-line",
+      "powershell",
+      "ps",
+      "shell",
+      "windows"
+    ],
+    "normalizedAliases": [
+      "cli",
+      "cmdlets",
+      "commandline",
+      "ps",
+      "shell",
+      "windows"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.2317,
+    "frequency": 7362,
+    "iconKey": "powershell",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "MariaDB",
+    "normalizedName": "mariadb",
+    "aliases": [
+      "mariadb"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.2246,
+    "frequency": 5857,
+    "iconKey": "mariadb",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "C",
+    "normalizedName": "c",
+    "aliases": [
+      "c"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.2196,
+    "frequency": 6977,
+    "iconKey": "c",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Yarn",
+    "normalizedName": "yarn",
+    "aliases": [
+      "yarn"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.2114,
+    "frequency": 5173,
+    "iconKey": "yarn",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Next.js",
+    "normalizedName": "nextjs",
+    "aliases": [
+      "NextJS"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.2079,
+    "frequency": 4923,
+    "iconKey": "nextjs",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cloudflare",
+    "normalizedName": "cloudflare",
+    "aliases": [
+      "cdn",
+      "cloudflare",
+      "dns",
+      "proxy",
+      "security"
+    ],
+    "normalizedAliases": [
+      "cdn",
+      "dns",
+      "proxy",
+      "security"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.201,
+    "frequency": 4918,
+    "iconKey": "cloudflare",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Express",
+    "normalizedName": "express",
+    "aliases": [
+      "express",
+      "expressjs"
+    ],
+    "normalizedAliases": [
+      "expressjs"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1987,
+    "frequency": 4706,
+    "iconKey": "express",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "ASP.NET Core",
+    "normalizedName": "aspnet core",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1967,
+    "frequency": 4658,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "NuGet",
+    "normalizedName": "nuget",
+    "aliases": [
+      "nuget"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1893,
+    "frequency": 4632,
+    "iconKey": "nuget",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "PHP",
+    "normalizedName": "php",
+    "aliases": [
+      "Personal Home Page",
+      "php",
+      "PHP Hypertext Preprocessor"
+    ],
+    "normalizedAliases": [
+      "personal home page",
+      "php hypertext preprocessor"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.1885,
+    "frequency": 5988,
+    "iconKey": "php",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "APT",
+    "normalizedName": "apt",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1844,
+    "frequency": 4512,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Webpack",
+    "normalizedName": "webpack",
+    "aliases": [
+      "webpack",
+      "webpackjs"
+    ],
+    "normalizedAliases": [
+      "webpackjs"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1838,
+    "frequency": 4498,
+    "iconKey": "webpack",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Angular",
+    "normalizedName": "angular",
+    "aliases": [
+      "angular"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1822,
+    "frequency": 4315,
+    "iconKey": "angular",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cursor",
+    "normalizedName": "cursor",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1786,
+    "frequency": 4670,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Terraform",
+    "normalizedName": "terraform",
+    "aliases": [
+      "architecture",
+      "terraform"
+    ],
+    "normalizedAliases": [
+      "architecture"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1775,
+    "frequency": 4343,
+    "iconKey": "terraform",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Vue.js",
+    "normalizedName": "vue",
+    "aliases": [
+      "Vue",
+      "vuejs"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1757,
+    "frequency": 4161,
+    "iconKey": "vuejs",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Elasticsearch",
+    "normalizedName": "elasticsearch",
+    "aliases": [
+      "elastic",
+      "elasticsearch",
+      "logs"
+    ],
+    "normalizedAliases": [
+      "elastic",
+      "logs"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.1665,
+    "frequency": 4343,
+    "iconKey": "elasticsearch",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Maven (build tool)",
+    "normalizedName": "maven build tool",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1641,
+    "frequency": 4016,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Go",
+    "normalizedName": "go",
+    "aliases": [
+      "go",
+      "golang"
+    ],
+    "normalizedAliases": [
+      "golang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.164,
+    "frequency": 5211,
+    "iconKey": "go",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "PyCharm",
+    "normalizedName": "pycharm",
+    "aliases": [
+      "pycharm"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1505,
+    "frequency": 3935,
+    "iconKey": "pycharm",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Android Studio",
+    "normalizedName": "android studio",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1497,
+    "frequency": 3913,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Rust",
+    "normalizedName": "rust",
+    "aliases": [
+      "rust",
+      "rustlang"
+    ],
+    "normalizedAliases": [
+      "rustlang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.1484,
+    "frequency": 4716,
+    "iconKey": "rust",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "FastAPI",
+    "normalizedName": "fastapi",
+    "aliases": [
+      "fastapi"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1479,
+    "frequency": 3501,
+    "iconKey": "fastapi",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Spring Boot",
+    "normalizedName": "spring boot",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1468,
+    "frequency": 3475,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cargo",
+    "normalizedName": "cargo",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1437,
+    "frequency": 3516,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Gradle",
+    "normalizedName": "gradle",
+    "aliases": [
+      "apachegradle",
+      "gradle",
+      "gradlebuildtool",
+      "task-runner"
+    ],
+    "normalizedAliases": [
+      "apachegradle",
+      "gradlebuildtool",
+      "taskrunner"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1437,
+    "frequency": 3516,
+    "iconKey": "gradle",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Flask",
+    "normalizedName": "flask",
+    "aliases": [
+      "flask"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1437,
+    "frequency": 3402,
+    "iconKey": "flask",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "ASP.NET",
+    "normalizedName": "aspnet",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1417,
+    "frequency": 3356,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Jupyter Nb/JupyterLab",
+    "normalizedName": "jupyter nbjupyterlab",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1407,
+    "frequency": 3678,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Neovim",
+    "normalizedName": "neovim",
+    "aliases": [
+      "neovim"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.14,
+    "frequency": 3659,
+    "iconKey": "neovim",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "WordPress",
+    "normalizedName": "wordpress",
+    "aliases": [
+      "wordpress"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1361,
+    "frequency": 3223,
+    "iconKey": "wordpress",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "pnpm",
+    "normalizedName": "pnpm",
+    "aliases": [
+      "performant npm"
+    ],
+    "normalizedAliases": [
+      "performant npm"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1344,
+    "frequency": 3288,
+    "iconKey": "pnpm",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Firebase",
+    "normalizedName": "firebase",
+    "aliases": [
+      "auth",
+      "firebase"
+    ],
+    "normalizedAliases": [
+      "auth"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1306,
+    "frequency": 3195,
+    "iconKey": "firebase",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Django",
+    "normalizedName": "django",
+    "aliases": [
+      "django"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.1257,
+    "frequency": 2977,
+    "iconKey": "django",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Nano",
+    "normalizedName": "nano",
+    "aliases": [
+      "GNU",
+      "GNU nano",
+      "gnu-nano",
+      "nano"
+    ],
+    "normalizedAliases": [
+      "gnu",
+      "gnu nano",
+      "gnunano"
+    ],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1224,
+    "frequency": 3201,
+    "iconKey": "nano",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Prometheus",
+    "normalizedName": "prometheus",
+    "aliases": [
+      "analysis",
+      "observability",
+      "prometheus"
+    ],
+    "normalizedAliases": [
+      "analysis",
+      "observability"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1177,
+    "frequency": 2881,
+    "iconKey": "prometheus",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Ansible",
+    "normalizedName": "ansible",
+    "aliases": [
+      "ansible",
+      "continuous-delivery",
+      "provisioning"
+    ],
+    "normalizedAliases": [
+      "continuousdelivery",
+      "provisioning"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1173,
+    "frequency": 2870,
+    "iconKey": "ansible",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Podman",
+    "normalizedName": "podman",
+    "aliases": [
+      "podman",
+      "pods"
+    ],
+    "normalizedAliases": [
+      "pods"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1113,
+    "frequency": 2724,
+    "iconKey": "podman",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Chocolatey",
+    "normalizedName": "chocolatey",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1104,
+    "frequency": 2702,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Composer",
+    "normalizedName": "composer",
+    "aliases": [
+      "composer"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1103,
+    "frequency": 2699,
+    "iconKey": "composer",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "MSBuild",
+    "normalizedName": "msbuild",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1103,
+    "frequency": 2699,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Kotlin",
+    "normalizedName": "kotlin",
+    "aliases": [
+      "kotlin",
+      "kotlinlang"
+    ],
+    "normalizedAliases": [
+      "kotlinlang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.1076,
+    "frequency": 3417,
+    "iconKey": "kotlin",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Digital Ocean",
+    "normalizedName": "digital ocean",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.107,
+    "frequency": 2618,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Vercel",
+    "normalizedName": "vercel",
+    "aliases": [
+      "git",
+      "vercel"
+    ],
+    "normalizedAliases": [
+      "git"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.1062,
+    "frequency": 2599,
+    "iconKey": "vercel",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Oracle",
+    "normalizedName": "oracle",
+    "aliases": [
+      "oracle",
+      "oracledatabase"
+    ],
+    "normalizedAliases": [
+      "oracledatabase"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.1058,
+    "frequency": 2760,
+    "iconKey": "oracle",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Sublime Text",
+    "normalizedName": "sublime text",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1046,
+    "frequency": 2734,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Xcode",
+    "normalizedName": "xcode",
+    "aliases": [
+      "ios",
+      "iphone",
+      "mobile",
+      "xcode"
+    ],
+    "normalizedAliases": [
+      "ios",
+      "iphone",
+      "mobile"
+    ],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.1002,
+    "frequency": 2619,
+    "iconKey": "xcode",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Dynamodb",
+    "normalizedName": "dynamodb",
+    "aliases": [
+      "dynamodb",
+      "key-value"
+    ],
+    "normalizedAliases": [
+      "keyvalue"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0976,
+    "frequency": 2547,
+    "iconKey": "dynamodb",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Claude Code",
+    "normalizedName": "claude code",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0969,
+    "frequency": 2533,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Lua",
+    "normalizedName": "lua",
+    "aliases": [
+      "functional",
+      "lua",
+      "lualang",
+      "object-oriented",
+      "procedural",
+      "prototype-based",
+      "scripting"
+    ],
+    "normalizedAliases": [
+      "functional",
+      "lualang",
+      "objectoriented",
+      "procedural",
+      "prototypebased",
+      "scripting"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0915,
+    "frequency": 2906,
+    "iconKey": "lua",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Poetry",
+    "normalizedName": "poetry",
+    "aliases": [
+      "package-manager",
+      "poetry",
+      "python-poetry"
+    ],
+    "normalizedAliases": [
+      "packagemanager",
+      "pythonpoetry"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0904,
+    "frequency": 2213,
+    "iconKey": "poetry",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Laravel",
+    "normalizedName": "laravel",
+    "aliases": [
+      "laravel"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0889,
+    "frequency": 2106,
+    "iconKey": "laravel",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Datadog",
+    "normalizedName": "datadog",
+    "aliases": [
+      "datadog",
+      "integration"
+    ],
+    "normalizedAliases": [
+      "integration"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0886,
+    "frequency": 2169,
+    "iconKey": "datadog",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Pacman",
+    "normalizedName": "pacman",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0868,
+    "frequency": 2124,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "WebStorm",
+    "normalizedName": "webstorm",
+    "aliases": [
+      "webstorm"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0765,
+    "frequency": 2001,
+    "iconKey": "webstorm",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Zed",
+    "normalizedName": "zed",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0728,
+    "frequency": 1903,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "AngularJS",
+    "normalizedName": "angularjs",
+    "aliases": [
+      "angularjs"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0725,
+    "frequency": 1717,
+    "iconKey": "angularjs",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Svelte",
+    "normalizedName": "svelte",
+    "aliases": [
+      "compiler",
+      "svelte",
+      "sveltejs"
+    ],
+    "normalizedAliases": [
+      "compiler",
+      "sveltejs"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0724,
+    "frequency": 1715,
+    "iconKey": "svelte",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Rider",
+    "normalizedName": "rider",
+    "aliases": [
+      "rider"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0713,
+    "frequency": 1865,
+    "iconKey": "rider",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Eclipse",
+    "normalizedName": "eclipse",
+    "aliases": [
+      "eclipse",
+      "Eclipse IDE"
+    ],
+    "normalizedAliases": [
+      "eclipse ide"
+    ],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0711,
+    "frequency": 1859,
+    "iconKey": "eclipse",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Assembly",
+    "normalizedName": "assembly",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0706,
+    "frequency": 2243,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Blazor",
+    "normalizedName": "blazor",
+    "aliases": [
+      "blazor",
+      "design"
+    ],
+    "normalizedAliases": [
+      "design"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0695,
+    "frequency": 1646,
+    "iconKey": "blazor",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "NestJS",
+    "normalizedName": "nestjs",
+    "aliases": [
+      "nestjs"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0674,
+    "frequency": 1596,
+    "iconKey": "nestjs",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "BigQuery",
+    "normalizedName": "bigquery",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0654,
+    "frequency": 1705,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Ruby",
+    "normalizedName": "ruby",
+    "aliases": [
+      "ruby",
+      "rubylang"
+    ],
+    "normalizedAliases": [
+      "rubylang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0644,
+    "frequency": 2046,
+    "iconKey": "ruby",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "VSCodium",
+    "normalizedName": "vscodium",
+    "aliases": [
+      "vscodium"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0622,
+    "frequency": 1627,
+    "iconKey": "vscodium",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Supabase",
+    "normalizedName": "supabase",
+    "aliases": [
+      "authentication",
+      "cloud-computing-platform",
+      "supabase"
+    ],
+    "normalizedAliases": [
+      "authentication",
+      "cloudcomputingplatform"
+    ],
+    "categories": [
+      "DATABASE",
+      "PLATFORM"
+    ],
+    "popularity": 0.0597,
+    "frequency": 1556,
+    "iconKey": "supabase",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Dart",
+    "normalizedName": "dart",
+    "aliases": [
+      "dart",
+      "googledart"
+    ],
+    "normalizedAliases": [
+      "googledart"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0592,
+    "frequency": 1881,
+    "iconKey": "dart",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Ruby on Rails",
+    "normalizedName": "ruby on rails",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0589,
+    "frequency": 1395,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Netlify",
+    "normalizedName": "netlify",
+    "aliases": [
+      "cloud hosting",
+      "dynamic websites",
+      "netlify",
+      "serverless",
+      "web applications"
+    ],
+    "normalizedAliases": [
+      "cloud hosting",
+      "dynamic websites",
+      "serverless",
+      "web applications"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0585,
+    "frequency": 1432,
+    "iconKey": "netlify",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "PhpStorm",
+    "normalizedName": "phpstorm",
+    "aliases": [
+      "html",
+      "phpstorm"
+    ],
+    "normalizedAliases": [
+      "html"
+    ],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0584,
+    "frequency": 1526,
+    "iconKey": "phpstorm",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cloud Firestore",
+    "normalizedName": "cloud firestore",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0572,
+    "frequency": 1493,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Bun",
+    "normalizedName": "bun",
+    "aliases": [
+      "bun"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0549,
+    "frequency": 1344,
+    "iconKey": "bun",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Swift",
+    "normalizedName": "swift",
+    "aliases": [
+      "swift"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0541,
+    "frequency": 1718,
+    "iconKey": "swift",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Heroku",
+    "normalizedName": "heroku",
+    "aliases": [
+      "heroku"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0538,
+    "frequency": 1316,
+    "iconKey": "heroku",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Ninja",
+    "normalizedName": "ninja",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0519,
+    "frequency": 1270,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "H2",
+    "normalizedName": "h2",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.05,
+    "frequency": 1303,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Firebase Realtime Database",
+    "normalizedName": "firebase realtime database",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0498,
+    "frequency": 1298,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "R",
+    "normalizedName": "r",
+    "aliases": [
+      "r",
+      "rlang"
+    ],
+    "normalizedAliases": [
+      "rlang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0494,
+    "frequency": 1568,
+    "iconKey": "r",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Windsurf",
+    "normalizedName": "windsurf",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0487,
+    "frequency": 1274,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Groovy",
+    "normalizedName": "groovy",
+    "aliases": [
+      "apachegroovy",
+      "groovy",
+      "groovylang"
+    ],
+    "normalizedAliases": [
+      "apachegroovy",
+      "groovylang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0482,
+    "frequency": 1532,
+    "iconKey": "groovy",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Microsoft Access",
+    "normalizedName": "microsoft access",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0477,
+    "frequency": 1243,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cosmos DB",
+    "normalizedName": "cosmos db",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0456,
+    "frequency": 1189,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Splunk",
+    "normalizedName": "splunk",
+    "aliases": [
+      "log",
+      "splunk"
+    ],
+    "normalizedAliases": [
+      "log"
+    ],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.045,
+    "frequency": 1102,
+    "iconKey": "splunk",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Astro",
+    "normalizedName": "astro",
+    "aliases": [
+      "astro",
+      "static site generator"
+    ],
+    "normalizedAliases": [
+      "static site generator"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0446,
+    "frequency": 1056,
+    "iconKey": "astro",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Visual Basic (.Net)",
+    "normalizedName": "visual basic net",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0443,
+    "frequency": 1408,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "VBA",
+    "normalizedName": "vba",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.042,
+    "frequency": 1333,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Snowflake",
+    "normalizedName": "snowflake",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0413,
+    "frequency": 1077,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Deno",
+    "normalizedName": "deno",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0405,
+    "frequency": 958,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Symfony",
+    "normalizedName": "symfony",
+    "aliases": [
+      "symfony"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0401,
+    "frequency": 949,
+    "iconKey": "symfony",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Nuxt.js",
+    "normalizedName": "nuxtjs",
+    "aliases": [
+      "frontend",
+      "nuxtjs"
+    ],
+    "normalizedAliases": [
+      "frontend"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.04,
+    "frequency": 948,
+    "iconKey": "nuxtjs",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "MATLAB",
+    "normalizedName": "matlab",
+    "aliases": [
+      "matlab"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0387,
+    "frequency": 1230,
+    "iconKey": "matlab",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Perl",
+    "normalizedName": "perl",
+    "aliases": [
+      "perl"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0382,
+    "frequency": 1215,
+    "iconKey": "perl",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "New Relic",
+    "normalizedName": "new relic",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0382,
+    "frequency": 934,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "InfluxDB",
+    "normalizedName": "influxdb",
+    "aliases": [
+      "api",
+      "influxdb"
+    ],
+    "normalizedAliases": [
+      "api"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0369,
+    "frequency": 963,
+    "iconKey": "influxdb",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Databricks SQL",
+    "normalizedName": "databricks sql",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0342,
+    "frequency": 892,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "GDScript",
+    "normalizedName": "gdscript",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0333,
+    "frequency": 1059,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "DuckDB",
+    "normalizedName": "duckdb",
+    "aliases": [
+      "duckdb"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.033,
+    "frequency": 861,
+    "iconKey": "duckdb",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "RustRover",
+    "normalizedName": "rustrover",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0324,
+    "frequency": 848,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cassandra",
+    "normalizedName": "cassandra",
+    "aliases": [
+      "Apache Cassandra",
+      "cassandra",
+      "nosql"
+    ],
+    "normalizedAliases": [
+      "apache cassandra",
+      "nosql"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0293,
+    "frequency": 765,
+    "iconKey": "cassandra",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Fastify",
+    "normalizedName": "fastify",
+    "aliases": [
+      "fastify",
+      "performance"
+    ],
+    "normalizedAliases": [
+      "performance"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0292,
+    "frequency": 692,
+    "iconKey": "fastify",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Axum",
+    "normalizedName": "axum",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0283,
+    "frequency": 669,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Elixir",
+    "normalizedName": "elixir",
+    "aliases": [
+      "elexirlang",
+      "elixir"
+    ],
+    "normalizedAliases": [
+      "elexirlang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0267,
+    "frequency": 847,
+    "iconKey": "elixir",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Scala",
+    "normalizedName": "scala",
+    "aliases": [
+      "scala",
+      "scalalang"
+    ],
+    "normalizedAliases": [
+      "scalalang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0265,
+    "frequency": 842,
+    "iconKey": "scala",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Neo4J",
+    "normalizedName": "neo4j",
+    "aliases": [
+      "neo4j"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0265,
+    "frequency": 690,
+    "iconKey": "neo4j",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Delphi",
+    "normalizedName": "delphi",
+    "aliases": [
+      "delphi",
+      "embarcadero"
+    ],
+    "normalizedAliases": [
+      "embarcadero"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.025,
+    "frequency": 795,
+    "iconKey": "delphi",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Valkey",
+    "normalizedName": "valkey",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0242,
+    "frequency": 632,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Clickhouse",
+    "normalizedName": "clickhouse",
+    "aliases": [
+      "clickhouse",
+      "column-oriented",
+      "warehouse"
+    ],
+    "normalizedAliases": [
+      "columnoriented",
+      "warehouse"
+    ],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.024,
+    "frequency": 626,
+    "iconKey": "clickhouse",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Phoenix",
+    "normalizedName": "phoenix",
+    "aliases": [
+      "build",
+      "phoenix",
+      "Phoenix Framework"
+    ],
+    "normalizedAliases": [
+      "build",
+      "phoenix framework"
+    ],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.024,
+    "frequency": 568,
+    "iconKey": "phoenix",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Lovable.dev",
+    "normalizedName": "lovabledev",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0238,
+    "frequency": 623,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Lisp",
+    "normalizedName": "lisp",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0236,
+    "frequency": 751,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "IBM DB2",
+    "normalizedName": "ibm db2",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0235,
+    "frequency": 614,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Amazon Redshift",
+    "normalizedName": "amazon redshift",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0234,
+    "frequency": 610,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Bolt",
+    "normalizedName": "bolt",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0229,
+    "frequency": 599,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "MicroPython",
+    "normalizedName": "micropython",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0227,
+    "frequency": 720,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Drupal",
+    "normalizedName": "drupal",
+    "aliases": [
+      "drupal"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "FRAMEWORK"
+    ],
+    "popularity": 0.0222,
+    "frequency": 526,
+    "iconKey": "drupal",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cline and/or Roo",
+    "normalizedName": "cline andor roo",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.022,
+    "frequency": 574,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Zig",
+    "normalizedName": "zig",
+    "aliases": [
+      "zig",
+      "ziglang"
+    ],
+    "normalizedAliases": [
+      "ziglang"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0213,
+    "frequency": 678,
+    "iconKey": "zig",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Aider",
+    "normalizedName": "aider",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0193,
+    "frequency": 504,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Railway",
+    "normalizedName": "railway",
+    "aliases": [
+      "railway"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0147,
+    "frequency": 359,
+    "iconKey": "railway",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Erlang",
+    "normalizedName": "erlang",
+    "aliases": [
+      "erlang"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0146,
+    "frequency": 464,
+    "iconKey": "erlang",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Fortran",
+    "normalizedName": "fortran",
+    "aliases": [
+      "fortran"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0141,
+    "frequency": 448,
+    "iconKey": "fortran",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Ada",
+    "normalizedName": "ada",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0135,
+    "frequency": 430,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "F#",
+    "normalizedName": "f sharp",
+    "aliases": [
+      "f#",
+      "fsharp"
+    ],
+    "normalizedAliases": [
+      "fsharp"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0127,
+    "frequency": 405,
+    "iconKey": "fsharp",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "IBM Cloud",
+    "normalizedName": "ibm cloud",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.012,
+    "frequency": 294,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "OCaml",
+    "normalizedName": "ocaml",
+    "aliases": [
+      "ocaml"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0116,
+    "frequency": 367,
+    "iconKey": "ocaml",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Gleam",
+    "normalizedName": "gleam",
+    "aliases": [
+      "gleam"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0111,
+    "frequency": 353,
+    "iconKey": "gleam",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Prolog",
+    "normalizedName": "prolog",
+    "aliases": [
+      "logic",
+      "prolog",
+      "swi-prolog"
+    ],
+    "normalizedAliases": [
+      "logic",
+      "swiprolog"
+    ],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0106,
+    "frequency": 337,
+    "iconKey": "prolog",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cockroachdb",
+    "normalizedName": "cockroachdb",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.01,
+    "frequency": 262,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Pocketbase",
+    "normalizedName": "pocketbase",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.01,
+    "frequency": 262,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "COBOL",
+    "normalizedName": "cobol",
+    "aliases": [
+      "cobol"
+    ],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0097,
+    "frequency": 308,
+    "iconKey": "cobol",
+    "sources": [
+      "STACK_OVERFLOW",
+      "DEVICON"
+    ],
+    "active": true
+  },
+  {
+    "name": "Trae",
+    "normalizedName": "trae",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "TOOL"
+    ],
+    "popularity": 0.0084,
+    "frequency": 219,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Yandex Cloud",
+    "normalizedName": "yandex cloud",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "PLATFORM"
+    ],
+    "popularity": 0.0067,
+    "frequency": 165,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Datomic",
+    "normalizedName": "datomic",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATABASE"
+    ],
+    "popularity": 0.0057,
+    "frequency": 148,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Mojo",
+    "normalizedName": "mojo",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "LANGUAGE"
+    ],
+    "popularity": 0.0045,
+    "frequency": 144,
+    "iconKey": null,
+    "sources": [
+      "STACK_OVERFLOW"
+    ],
+    "active": true
+  },
+  {
+    "name": "Academic Research",
+    "normalizedName": "academic research",
+    "aliases": [
+      "Scholarly Research"
+    ],
+    "normalizedAliases": [
+      "scholarly research"
+    ],
+    "categories": [
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Account Management",
+    "normalizedName": "account management",
+    "aliases": [
+      "Client Account Management"
+    ],
+    "normalizedAliases": [
+      "client account management"
+    ],
+    "categories": [
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Accounting",
+    "normalizedName": "accounting",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Active Listening",
+    "normalizedName": "active listening",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Adaptability",
+    "normalizedName": "adaptability",
+    "aliases": [
+      "Flexibility"
+    ],
+    "normalizedAliases": [
+      "flexibility"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Advertising",
+    "normalizedName": "advertising",
+    "aliases": [
+      "Ad Campaigns"
+    ],
+    "normalizedAliases": [
+      "ad campaigns"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Agile",
+    "normalizedName": "agile",
+    "aliases": [
+      "Agile Methodology"
+    ],
+    "normalizedAliases": [
+      "agile methodology"
+    ],
+    "categories": [
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Attention to Detail",
+    "normalizedName": "attention to detail",
+    "aliases": [
+      "Detail Oriented"
+    ],
+    "normalizedAliases": [
+      "detail oriented"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Auditing",
+    "normalizedName": "auditing",
+    "aliases": [
+      "Audit"
+    ],
+    "normalizedAliases": [
+      "audit"
+    ],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Bookkeeping",
+    "normalizedName": "bookkeeping",
+    "aliases": [
+      "Book Keeping"
+    ],
+    "normalizedAliases": [
+      "book keeping"
+    ],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Brand Management",
+    "normalizedName": "brand management",
+    "aliases": [
+      "Branding"
+    ],
+    "normalizedAliases": [
+      "branding"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Budgeting",
+    "normalizedName": "budgeting",
+    "aliases": [
+      "Budget Management"
+    ],
+    "normalizedAliases": [
+      "budget management"
+    ],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Business Analysis",
+    "normalizedName": "business analysis",
+    "aliases": [
+      "BA"
+    ],
+    "normalizedAliases": [
+      "ba"
+    ],
+    "categories": [
+      "BUSINESS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Business Development",
+    "normalizedName": "business development",
+    "aliases": [
+      "Biz Dev"
+    ],
+    "normalizedAliases": [
+      "biz dev"
+    ],
+    "categories": [
+      "BUSINESS",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Business Intelligence",
+    "normalizedName": "business intelligence",
+    "aliases": [
+      "BI"
+    ],
+    "normalizedAliases": [
+      "bi"
+    ],
+    "categories": [
+      "BUSINESS",
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Business Planning",
+    "normalizedName": "business planning",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "BUSINESS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Business Strategy",
+    "normalizedName": "business strategy",
+    "aliases": [
+      "Corporate Strategy"
+    ],
+    "normalizedAliases": [
+      "corporate strategy"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Campaign Management",
+    "normalizedName": "campaign management",
+    "aliases": [
+      "Marketing Campaigns"
+    ],
+    "normalizedAliases": [
+      "marketing campaigns"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cash Flow Management",
+    "normalizedName": "cash flow management",
+    "aliases": [
+      "Cashflow Management"
+    ],
+    "normalizedAliases": [
+      "cashflow management"
+    ],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Change Management",
+    "normalizedName": "change management",
+    "aliases": [
+      "Organizational Change"
+    ],
+    "normalizedAliases": [
+      "organizational change"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Client Relations",
+    "normalizedName": "client relations",
+    "aliases": [
+      "Customer Relations"
+    ],
+    "normalizedAliases": [
+      "customer relations"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Collaboration",
+    "normalizedName": "collaboration",
+    "aliases": [
+      "Collaborative Working"
+    ],
+    "normalizedAliases": [
+      "collaborative working"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Communication",
+    "normalizedName": "communication",
+    "aliases": [
+      "Communication Skills"
+    ],
+    "normalizedAliases": [
+      "communication skills"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Compensation and Benefits",
+    "normalizedName": "compensation and benefits",
+    "aliases": [
+      "Comp and Benefits"
+    ],
+    "normalizedAliases": [
+      "comp and benefits"
+    ],
+    "categories": [
+      "FINANCE",
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Competitive Analysis",
+    "normalizedName": "competitive analysis",
+    "aliases": [
+      "Competitor Analysis"
+    ],
+    "normalizedAliases": [
+      "competitor analysis"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Compliance Management",
+    "normalizedName": "compliance management",
+    "aliases": [
+      "Regulatory Compliance"
+    ],
+    "normalizedAliases": [
+      "regulatory compliance"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Conflict Resolution",
+    "normalizedName": "conflict resolution",
+    "aliases": [
+      "Conflict Management"
+    ],
+    "normalizedAliases": [
+      "conflict management"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Consulting",
+    "normalizedName": "consulting",
+    "aliases": [
+      "Business Consulting"
+    ],
+    "normalizedAliases": [
+      "business consulting"
+    ],
+    "categories": [
+      "BUSINESS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Content Marketing",
+    "normalizedName": "content marketing",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Content Strategy",
+    "normalizedName": "content strategy",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Content Writing",
+    "normalizedName": "content writing",
+    "aliases": [
+      "Web Content Writing"
+    ],
+    "normalizedAliases": [
+      "web content writing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Contract Management",
+    "normalizedName": "contract management",
+    "aliases": [
+      "Contract Administration"
+    ],
+    "normalizedAliases": [
+      "contract administration"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Copywriting",
+    "normalizedName": "copywriting",
+    "aliases": [
+      "Marketing Copywriting"
+    ],
+    "normalizedAliases": [
+      "marketing copywriting"
+    ],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Cost Analysis",
+    "normalizedName": "cost analysis",
+    "aliases": [
+      "Costing"
+    ],
+    "normalizedAliases": [
+      "costing"
+    ],
+    "categories": [
+      "DATA",
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Critical Thinking",
+    "normalizedName": "critical thinking",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Customer Relationship Management",
+    "normalizedName": "customer relationship management",
+    "aliases": [
+      "CRM"
+    ],
+    "normalizedAliases": [
+      "crm"
+    ],
+    "categories": [
+      "BUSINESS",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Customer Service",
+    "normalizedName": "customer service",
+    "aliases": [
+      "Customer Support"
+    ],
+    "normalizedAliases": [
+      "customer support"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Customer Success",
+    "normalizedName": "customer success",
+    "aliases": [
+      "Client Success"
+    ],
+    "normalizedAliases": [
+      "client success"
+    ],
+    "categories": [
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Dashboard Design",
+    "normalizedName": "dashboard design",
+    "aliases": [
+      "Dashboarding"
+    ],
+    "normalizedAliases": [
+      "dashboarding"
+    ],
+    "categories": [
+      "DESIGN",
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Data Analysis",
+    "normalizedName": "data analysis",
+    "aliases": [
+      "Data Analytics"
+    ],
+    "normalizedAliases": [
+      "data analytics"
+    ],
+    "categories": [
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Data Cleaning",
+    "normalizedName": "data cleaning",
+    "aliases": [
+      "Data Cleansing"
+    ],
+    "normalizedAliases": [
+      "data cleansing"
+    ],
+    "categories": [
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Data Collection",
+    "normalizedName": "data collection",
+    "aliases": [
+      "Research Data Collection"
+    ],
+    "normalizedAliases": [
+      "research data collection"
+    ],
+    "categories": [
+      "DATA",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Data Modeling",
+    "normalizedName": "data modeling",
+    "aliases": [
+      "Data Modelling"
+    ],
+    "normalizedAliases": [
+      "data modelling"
+    ],
+    "categories": [
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Data Visualization",
+    "normalizedName": "data visualization",
+    "aliases": [
+      "Data Visualisation"
+    ],
+    "normalizedAliases": [
+      "data visualisation"
+    ],
+    "categories": [
+      "DESIGN",
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Decision Making",
+    "normalizedName": "decision making",
+    "aliases": [
+      "Decision-Making"
+    ],
+    "normalizedAliases": [
+      "decisionmaking"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Digital Marketing",
+    "normalizedName": "digital marketing",
+    "aliases": [
+      "Online Marketing"
+    ],
+    "normalizedAliases": [
+      "online marketing"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Editing",
+    "normalizedName": "editing",
+    "aliases": [
+      "Copy Editing"
+    ],
+    "normalizedAliases": [
+      "copy editing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Email Marketing",
+    "normalizedName": "email marketing",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Emotional Intelligence",
+    "normalizedName": "emotional intelligence",
+    "aliases": [
+      "EQ"
+    ],
+    "normalizedAliases": [
+      "eq"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Employee Engagement",
+    "normalizedName": "employee engagement",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Employee Relations",
+    "normalizedName": "employee relations",
+    "aliases": [
+      "Labor Relations"
+    ],
+    "normalizedAliases": [
+      "labor relations"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Entrepreneurship",
+    "normalizedName": "entrepreneurship",
+    "aliases": [
+      "Entrepreneurial Skills"
+    ],
+    "normalizedAliases": [
+      "entrepreneurial skills"
+    ],
+    "categories": [
+      "BUSINESS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "ETL",
+    "normalizedName": "etl",
+    "aliases": [
+      "Extract Transform Load"
+    ],
+    "normalizedAliases": [
+      "extract transform load"
+    ],
+    "categories": [
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Event Management",
+    "normalizedName": "event management",
+    "aliases": [
+      "Event Planning"
+    ],
+    "normalizedAliases": [
+      "event planning"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Experimental Design",
+    "normalizedName": "experimental design",
+    "aliases": [
+      "Design of Experiments"
+    ],
+    "normalizedAliases": [
+      "design of experiments"
+    ],
+    "categories": [
+      "DATA",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Financial Analysis",
+    "normalizedName": "financial analysis",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Financial Modeling",
+    "normalizedName": "financial modeling",
+    "aliases": [
+      "Financial Modelling"
+    ],
+    "normalizedAliases": [
+      "financial modelling"
+    ],
+    "categories": [
+      "DATA",
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Financial Reporting",
+    "normalizedName": "financial reporting",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Forecasting",
+    "normalizedName": "forecasting",
+    "aliases": [
+      "Predictive Forecasting"
+    ],
+    "normalizedAliases": [
+      "predictive forecasting"
+    ],
+    "categories": [
+      "DATA",
+      "FINANCE",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Graphic Design",
+    "normalizedName": "graphic design",
+    "aliases": [
+      "Graphics Design"
+    ],
+    "normalizedAliases": [
+      "graphics design"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Information Architecture",
+    "normalizedName": "information architecture",
+    "aliases": [
+      "IA"
+    ],
+    "normalizedAliases": [
+      "ia"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Interaction Design",
+    "normalizedName": "interaction design",
+    "aliases": [
+      "IxD"
+    ],
+    "normalizedAliases": [
+      "ixd"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Interviewing",
+    "normalizedName": "interviewing",
+    "aliases": [
+      "Candidate Interviewing"
+    ],
+    "normalizedAliases": [
+      "candidate interviewing"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Inventory Management",
+    "normalizedName": "inventory management",
+    "aliases": [
+      "Stock Management"
+    ],
+    "normalizedAliases": [
+      "stock management"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Lead Generation",
+    "normalizedName": "lead generation",
+    "aliases": [
+      "Lead Gen"
+    ],
+    "normalizedAliases": [
+      "lead gen"
+    ],
+    "categories": [
+      "MARKETING",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Leadership",
+    "normalizedName": "leadership",
+    "aliases": [
+      "Leadership Skills"
+    ],
+    "normalizedAliases": [
+      "leadership skills"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Literature Review",
+    "normalizedName": "literature review",
+    "aliases": [
+      "Literature Research"
+    ],
+    "normalizedAliases": [
+      "literature research"
+    ],
+    "categories": [
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Logistics Management",
+    "normalizedName": "logistics management",
+    "aliases": [
+      "Logistics"
+    ],
+    "normalizedAliases": [
+      "logistics"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Machine Learning",
+    "normalizedName": "machine learning",
+    "aliases": [
+      "ML"
+    ],
+    "normalizedAliases": [
+      "ml"
+    ],
+    "categories": [
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Market Research",
+    "normalizedName": "market research",
+    "aliases": [
+      "Marketing Research"
+    ],
+    "normalizedAliases": [
+      "marketing research"
+    ],
+    "categories": [
+      "MARKETING",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Marketing Analytics",
+    "normalizedName": "marketing analytics",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "MARKETING",
+      "DATA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Marketing Strategy",
+    "normalizedName": "marketing strategy",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "BUSINESS",
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Media Relations",
+    "normalizedName": "media relations",
+    "aliases": [
+      "Press Relations"
+    ],
+    "normalizedAliases": [
+      "press relations"
+    ],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Negotiation",
+    "normalizedName": "negotiation",
+    "aliases": [
+      "Negotiation Skills"
+    ],
+    "normalizedAliases": [
+      "negotiation skills"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Onboarding",
+    "normalizedName": "onboarding",
+    "aliases": [
+      "Employee Onboarding"
+    ],
+    "normalizedAliases": [
+      "employee onboarding"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Operations Management",
+    "normalizedName": "operations management",
+    "aliases": [
+      "Operational Management"
+    ],
+    "normalizedAliases": [
+      "operational management"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "People Management",
+    "normalizedName": "people management",
+    "aliases": [
+      "Personnel Management"
+    ],
+    "normalizedAliases": [
+      "personnel management"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Performance Management",
+    "normalizedName": "performance management",
+    "aliases": [
+      "Employee Performance Management"
+    ],
+    "normalizedAliases": [
+      "employee performance management"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Photography",
+    "normalizedName": "photography",
+    "aliases": [
+      "Photo Production"
+    ],
+    "normalizedAliases": [
+      "photo production"
+    ],
+    "categories": [
+      "DESIGN",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Presentation Skills",
+    "normalizedName": "presentation skills",
+    "aliases": [
+      "Presenting"
+    ],
+    "normalizedAliases": [
+      "presenting"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Problem Solving",
+    "normalizedName": "problem solving",
+    "aliases": [
+      "Problem-Solving"
+    ],
+    "normalizedAliases": [
+      "problemsolving"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Process Improvement",
+    "normalizedName": "process improvement",
+    "aliases": [
+      "Continuous Improvement"
+    ],
+    "normalizedAliases": [
+      "continuous improvement"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Procurement",
+    "normalizedName": "procurement",
+    "aliases": [
+      "Purchasing"
+    ],
+    "normalizedAliases": [
+      "purchasing"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Product Management",
+    "normalizedName": "product management",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Program Management",
+    "normalizedName": "program management",
+    "aliases": [
+      "Programme Management"
+    ],
+    "normalizedAliases": [
+      "programme management"
+    ],
+    "categories": [
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Project Management",
+    "normalizedName": "project management",
+    "aliases": [
+      "Project Coordination"
+    ],
+    "normalizedAliases": [
+      "project coordination"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Prototyping",
+    "normalizedName": "prototyping",
+    "aliases": [
+      "Prototype Design"
+    ],
+    "normalizedAliases": [
+      "prototype design"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Public Relations",
+    "normalizedName": "public relations",
+    "aliases": [
+      "PR"
+    ],
+    "normalizedAliases": [
+      "pr"
+    ],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Public Speaking",
+    "normalizedName": "public speaking",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Qualitative Research",
+    "normalizedName": "qualitative research",
+    "aliases": [
+      "Qualitative Analysis"
+    ],
+    "normalizedAliases": [
+      "qualitative analysis"
+    ],
+    "categories": [
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Quality Assurance",
+    "normalizedName": "quality assurance",
+    "aliases": [
+      "QA"
+    ],
+    "normalizedAliases": [
+      "qa"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Quantitative Research",
+    "normalizedName": "quantitative research",
+    "aliases": [
+      "Quantitative Analysis"
+    ],
+    "normalizedAliases": [
+      "quantitative analysis"
+    ],
+    "categories": [
+      "DATA",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Recruitment",
+    "normalizedName": "recruitment",
+    "aliases": [
+      "Recruiting"
+    ],
+    "normalizedAliases": [
+      "recruiting"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Report Writing",
+    "normalizedName": "report writing",
+    "aliases": [
+      "Business Report Writing"
+    ],
+    "normalizedAliases": [
+      "business report writing"
+    ],
+    "categories": [
+      "WRITING_MEDIA",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Requirements Gathering",
+    "normalizedName": "requirements gathering",
+    "aliases": [
+      "Requirements Elicitation"
+    ],
+    "normalizedAliases": [
+      "requirements elicitation"
+    ],
+    "categories": [
+      "BUSINESS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Research",
+    "normalizedName": "research",
+    "aliases": [
+      "Research Skills"
+    ],
+    "normalizedAliases": [
+      "research skills"
+    ],
+    "categories": [
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Research Methodology",
+    "normalizedName": "research methodology",
+    "aliases": [
+      "Research Methods"
+    ],
+    "normalizedAliases": [
+      "research methods"
+    ],
+    "categories": [
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Resource Planning",
+    "normalizedName": "resource planning",
+    "aliases": [
+      "Capacity Planning"
+    ],
+    "normalizedAliases": [
+      "capacity planning"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Risk Management",
+    "normalizedName": "risk management",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT",
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Sales",
+    "normalizedName": "sales",
+    "aliases": [
+      "Selling"
+    ],
+    "normalizedAliases": [
+      "selling"
+    ],
+    "categories": [
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Sales Forecasting",
+    "normalizedName": "sales forecasting",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DATA",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Sales Strategy",
+    "normalizedName": "sales strategy",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "BUSINESS",
+      "SALES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Scriptwriting",
+    "normalizedName": "scriptwriting",
+    "aliases": [
+      "Script Writing"
+    ],
+    "normalizedAliases": [
+      "script writing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Scrum",
+    "normalizedName": "scrum",
+    "aliases": [
+      "Scrum Framework"
+    ],
+    "normalizedAliases": [
+      "scrum framework"
+    ],
+    "categories": [
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Search Engine Marketing",
+    "normalizedName": "search engine marketing",
+    "aliases": [
+      "Paid Search",
+      "SEM"
+    ],
+    "normalizedAliases": [
+      "paid search",
+      "sem"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Search Engine Optimization",
+    "normalizedName": "search engine optimization",
+    "aliases": [
+      "SEO"
+    ],
+    "normalizedAliases": [
+      "seo"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Social Media Marketing",
+    "normalizedName": "social media marketing",
+    "aliases": [
+      "SMM"
+    ],
+    "normalizedAliases": [
+      "smm"
+    ],
+    "categories": [
+      "MARKETING"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Stakeholder Management",
+    "normalizedName": "stakeholder management",
+    "aliases": [
+      "Stakeholder Engagement"
+    ],
+    "normalizedAliases": [
+      "stakeholder engagement"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Statistical Analysis",
+    "normalizedName": "statistical analysis",
+    "aliases": [
+      "Statistics"
+    ],
+    "normalizedAliases": [
+      "statistics"
+    ],
+    "categories": [
+      "DATA",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Strategic Planning",
+    "normalizedName": "strategic planning",
+    "aliases": [
+      "Strategy Planning"
+    ],
+    "normalizedAliases": [
+      "strategy planning"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Supply Chain Management",
+    "normalizedName": "supply chain management",
+    "aliases": [
+      "SCM"
+    ],
+    "normalizedAliases": [
+      "scm"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Survey Design",
+    "normalizedName": "survey design",
+    "aliases": [
+      "Questionnaire Design"
+    ],
+    "normalizedAliases": [
+      "questionnaire design"
+    ],
+    "categories": [
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Talent Acquisition",
+    "normalizedName": "talent acquisition",
+    "aliases": [
+      "Talent Recruitment"
+    ],
+    "normalizedAliases": [
+      "talent recruitment"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Tax Preparation",
+    "normalizedName": "tax preparation",
+    "aliases": [
+      "Tax Accounting"
+    ],
+    "normalizedAliases": [
+      "tax accounting"
+    ],
+    "categories": [
+      "FINANCE"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Team Leadership",
+    "normalizedName": "team leadership",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "MANAGEMENT"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Teamwork",
+    "normalizedName": "teamwork",
+    "aliases": [
+      "Team Work"
+    ],
+    "normalizedAliases": [
+      "team work"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Technical Writing",
+    "normalizedName": "technical writing",
+    "aliases": [
+      "Technical Documentation"
+    ],
+    "normalizedAliases": [
+      "technical documentation"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Time Management",
+    "normalizedName": "time management",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Training and Development",
+    "normalizedName": "training and development",
+    "aliases": [
+      "Employee Development"
+    ],
+    "normalizedAliases": [
+      "employee development"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "HUMAN_RESOURCES"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Typography",
+    "normalizedName": "typography",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "UI Design",
+    "normalizedName": "ui design",
+    "aliases": [
+      "UI",
+      "User Interface Design"
+    ],
+    "normalizedAliases": [
+      "ui",
+      "user interface design"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Usability Testing",
+    "normalizedName": "usability testing",
+    "aliases": [
+      "User Testing"
+    ],
+    "normalizedAliases": [
+      "user testing"
+    ],
+    "categories": [
+      "DESIGN",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "User Research",
+    "normalizedName": "user research",
+    "aliases": [
+      "UX Research"
+    ],
+    "normalizedAliases": [
+      "ux research"
+    ],
+    "categories": [
+      "DESIGN",
+      "RESEARCH"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "UX Design",
+    "normalizedName": "ux design",
+    "aliases": [
+      "User Experience Design",
+      "UX"
+    ],
+    "normalizedAliases": [
+      "user experience design",
+      "ux"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Vendor Management",
+    "normalizedName": "vendor management",
+    "aliases": [
+      "Supplier Management"
+    ],
+    "normalizedAliases": [
+      "supplier management"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Verbal Communication",
+    "normalizedName": "verbal communication",
+    "aliases": [
+      "Oral Communication"
+    ],
+    "normalizedAliases": [
+      "oral communication"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Video Editing",
+    "normalizedName": "video editing",
+    "aliases": [
+      "Film Editing"
+    ],
+    "normalizedAliases": [
+      "film editing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Video Production",
+    "normalizedName": "video production",
+    "aliases": [
+      "Film Production"
+    ],
+    "normalizedAliases": [
+      "film production"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Warehouse Management",
+    "normalizedName": "warehouse management",
+    "aliases": [
+      "Warehousing"
+    ],
+    "normalizedAliases": [
+      "warehousing"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Wireframing",
+    "normalizedName": "wireframing",
+    "aliases": [
+      "Wireframe Design"
+    ],
+    "normalizedAliases": [
+      "wireframe design"
+    ],
+    "categories": [
+      "DESIGN"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Workforce Planning",
+    "normalizedName": "workforce planning",
+    "aliases": [
+      "Manpower Planning"
+    ],
+    "normalizedAliases": [
+      "manpower planning"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES",
+      "OPERATIONS"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  },
+  {
+    "name": "Written Communication",
+    "normalizedName": "written communication",
+    "aliases": [],
+    "normalizedAliases": [],
+    "categories": [
+      "SOFT_SKILL",
+      "WRITING_MEDIA"
+    ],
+    "popularity": null,
+    "frequency": null,
+    "iconKey": null,
+    "sources": [
+      "CURATED"
+    ],
+    "active": true
+  }
+]

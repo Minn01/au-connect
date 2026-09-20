@@ -127,7 +127,12 @@ async function main() {
       const skill =
         (await prisma.skill.findFirst({ where: { normalizedName } })) ??
         (await prisma.skill.create({
-          data: { name, normalizedName, source: "USER_CREATED" },
+          data: {
+            name,
+            normalizedName,
+            categories: ["SOFT_SKILL"],
+            sources: ["LEGACY_MIGRATION"],
+          },
         }));
 
       await prisma.jobSkill.upsert({

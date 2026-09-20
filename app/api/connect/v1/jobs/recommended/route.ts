@@ -22,9 +22,16 @@ export async function GET(req: NextRequest) {
   const upstreamLimit = Math.min(limit * 3, 50);
   const recommendations = await getJobRecommendations(userId, upstreamLimit);
   if (!recommendations.ok) {
+    console.warn("Job recommendations are unavailable", {
+      userId,
+      reason: recommendations.reason,
+    });
     return NextResponse.json(
-      { jobs: [], error: "Recommendations are temporarily unavailable" },
-      { status: 503 },
+      {
+        jobs: [],
+        hasProfileSkills: false,
+        available: false,
+      },
     );
   }
 
@@ -116,5 +123,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     jobs: hydrated,
     hasProfileSkills: (profile?.userSkills.length ?? 0) > 0,
+    available: true,
   });
 }

@@ -14,11 +14,7 @@ type MyApplication = {
 };
 
 export function MyApplicationSection() {
-  const {
-    data: applications = [],
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: applications = [] } = useQuery({
     queryKey: ["my-applications"],
     queryFn: async (): Promise<MyApplication[]> => {
       const res = await fetch(MY_APPLICATIONS_API_PATH);
@@ -28,7 +24,6 @@ export function MyApplicationSection() {
       }
 
       const data = await res.json();
-      console.log(data);
       return data.applications;
     },
   });

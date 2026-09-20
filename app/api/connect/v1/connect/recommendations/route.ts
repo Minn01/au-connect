@@ -26,15 +26,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+        available: false,
         data: { recommendations: [], nextCursor: null, hasMore: false },
         error: "Connection recommendations are temporarily unavailable",
       },
-      { status: result.reason === "configuration" ? 500 : 502 },
     );
   }
 
   return NextResponse.json({
     success: true,
+    available: true,
     data: {
       recommendations: result.recommendations,
       nextCursor: result.nextCursor,

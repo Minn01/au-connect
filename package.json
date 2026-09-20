@@ -11,10 +11,16 @@
     "start": "next start",
     "lint": "eslint",
     "test:content": "NODE_OPTIONS=--conditions=react-server tsx --test tests/*.test.ts",
-    "skills:normalize:dry": "tsx scripts/normalize-existing-skills.ts --dry-run",
-    "skills:normalize": "tsx scripts/normalize-existing-skills.ts",
-    "skills:import:dry": "tsx scripts/import-esco-skills.ts --dry-run",
-    "skills:import": "tsx scripts/import-esco-skills.ts"
+    "test": "pnpm test:content",
+    "typecheck": "tsc --noEmit",
+    "skills:prepare": "tsx scripts/prepare-skill-catalogue.ts",
+    "skills:prepare:check": "tsx scripts/prepare-skill-catalogue.ts --check",
+    "skills:bootstrap:dry": "tsx scripts/bootstrap-skills.ts",
+    "skills:bootstrap": "tsx scripts/bootstrap-skills.ts --write",
+    "skills:import:dry": "tsx scripts/import-skill-catalogue.ts --dry-run",
+    "skills:import": "tsx scripts/import-skill-catalogue.ts --write",
+    "skills:reset:dry": "tsx scripts/reset-skill-data.ts --dry-run",
+    "skills:reset": "tsx scripts/reset-skill-data.ts --confirm-reset-skills"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
