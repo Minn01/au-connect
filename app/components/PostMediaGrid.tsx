@@ -64,7 +64,7 @@ export default function PostMediaGrid({
   // Show skeleton loading state
   if (isLoading) {
     return (
-      <div className={`grid ${gridClass} gap-1 overflow-hidden`}>
+      <div className={`grid min-w-0 ${gridClass} gap-1 overflow-hidden`}>
         {visibleMedia.map((_, index) => (
           <div
             key={index}
@@ -85,7 +85,7 @@ export default function PostMediaGrid({
   }
 
   return (
-    <div className={`grid ${gridClass} gap-1 overflow-hidden cursor-pointer`}>
+    <div className={`grid min-w-0 ${gridClass} gap-1 overflow-hidden cursor-pointer`}>
       {visibleMedia.map((item, index) => {
         const isLastVisible = index === maxVisible - 1 && extraCount > 0;
         return (

@@ -82,7 +82,7 @@ export default function PostPoll({
   };
 
   return (
-    <div className="px-5 py-4">
+    <div className="px-3 py-4 sm:px-5">
       <div className="space-y-3">
         {options.map((option, index) => {
           const percentage = getVotePercentage(index);
@@ -96,7 +96,7 @@ export default function PostPoll({
               key={index}
               onClick={() => handleVote(index)}
               disabled={userHasVoted || pollEnded || votingDisabled}
-              className={`w-full text-left relative overflow-hidden rounded-xl border-2 transition-all ${
+              className={`w-full min-w-0 text-left relative overflow-hidden rounded-xl border-2 transition-all ${
                 showResults
                   ? isSelected
                     ? "border-blue-500 bg-blue-50"
@@ -115,8 +115,8 @@ export default function PostPoll({
               )}
 
               {/* Content */}
-              <div className="relative px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative flex min-w-0 items-center justify-between gap-2 px-3 py-3 sm:px-4">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                   {showResults ? (
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -133,7 +133,7 @@ export default function PostPoll({
                     <div className="w-5 h-5 rounded-full border-2 border-neutral-400" />
                   )}
                   <span
-                    className={`text-sm font-medium ${
+                    className={`min-w-0 break-words text-sm font-medium ${
                       isSelected ? "text-blue-900" : "text-gray-700"
                     }`}
                   >
@@ -142,8 +142,8 @@ export default function PostPoll({
                 </div>
 
                 {showResults && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500">
+                  <div className="flex shrink-0 flex-col items-end gap-0 sm:flex-row sm:items-center sm:gap-3">
+                    <span className="text-[11px] leading-tight text-gray-500 sm:text-xs">
                       {voteCount} {voteCount === 1 ? "vote" : "votes"}
                     </span>
                     <span

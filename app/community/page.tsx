@@ -257,8 +257,8 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-full bg-slate-100 lg:h-[calc(100vh-73px)] lg:overflow-hidden">
-      <div className="mx-auto grid min-h-full w-full max-w-7xl px-3 sm:px-4 lg:h-full lg:grid-cols-[360px_minmax(0,1fr)]">
-        <aside className="border-b border-slate-200 bg-white lg:h-full lg:overflow-hidden lg:border-b-0 lg:border-r">
+      <div className="mx-auto grid min-h-full w-full max-w-7xl min-w-0 px-3 sm:px-4 lg:h-full lg:grid-cols-[360px_minmax(0,1fr)]">
+        <aside className="min-w-0 border-b border-slate-200 bg-white lg:h-full lg:overflow-hidden lg:border-b-0 lg:border-r">
           <div className="flex h-full flex-col p-3 sm:p-4 lg:overflow-y-auto">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -343,7 +343,7 @@ export default function CommunityPage() {
                   {visibleMobileCommunities.map((community) => (
                     <div
                       key={community.id}
-                      className={`flex items-center gap-3 rounded-lg border bg-white p-3 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-md ${
+                      className={`flex min-w-0 items-center gap-2 rounded-lg border bg-white p-3 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-md sm:gap-3 ${
                         selectedCommunityId === community.id
                           ? "border-red-100 bg-red-50"
                           : "border-slate-200"
@@ -352,7 +352,7 @@ export default function CommunityPage() {
                       <button
                         type="button"
                         onClick={() => selectCommunity(community)}
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        className="flex min-w-0 flex-1 items-center gap-2 text-left sm:gap-3"
                       >
                         <CommunityAvatar community={community} size={40} />
                         <span className="min-w-0 flex-1">
@@ -371,7 +371,7 @@ export default function CommunityPage() {
                         <button
                           type="button"
                           onClick={() => toggleFollow(community)}
-                          className="rounded-md px-2 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-red-600"
+                          className="shrink-0 rounded-md px-2 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-red-600"
                         >
                           Unfollow
                         </button>
@@ -512,8 +512,8 @@ export default function CommunityPage() {
           </div>
         </aside>
 
-	        <main className="py-5 pl-0 sm:py-6 lg:h-full lg:overflow-y-auto lg:pl-4">
-          <div className="mx-auto max-w-3xl">
+        <main className="min-w-0 py-4 pl-0 sm:py-6 lg:h-full lg:overflow-y-auto lg:pl-4">
+          <div className="mx-auto w-full max-w-3xl min-w-0">
             <div
               role={selectedCommunity ? "button" : undefined}
               tabIndex={selectedCommunity ? 0 : undefined}
@@ -545,7 +545,7 @@ export default function CommunityPage() {
                   />
                 </div>
               )}
-              <div className="flex items-start gap-3 p-4">
+              <div className="flex min-w-0 items-start gap-3 p-3 sm:p-4">
                 {selectedCommunity ? (
                   <CommunityAvatar community={selectedCommunity} size={48} />
                 ) : (
@@ -557,7 +557,7 @@ export default function CommunityPage() {
                   <h2 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">
                     {selectedCommunity?.name ?? "Recent activity"}
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                     {selectedCommunity
                       ? "Posts from this community page"
                       : "Posts from all communities"}
@@ -572,12 +572,12 @@ export default function CommunityPage() {
             </div>
 
             {postsLoading ? (
-              <div className="space-y-4">
+              <div className="min-w-0 space-y-4">
                 <Post isLoading={true} />
                 <Post isLoading={true} />
               </div>
             ) : posts.length ? (
-              <div className="space-y-4">
+              <div className="min-w-0 space-y-4">
                 {posts.map((post) => (
                   <Post
                     key={post.id}
@@ -597,7 +597,7 @@ export default function CommunityPage() {
                 )}
               </div>
             ) : (
-              <div className="rounded-lg border border-slate-200 bg-white p-10 text-center">
+              <div className="rounded-lg border border-slate-200 bg-white p-6 text-center sm:p-10">
                 <UsersRound className="mx-auto h-10 w-10 text-slate-300" />
                 <p className="mt-3 text-sm font-semibold text-slate-700">
                   No community posts yet.
@@ -615,7 +615,7 @@ export default function CommunityPage() {
           onClick={() => setMobilePickerOpen(false)}
         >
           <div
-            className="max-h-[82vh] w-full max-w-md overflow-hidden rounded-2xl bg-white text-slate-950 shadow-2xl"
+            className="max-h-[82vh] w-full max-w-md min-w-0 overflow-hidden rounded-2xl bg-white text-slate-950 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-5 text-white">
@@ -656,7 +656,7 @@ export default function CommunityPage() {
                 mobileCommunities.map((community) => (
                   <div
                     key={community.id}
-                    className={`flex items-center gap-3 rounded-lg border bg-white p-3 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-md ${
+                    className={`flex min-w-0 items-center gap-2 rounded-lg border bg-white p-3 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-md sm:gap-3 ${
                       selectedCommunityId === community.id
                         ? "border-red-100 bg-red-50"
                         : "border-slate-200"
@@ -665,7 +665,7 @@ export default function CommunityPage() {
                     <button
                       type="button"
                       onClick={() => selectCommunity(community)}
-                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      className="flex min-w-0 flex-1 items-center gap-2 text-left sm:gap-3"
                     >
                       <CommunityAvatar community={community} size={42} />
                       <span className="min-w-0 flex-1">
