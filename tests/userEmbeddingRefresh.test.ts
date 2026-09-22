@@ -14,12 +14,11 @@ for (const name of [
   "AZURE_STORAGE_ACCOUNT_NAME",
   "AZURE_STORAGE_CONNECTION_STRING",
   "AZURE_STORAGE_CONTAINER_NAME",
-  "NEXT_PUBLIC_BASE_URL",
   "JWT_SECRET",
   "RECOMMENDATION_SERVICE_URL",
   "RECOMMENDATION_SERVICE_API_KEY",
 ]) {
-  process.env[name] = name === "NEXT_PUBLIC_BASE_URL" ? "http://localhost:3000" : "test";
+  process.env[name] = "test";
 }
 
 const userId = "a".repeat(24);

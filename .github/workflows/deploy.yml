@@ -23,15 +23,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Check production public URL
-        env:
-          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
-        run: |
-          case "$NEXT_PUBLIC_BASE_URL" in
-            https://*/connect) ;;
-            *) echo "NEXT_PUBLIC_BASE_URL must be an HTTPS URL ending in /connect" >&2; exit 1 ;;
-          esac
-
       # Tags: :latest and :<short-sha> for traceability.
       - name: Generate image tags
         id: meta
@@ -51,9 +42,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Bakes the production URL into the browser bundle. Set repo variable
-          # NEXT_PUBLIC_BASE_URL (Settings → Actions → Variables).
-          build-args: |
-            NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -50,7 +50,7 @@ variables come from those repos' own READMEs. For the main app's `.env`, the
 key ones:
 
 ```dotenv
-NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL, use https
+APP_PUBLIC_URL=https://life.au.edu/connect         # runtime public URL
 NODE_ENV=production
 JWT_SECRET=                                        # openssl rand -base64 32
 DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
@@ -73,12 +73,12 @@ GMAIL_APP_PASSWORD=
 
 For the OAuth logins to work, register these redirect URIs with each provider
 (Google Cloud Console, LinkedIn, and Microsoft Entra ID), using your real
-`NEXT_PUBLIC_BASE_URL` as the host:
+`APP_PUBLIC_URL` as the base URL:
 
 ```
-<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/google/callback
-<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/linkedin/callback
-<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/azure-ad/callback
+<APP_PUBLIC_URL>/api/connect/v1/auth/google/callback
+<APP_PUBLIC_URL>/api/connect/v1/auth/linkedin/callback
+<APP_PUBLIC_URL>/api/connect/v1/auth/azure-ad/callback
 ```
 
 The AU team decides the final URL, so let us know what it is and we'll add the
@@ -142,27 +142,19 @@ Each of the three repos owns its own `Dockerfile` + push workflow
 
 ### One-time CI setup
 
-`NEXT_PUBLIC_BASE_URL` gets compiled into the browser code when the image is
-built, not when it runs. So the image has to be built with the real URL. In the
-GitHub repo, under Settings > Secrets and variables > Actions, add a variable:
-
-```
-NEXT_PUBLIC_BASE_URL = https://life.au.edu/connect
-```
-
-And add the two secrets the build uses: `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN`. The production workflow stops if the URL is missing or
-does not end in `/connect`.
+Add the two secrets used to publish the image: `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN`. The public hostname is runtime configuration and is not
+compiled into the Docker image.
 
 ## About the /connect path
 
 The main app is served under `/connect` everywhere: `basePath: "/connect"` is
 set in `next.config.ts` for both localhost and production. Next prefixes page
 navigation; browser API calls use the `/connect/api/connect/v1` paths in
-`lib/constants.ts`. Share links are built from `NEXT_PUBLIC_BASE_URL`.
+`lib/constants.ts`. Browser share links use the current browser origin.
 
-The main thing is to build and run with
-`NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect` (both the GitHub Actions
-variable and the `.env`). That value has to include the `/connect` part, or the
-links, logins, and notification emails won't line up. The server rejects a
-missing or invalid public URL in production instead of sending localhost links.
+Run each deployment with `APP_PUBLIC_URL` set to its externally visible URL,
+including `/connect`. OAuth request handlers can derive the current host from
+forwarded request headers, while notification email links require the runtime
+value. The server rejects a missing or invalid URL for production background
+work instead of sending localhost links.

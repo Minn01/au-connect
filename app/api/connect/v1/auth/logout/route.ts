@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { JWT_COOKIE } from "@/lib/constants";
 import { isSecureCookie } from "@/lib/authFunctions";
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
   try {
     const response = NextResponse.json(
       { message: "Logged out successfully" },
@@ -12,7 +12,7 @@ export async function DELETE() {
     // Keep cookie attributes aligned with login cookie settings.
     response.cookies.set(JWT_COOKIE, "", {
       httpOnly: true,
-      secure: isSecureCookie(),
+      secure: isSecureCookie(req),
       sameSite: "lax",
       maxAge: 0,
       expires: new Date(0),

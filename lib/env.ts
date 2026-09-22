@@ -30,15 +30,6 @@ export const AZURE_STORAGE_CONTAINER_NAME = required(
   "AZURE_STORAGE_CONTAINER_NAME",
 );
 
-export const NEXT_PUBLIC_BASE_URL = required("NEXT_PUBLIC_BASE_URL");
-export const NODE_ENV = process.env.NODE_ENV || "development";
-
-export const GOOGLE_REDIRECT_URI =
-  NEXT_PUBLIC_BASE_URL + "/api/connect/v1/auth/google/callback";
-export const LINKEDIN_REDIRECT_URI =
-  NEXT_PUBLIC_BASE_URL + "/api/connect/v1/auth/linkedin/callback";
-export const MICROSOFT_REDIRECT_URI =
-  NEXT_PUBLIC_BASE_URL + "/api/connect/v1/auth/azure-ad/callback";
 export const JWT_SECRET = required("JWT_SECRET");
 
 // Optional: the recommendation service is read via process.env directly by its

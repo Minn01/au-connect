@@ -20,22 +20,18 @@ import {
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URI,
   JWT_SECRET,
   LINKEDIN_CLIENT_ID,
   LINKEDIN_CLIENT_SECRET,
-  LINKEDIN_REDIRECT_URI,
   MICROSOFT_CLIENT_ID,
   MICROSOFT_CLIENT_SECRET,
-  MICROSOFT_REDIRECT_URI,
-  NODE_ENV,
   AZURE_STORAGE_CONNECTION_STRING,
   AZURE_STORAGE_CONTAINER_NAME,
 } from "./env";
 
 import { BlobServiceClient } from "@azure/storage-blob";
 import { getAccountRestriction } from "@/lib/accountStatus";
-import { getAppUrl } from "@/lib/server/appUrl";
+import { getAppUrl, getOAuthCallbackUrl } from "@/lib/server/appUrl";
 
 // TODO: check for errors from providers in each function
 // TODO: google and linkedin are missing error handline for fetching token
@@ -50,6 +46,8 @@ export async function googleAuthSignIn(req: NextRequest) {
   verifyOauthState(url, req);
 
   if (!code) return responseJSON("No code", 400);
+  const appUrl = getAppUrl(req);
+  const redirectUri = getOAuthCallbackUrl("google", req);
 
   // Exchange code for access token
   const tokenRes = await fetch(GOOGLE_ACCESS_TOKEN_URL, {
@@ -60,7 +58,7 @@ export async function googleAuthSignIn(req: NextRequest) {
       client_secret: GOOGLE_CLIENT_SECRET,
       code,
       grant_type: "authorization_code",
-      redirect_uri: GOOGLE_REDIRECT_URI,
+      redirect_uri: redirectUri,
     }),
   });
 
@@ -138,7 +136,8 @@ export async function googleAuthSignIn(req: NextRequest) {
 
   return createUserSession(
     { id: user.id, email: user.email },
-    SessionMethod.SIGN_IN_GOOGLE
+    SessionMethod.SIGN_IN_GOOGLE,
+    appUrl,
   );
 }
 
@@ -151,6 +150,8 @@ export async function linkedinAuthSignIn(req: NextRequest) {
   verifyOauthState(url, req);
 
   if (!code) return responseJSON("Missing code", 400);
+  const appUrl = getAppUrl(req);
+  const redirectUri = getOAuthCallbackUrl("linkedin", req);
 
   // Exchange code for access token
   const tokenRes = await fetch(LINKEDIN_ACCESS_TOKEN_URL, {
@@ -159,7 +160,7 @@ export async function linkedinAuthSignIn(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: LINKEDIN_REDIRECT_URI,
+      redirect_uri: redirectUri,
       client_id: LINKEDIN_CLIENT_ID,
       client_secret: LINKEDIN_CLIENT_SECRET,
     }),
@@ -237,20 +238,23 @@ export async function linkedinAuthSignIn(req: NextRequest) {
   // Create a login session
   return createUserSession(
     { id: user.id, email: user.email },
-    SessionMethod.SIGN_IN_LINKEDIN
+    SessionMethod.SIGN_IN_LINKEDIN,
+    appUrl,
   );
 }
 
 export async function azurezAdAuthSignIn(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const code = searchParams.get("code");
+  const appUrl = getAppUrl(req);
+  const redirectUri = getOAuthCallbackUrl("azure-ad", req);
 
   // verify state to prevent CSRF
   verifyOauthState(req.nextUrl, req);
 
   if (!code) {
     return NextResponse.redirect(
-      `${SIGNIN_PAGE_PATH}?error=No authorization code received`
+      `${appUrl}${SIGNIN_PAGE_PATH}?error=No authorization code received`,
     );
   }
 
@@ -265,7 +269,7 @@ export async function azurezAdAuthSignIn(req: NextRequest) {
         client_id: MICROSOFT_CLIENT_ID,
         client_secret: MICROSOFT_CLIENT_SECRET,
         code: code,
-        redirect_uri: MICROSOFT_REDIRECT_URI,
+        redirect_uri: redirectUri,
         grant_type: "authorization_code",
       }),
     });
@@ -341,29 +345,34 @@ export async function azurezAdAuthSignIn(req: NextRequest) {
 
     return createUserSession(
       { id: user.id, email: user.email },
-      SessionMethod.SIGN_IN_MICROSOFT
+      SessionMethod.SIGN_IN_MICROSOFT,
+      appUrl,
     );
   } catch (error) {
     console.error("Microsoft OAuth callback error:", error);
     return NextResponse.redirect(
-      `${getAppUrl()}${SIGNIN_PAGE_PATH}?error=${encodeURIComponent(
+      `${appUrl}${SIGNIN_PAGE_PATH}?error=${encodeURIComponent(
         error instanceof Error ? error.message : "Authentication failed"
       )}`
     );
   }
 }
 
-export function createOauthStateCookie(res: NextResponse, state: string) {
+export function createOauthStateCookie(
+  res: NextResponse,
+  state: string,
+  request: Request,
+) {
   return res.cookies.set(OAUTH_STATE_COOKIE, state, {
     httpOnly: true,
-    secure: isSecureCookie(),
+    secure: isSecureCookie(request),
     sameSite: "lax",
     maxAge: OAUTH_STATE_COOKIE_EXPIRATION_TIME, // 10 minutes
   });
 }
 
-export function isSecureCookie() {
-  return getAppUrl().startsWith("https://");
+export function isSecureCookie(request?: Request) {
+  return getAppUrl(request).startsWith("https://");
 }
 
 function verifyOauthState(url: URL, req: NextRequest) {
@@ -396,7 +405,8 @@ export async function checkExistUser(email: string) {
 
 export async function createUserSession(
   user: { id: string; email: string },
-  method: SessionMethod
+  method: SessionMethod,
+  appUrl: string,
 ) {
   // create JWT token
   const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
@@ -405,10 +415,8 @@ export async function createUserSession(
 
   const restriction = await getAccountRestriction(user.id);
   const response = restriction
-    ? NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/account-restricted`,
-      )
-    : getResponse(method);
+    ? NextResponse.redirect(`${appUrl}/account-restricted`)
+    : getResponse(method, appUrl);
 
   if (response) {
     // delete oauth state cookie
@@ -419,7 +427,7 @@ export async function createUserSession(
       name: JWT_COOKIE,
       value: token,
       httpOnly: true,
-      secure: isSecureCookie(),
+      secure: appUrl.startsWith("https://"),
       sameSite: "lax",
       path: "/",
       maxAge: JWT_COOKIE_EXPIRATION_TIME,
@@ -429,7 +437,7 @@ export async function createUserSession(
   return response;
 }
 
-function getResponse(method: SessionMethod) {
+function getResponse(method: SessionMethod, appUrl: string) {
   switch (method) {
     case SessionMethod.LOGOUT:
       return NextResponse.json(
@@ -438,15 +446,15 @@ function getResponse(method: SessionMethod) {
       );
     case SessionMethod.SIGN_IN_GOOGLE:
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=google`
+        `${appUrl}/?success=true&provider=google`,
       );
     case SessionMethod.SIGN_IN_LINKEDIN:
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=linkedin`
+        `${appUrl}/?success=true&provider=linkedin`,
       );
     case SessionMethod.SIGN_IN_MICROSOFT:
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/?success=true&provider=microsoft`
+        `${appUrl}/?success=true&provider=microsoft`,
       );
     default:
     // TODO: add default response ?

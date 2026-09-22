@@ -19,11 +19,6 @@ RUN npm install -g pnpm
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# NEXT_PUBLIC_* values are inlined into the browser bundle at build time, so the
-# public URL must be supplied HERE (via --build-arg), not just at runtime.
-# The production build must supply the public URL explicitly.
-ARG NEXT_PUBLIC_BASE_URL
-
 # Now generate and build with real-ish env (placeholders, only needed at build time)
 RUN DATABASE_URL="mongodb://placeholder" pnpm prisma generate
 RUN DATABASE_URL="mongodb://placeholder" \
@@ -39,7 +34,6 @@ RUN DATABASE_URL="mongodb://placeholder" \
     AZURE_STORAGE_CONTAINER_NAME="placeholder" \
     RECOMMENDATION_SERVICE_URL="http://placeholder" \
     RECOMMENDATION_SERVICE_API_KEY="placeholder" \
-    NEXT_PUBLIC_BASE_URL="${NEXT_PUBLIC_BASE_URL}" \
     JWT_SECRET="placeholder" \
     pnpm build
 

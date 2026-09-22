@@ -6,7 +6,7 @@
 # ─────────────────────────────────────────────────────────────────────────
 # Sub-path:  https://life.au.edu/connect
 # Requires the app to be built with  basePath: "/connect"  in next.config.ts
-# and  NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect  (see DEPLOYMENT.md).
+# and runtime APP_PUBLIC_URL=https://life.au.edu/connect (see DEPLOYMENT.md).
 # ─────────────────────────────────────────────────────────────────────────
 server {
     listen 80;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPublicPostPreview } from "@/lib/postHelpers";
 import {
@@ -7,7 +8,7 @@ import {
   SHARE_POST_OG_IMAGE_PATH,
   SHARE_POST_PAGE_PATH,
 } from "@/lib/constants";
-import { NEXT_PUBLIC_BASE_URL } from "@/lib/env";
+import { getAppUrl } from "@/lib/server/appUrl";
 
 const SITE_NAME = "AU Connect";
 
@@ -35,10 +36,9 @@ export async function generateMetadata({
 
   const title = post.title?.trim() || `${post.username} on ${SITE_NAME}`;
   const description = snippet(post.content) || `See this post on ${SITE_NAME}.`;
-  // Build fully-absolute URLs. NEXT_PUBLIC_BASE_URL already includes the
-  // /connect basePath, so we concatenate rather than rely on metadataBase
-  // resolution (a leading-slash path would otherwise drop /connect).
-  const base = NEXT_PUBLIC_BASE_URL.replace(/\/$/, "");
+  // Build absolute crawler URLs from the runtime deployment URL. A leading
+  // slash resolved by metadataBase would otherwise drop the /connect path.
+  const base = getAppUrl({ headers: await headers() });
   const imageUrl = `${base}${SHARE_POST_OG_IMAGE_PATH(postId)}`;
   const pageUrl = `${base}${SHARE_POST_PAGE_PATH(postId)}`;
 
@@ -79,7 +79,7 @@ export default async function SharePostPage({
   const openInAppHref = POST_DETAIL_PAGE_PATH(postId, 0);
   // Plain <img> is not basePath-prefixed, so use an absolute URL (base already
   // includes /connect).
-  const imageSrc = `${NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}${SHARE_POST_OG_IMAGE_PATH(postId)}`;
+  const imageSrc = `${getAppUrl({ headers: await headers() })}${SHARE_POST_OG_IMAGE_PATH(postId)}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
