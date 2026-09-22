@@ -19,6 +19,7 @@ import {
 import Post from "@/app/components/Post";
 import CoverPhotoCropModal from "@/app/(main)/profile/components/CoverPhotoCropModal";
 import ProfilePhotoCropModal from "@/app/(main)/profile/components/ProfilePhotoCropModal";
+import SectionCard from "@/app/(main)/profile/components/SectionCard";
 import { uploadFile } from "@/app/(main)/profile/utils/uploadMedia";
 import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMediaUrl";
 import { fetchUser } from "@/app/(main)/profile/utils/fetchfunctions";
@@ -99,6 +100,7 @@ export default function CommunityProfilePage({
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [followPending, setFollowPending] = useState(false);
   const [message, setMessage] = useState("");
   const [slug, setSlug] = useState<string | null>(null);
   const [imageModal, setImageModal] = useState<ImageTarget | null>(null);
@@ -517,16 +519,21 @@ export default function CommunityProfilePage({
   }
 
   async function toggleFollow() {
-    if (!community) return;
+    if (!community || followPending) return;
 
-    const res = await fetch(FOLLOW_COMMUNITY_API_PATH(community.id), {
-      method: community.isFollowing ? "DELETE" : "POST",
-      credentials: "include",
-    });
+    setFollowPending(true);
+    try {
+      const res = await fetch(FOLLOW_COMMUNITY_API_PATH(community.id), {
+        method: community.isFollowing ? "DELETE" : "POST",
+        credentials: "include",
+      });
 
-    if (!res.ok) return;
-    await refetchCommunity();
-    await queryClient.invalidateQueries({ queryKey: ["communities"] });
+      if (!res.ok) return;
+      await refetchCommunity();
+      await queryClient.invalidateQueries({ queryKey: ["communities"] });
+    } finally {
+      setFollowPending(false);
+    }
   }
 
   if (communityLoading) {
@@ -558,10 +565,10 @@ export default function CommunityProfilePage({
   }
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-slate-100 pb-8">
-      <div className="bg-white shadow-sm">
-        <div className="mx-auto max-w-5xl">
-          <div className="relative h-56 overflow-hidden rounded-b-lg bg-slate-200 md:h-80">
+    <div className="min-h-[calc(100vh-73px)] w-full min-w-0 overflow-x-clip bg-slate-100 pb-8">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pt-6">
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative aspect-[3/1] w-full bg-slate-200">
             <Image
               src={coverUrl}
               alt={community.name}
@@ -572,18 +579,19 @@ export default function CommunityProfilePage({
               <button
                 type="button"
                 onClick={() => openImageModal("coverPhoto")}
-                className="absolute bottom-4 right-4 inline-flex h-10  items-center gap-2 rounded-md bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm hover:bg-white"
+                aria-label="Edit cover photo"
+                title="Edit cover photo"
               >
                 <Camera className="h-4 w-4" />
-                Edit cover photo
               </button>
             )}
           </div>
 
-          <div className="px-4 pb-5">
-            <div className="-mt-12 flex flex-col gap-4 md:-mt-16 md:flex-row md:items-end md:justify-between">
-              <div className="flex flex-col gap-4 md:flex-row md:items-end">
-                <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-white shadow-md md:h-40 md:w-40">
+          <div className="relative min-w-0 p-4">
+            <div className="flex min-w-0 items-start justify-between gap-3 md:block">
+              <div className="relative z-10 -mt-16 h-32 w-32 shrink-0">
+                <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white bg-white shadow-md">
                   <Image
                     src={profileUrl}
                     alt={community.name}
@@ -594,88 +602,142 @@ export default function CommunityProfilePage({
                     <button
                       type="button"
                       onClick={() => openImageModal("profilePic")}
-                      className="absolute bottom-2 right-2 flex h-10 w-10  items-center justify-center rounded-full bg-white text-slate-700 shadow-md hover:bg-slate-50"
+                      className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md hover:bg-white"
+                      aria-label="Edit profile photo"
+                      title="Edit profile photo"
                     >
-                      <Camera className="h-5 w-5" />
+                      <Camera className="h-4 w-4" />
                     </button>
                   )}
                 </div>
-                <div className="pb-2">
-                  <h1 className="text-3xl font-bold text-slate-950">
-                    {community.name}
-                  </h1>
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                    <span>{community._count.followers} followers</span>
-                    <span>{community._count.posts} posts</span>
-                    {community.location && (
-                      <span className="inline-flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {community.location}
-                      </span>
-                    )}
-                  </div>
+              </div>
+
+              <div className="z-20 flex min-w-0 flex-1 flex-col items-end gap-2 md:absolute md:right-4 md:top-4 md:w-auto">
+                <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
+                  {canFollowCommunity && (
+                    <button
+                      type="button"
+                      onClick={toggleFollow}
+                      disabled={followPending}
+                      aria-busy={followPending}
+                      className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-white shadow-sm transition-colors disabled:opacity-70 md:h-10 md:gap-2 md:px-4 md:text-sm ${
+                        community.isFollowing
+                          ? "bg-red-500 hover:bg-red-600"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      }`}
+                    >
+                      {followPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <UserPlus className="h-4 w-4" />
+                      )}
+                      {followPending
+                        ? community.isFollowing
+                          ? "Unfollowing..."
+                          : "Following..."
+                        : community.isFollowing
+                          ? "Unfollow"
+                          : "Follow"}
+                    </button>
+                  )}
+                  {selectedActor.type === "USER" && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(`/messages?communityId=${community.id}`)
+                      }
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 md:h-10 md:gap-2 md:px-4 md:text-sm"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Message
+                    </button>
+                  )}
+                  {canManageThisCommunity && (
+                    <button
+                      type="button"
+                      onClick={openEdit}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 md:h-10 md:gap-2 md:px-4 md:text-sm"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Edit details
+                    </button>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div className="flex flex-wrap gap-2 pb-2">
-	                {canFollowCommunity && (
-	                  <button
-	                    type="button"
-	                    onClick={toggleFollow}
-	                    className="inline-flex h-10 items-center gap-2 rounded-md bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700"
-	                  >
-	                    <UserPlus className="h-4 w-4" />
-	                    {community.isFollowing ? "Unfollow" : "Follow"}
-	                  </button>
-	                )}
-                {selectedActor.type === "USER" && (
-	                  <button
-	                    type="button"
-	                    onClick={() => router.push(`/messages?communityId=${community.id}`)}
-	                    className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-	                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Message
-                  </button>
-                )}
-                {canManageThisCommunity && (
-                  <button
-                    type="button"
-                    onClick={openEdit}
-	                    className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-	                  >
-	                    <Pencil className="h-4 w-4" />
-	                    Edit details
-	                  </button>
-                )}
-              </div>
+            <h1 className="mt-2 break-words text-2xl font-bold text-slate-950">
+              {community.name}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+              <span>{community._count.followers} followers</span>
+              <span>{community._count.posts} posts</span>
+              {community.location && (
+                <span className="inline-flex items-center gap-1 text-blue-700">
+                  <MapPin className="h-4 w-4" />
+                  {community.location}
+                </span>
+              )}
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
-      <main className="mx-auto mt-5 grid max-w-5xl gap-5 px-4 lg:grid-cols-[320px_1fr]">
-        <aside className="space-y-4">
-          <section className="rounded-lg border border-slate-200 bg-white p-4">
-            <h2 className="text-base font-semibold text-slate-950">About</h2>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+      <main className="mx-auto mt-4 grid w-full min-w-0 max-w-5xl grid-cols-1 gap-4 px-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="min-w-0 space-y-4">
+          <SectionCard
+            title="About"
+            icon={
+              canManageThisCommunity ? (
+                <button
+                  type="button"
+                  onClick={openEdit}
+                  className="rounded-full p-2 text-blue-600 hover:bg-blue-100"
+                  aria-label="Edit community details"
+                  title="Edit community details"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              ) : undefined
+            }
+          >
+            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
               {community.about || "No community description yet."}
             </p>
-          </section>
+          </SectionCard>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-4">
-            <h2 className="text-base font-semibold text-slate-950">Community</h2>
-            <div className="mt-3 space-y-2 text-sm text-slate-600">
-              <p className="flex items-center gap-2">
-                <UsersRound className="h-4 w-4" />
-                {community._count.managers} managers
-              </p>
-              <p>{community._count.followers} followers</p>
+          <SectionCard
+            title="Community"
+            icon={<UsersRound className="h-5 w-5 text-purple-600" />}
+          >
+            <div className="space-y-3 text-sm text-slate-700">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                  <UsersRound className="h-4 w-4" />
+                </span>
+                <span>
+                  <strong className="font-semibold text-slate-950">
+                    {community._count.managers}
+                  </strong>{" "}
+                  managers
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+                  <UserPlus className="h-4 w-4" />
+                </span>
+                <span>
+                  <strong className="font-semibold text-slate-950">
+                    {community._count.followers}
+                  </strong>{" "}
+                  followers
+                </span>
+              </div>
             </div>
-          </section>
+          </SectionCard>
         </aside>
 
-        <section className="space-y-4">
+        <section className="min-w-0 space-y-4">
           {message && (
             <div className="rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
               {message}
@@ -718,96 +780,115 @@ export default function CommunityProfilePage({
       </main>
 
       {imageModal && canManageThisCommunity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={closeImageModal} />
-          <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 text-gray-900 shadow-lg">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
-                {imageModal === "profilePic" ? "Profile photo" : "Cover photo"}
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closeImageModal}
+          />
+          <div className="relative z-10 max-h-[86vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white text-gray-900 shadow-2xl">
+            <div className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-4 text-white">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  {imageModal === "profilePic"
+                    ? "Profile photo"
+                    : "Cover photo"}
+                </h2>
+                <p className="text-sm text-blue-100">
+                  Preview, upload, or crop this community image.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={closeImageModal}
                 disabled={saving}
-                className="rounded-full p-2 hover:bg-gray-100 disabled:opacity-50"
+                className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white disabled:opacity-50"
+                aria-label="Close image editor"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div
-              className={
-                imageModal === "profilePic"
-                  ? "relative mx-auto mb-5 h-48 w-48 overflow-hidden rounded-full border"
-                  : "relative mb-5 h-40 w-full overflow-hidden rounded-lg border"
-              }
-            >
-              <Image
-                src={imageModal === "profilePic" ? profileUrl : coverUrl}
-                alt={community.name}
-                fill
-                className="object-cover"
+            <div className="p-6">
+              <div
+                className={
+                  imageModal === "profilePic"
+                    ? "relative mx-auto mb-6 h-48 w-48 overflow-hidden rounded-full border border-slate-200"
+                    : "relative mb-6 h-40 w-full overflow-hidden rounded-lg border border-slate-200"
+                }
+              >
+                <Image
+                  src={imageModal === "profilePic" ? profileUrl : coverUrl}
+                  alt={community.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="space-y-3">
+                {(imageModal === "profilePic"
+                  ? hasProfilePhoto
+                  : hasCoverPhoto) && (
+                  <button
+                    type="button"
+                    onClick={() => editCurrentImage(imageModal)}
+                    disabled={
+                      saving ||
+                      (imageModal === "profilePic"
+                        ? !canEditProfileOriginal
+                        : !canEditCoverOriginal)
+                    }
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    {imageModal === "profilePic"
+                      ? "Edit current photo"
+                      : "Edit current cover"}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => pickImage(imageModal)}
+                  disabled={saving}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {imageModal === "profilePic"
+                    ? "Upload new photo"
+                    : "Upload new cover"}
+                </button>
+
+                {(imageModal === "profilePic"
+                  ? hasProfilePhoto
+                  : hasCoverPhoto) && (
+                  <button
+                    type="button"
+                    onClick={() => deleteImage(imageModal)}
+                    disabled={saving}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {imageModal === "profilePic"
+                      ? "Delete photo"
+                      : "Remove cover"}
+                  </button>
+                )}
+              </div>
+
+              <input
+                ref={profileInputRef}
+                type="file"
+                accept={ALLOWED_IMAGE_TYPES.join(",")}
+                className="hidden"
+                onChange={(event) => handleImageChange(event, "profilePic")}
+              />
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept={ALLOWED_IMAGE_TYPES.join(",")}
+                className="hidden"
+                onChange={(event) => handleImageChange(event, "coverPhoto")}
               />
             </div>
-
-            <div className="space-y-3">
-              {(imageModal === "profilePic" ? hasProfilePhoto : hasCoverPhoto) && (
-                <button
-                  type="button"
-                  onClick={() => editCurrentImage(imageModal)}
-                  disabled={
-                    saving ||
-                    (imageModal === "profilePic"
-                      ? !canEditProfileOriginal
-                      : !canEditCoverOriginal)
-                  }
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
-                >
-                  <Pencil className="h-4 w-4" />
-                  {imageModal === "profilePic"
-                    ? "Edit current photo"
-                    : "Edit current cover"}
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => pickImage(imageModal)}
-                disabled={saving}
-                className="w-full rounded-lg border px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:opacity-50"
-              >
-                {imageModal === "profilePic"
-                  ? "Upload new photo"
-                  : "Upload new cover"}
-              </button>
-
-              {(imageModal === "profilePic" ? hasProfilePhoto : hasCoverPhoto) && (
-                <button
-                  type="button"
-                  onClick={() => deleteImage(imageModal)}
-                  disabled={saving}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {imageModal === "profilePic" ? "Delete photo" : "Remove cover"}
-                </button>
-              )}
-            </div>
-
-            <input
-              ref={profileInputRef}
-              type="file"
-              accept={ALLOWED_IMAGE_TYPES.join(",")}
-              className="hidden"
-              onChange={(event) => handleImageChange(event, "profilePic")}
-            />
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept={ALLOWED_IMAGE_TYPES.join(",")}
-              className="hidden"
-              onChange={(event) => handleImageChange(event, "coverPhoto")}
-            />
           </div>
 
           <ProfilePhotoCropModal
@@ -835,90 +916,99 @@ export default function CommunityProfilePage({
       )}
 
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-5 shadow-xl">
-            <div className="flex items-start justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="max-h-[86vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-100 bg-white shadow-2xl">
+            <div className="flex items-start justify-between bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-5 text-white">
               <div>
-                <h3 className="text-lg font-semibold text-slate-950">
+                <h3 className="text-2xl font-bold text-white">
                   Edit Community
                 </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Update page details.
+                <p className="mt-1 text-sm text-blue-100">
+                  Update this community&apos;s public profile details.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="rounded-md p-2 text-slate-400 hover:bg-slate-50"
+                disabled={saving}
+                className="rounded-lg p-2 text-white/80 hover:bg-white/20 hover:text-white disabled:opacity-50"
+                aria-label="Close edit community"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-5 grid gap-4">
-              <label className="space-y-1.5 md:col-span-2">
-                <span className="text-sm font-medium text-slate-700">Name</span>
-                <input
-                  value={form.name}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      name: event.target.value,
-                    }))
-                  }
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-50"
-                />
-              </label>
+            <div className="p-6">
+              <div className="grid gap-4">
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium text-slate-900">
+                    Name
+                  </span>
+                  <input
+                    value={form.name}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        name: event.target.value,
+                      }))
+                    }
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </label>
 
-              <label className="space-y-1.5 md:col-span-2">
-                <span className="text-sm font-medium text-slate-700">
-                  Location
-                </span>
-                <input
-                  value={form.location}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      location: event.target.value,
-                    }))
-                  }
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-50"
-                />
-              </label>
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium text-slate-900">
+                    Location
+                  </span>
+                  <input
+                    value={form.location}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        location: event.target.value,
+                      }))
+                    }
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </label>
 
-              <label className="space-y-1.5 md:col-span-2">
-                <span className="text-sm font-medium text-slate-700">About</span>
-                <textarea
-                  value={form.about}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      about: event.target.value,
-                    }))
-                  }
-                  rows={4}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-950 placeholder:text-slate-400 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-50"
-                />
-              </label>
-            </div>
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium text-slate-900">
+                    About
+                  </span>
+                  <textarea
+                    value={form.about}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        about: event.target.value,
+                      }))
+                    }
+                    rows={4}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-950 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </label>
+              </div>
 
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                className="h-10 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={saveCommunity}
-                disabled={saving}
-                className="inline-flex h-10 items-center gap-2 rounded-md bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 disabled:bg-red-300"
-              >
-                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Save
-              </button>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  disabled={saving}
+                  className="h-10 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={saveCommunity}
+                  disabled={saving}
+                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-blue-300"
+                >
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         </div>
