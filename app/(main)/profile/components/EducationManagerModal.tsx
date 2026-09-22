@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import AddEditEducationModal from "./AddEditEducationModal";
 import type Education from "@/types/Education";
-import { ADD_EDUCATION_API_PATH , DELETE_EDUCATION_API_PATH } from "@/lib/constants";
+import { ADD_EDUCATION_API_PATH, BASE_API_PATH, DELETE_EDUCATION_API_PATH } from "@/lib/constants";
 
 const MONTHS = [
   "Jan","Feb","Mar","Apr","May","Jun",
@@ -142,7 +142,7 @@ export default function EducationManagerModal({
           if (editing) {
             const res = await fetch(
               //TODO:put the route in constant
-              `/api/connect/v1/profile/me/update/educationFields/${editing.id}`,
+              `${BASE_API_PATH}/profile/me/update/educationFields/${editing.id}`,
               {
                 method: "PUT",
                 credentials: "include",

@@ -1,0 +1,1208 @@
+[
+  {
+    "name": "Communication",
+    "aliases": [
+      "Communication Skills"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Written Communication",
+    "aliases": [],
+    "categories": [
+      "SOFT_SKILL",
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Verbal Communication",
+    "aliases": [
+      "Oral Communication"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Presentation Skills",
+    "aliases": [
+      "Presenting"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Public Speaking",
+    "aliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Teamwork",
+    "aliases": [
+      "Team Work"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Collaboration",
+    "aliases": [
+      "Collaborative Working"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Negotiation",
+    "aliases": [
+      "Negotiation Skills"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "SALES"
+    ]
+  },
+  {
+    "name": "Conflict Resolution",
+    "aliases": [
+      "Conflict Management"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Adaptability",
+    "aliases": [
+      "Flexibility"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Problem Solving",
+    "aliases": [
+      "Problem-Solving"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Critical Thinking",
+    "aliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Decision Making",
+    "aliases": [
+      "Decision-Making"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Time Management",
+    "aliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Emotional Intelligence",
+    "aliases": [
+      "EQ"
+    ],
+    "categories": [
+      "SOFT_SKILL",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Active Listening",
+    "aliases": [],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Attention to Detail",
+    "aliases": [
+      "Detail Oriented"
+    ],
+    "categories": [
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Leadership",
+    "aliases": [
+      "Leadership Skills"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "People Management",
+    "aliases": [
+      "Personnel Management"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Project Management",
+    "aliases": [
+      "Project Coordination"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Product Management",
+    "aliases": [],
+    "categories": [
+      "MANAGEMENT",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Program Management",
+    "aliases": [
+      "Programme Management"
+    ],
+    "categories": [
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Risk Management",
+    "aliases": [],
+    "categories": [
+      "MANAGEMENT",
+      "BUSINESS",
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Stakeholder Management",
+    "aliases": [
+      "Stakeholder Engagement"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Change Management",
+    "aliases": [
+      "Organizational Change"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Agile",
+    "aliases": [
+      "Agile Methodology"
+    ],
+    "categories": [
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Scrum",
+    "aliases": [
+      "Scrum Framework"
+    ],
+    "categories": [
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Strategic Planning",
+    "aliases": [
+      "Strategy Planning"
+    ],
+    "categories": [
+      "MANAGEMENT",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Team Leadership",
+    "aliases": [],
+    "categories": [
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Business Analysis",
+    "aliases": [
+      "BA"
+    ],
+    "categories": [
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Requirements Gathering",
+    "aliases": [
+      "Requirements Elicitation"
+    ],
+    "categories": [
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Process Improvement",
+    "aliases": [
+      "Continuous Improvement"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Business Strategy",
+    "aliases": [
+      "Corporate Strategy"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Entrepreneurship",
+    "aliases": [
+      "Entrepreneurial Skills"
+    ],
+    "categories": [
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Business Planning",
+    "aliases": [],
+    "categories": [
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Competitive Analysis",
+    "aliases": [
+      "Competitor Analysis"
+    ],
+    "categories": [
+      "BUSINESS",
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Consulting",
+    "aliases": [
+      "Business Consulting"
+    ],
+    "categories": [
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Vendor Management",
+    "aliases": [
+      "Supplier Management"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Contract Management",
+    "aliases": [
+      "Contract Administration"
+    ],
+    "categories": [
+      "BUSINESS",
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Market Research",
+    "aliases": [
+      "Marketing Research"
+    ],
+    "categories": [
+      "MARKETING",
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Digital Marketing",
+    "aliases": [
+      "Online Marketing"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Content Marketing",
+    "aliases": [],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Social Media Marketing",
+    "aliases": [
+      "SMM"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Email Marketing",
+    "aliases": [],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Search Engine Optimization",
+    "aliases": [
+      "SEO"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Search Engine Marketing",
+    "aliases": [
+      "SEM",
+      "Paid Search"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Brand Management",
+    "aliases": [
+      "Branding"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Campaign Management",
+    "aliases": [
+      "Marketing Campaigns"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Marketing Strategy",
+    "aliases": [],
+    "categories": [
+      "MARKETING",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Marketing Analytics",
+    "aliases": [],
+    "categories": [
+      "MARKETING",
+      "DATA"
+    ]
+  },
+  {
+    "name": "Advertising",
+    "aliases": [
+      "Ad Campaigns"
+    ],
+    "categories": [
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Public Relations",
+    "aliases": [
+      "PR"
+    ],
+    "categories": [
+      "MARKETING",
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "UI Design",
+    "aliases": [
+      "UI",
+      "User Interface Design"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "UX Design",
+    "aliases": [
+      "UX",
+      "User Experience Design"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "User Research",
+    "aliases": [
+      "UX Research"
+    ],
+    "categories": [
+      "DESIGN",
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Wireframing",
+    "aliases": [
+      "Wireframe Design"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Prototyping",
+    "aliases": [
+      "Prototype Design"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Graphic Design",
+    "aliases": [
+      "Graphics Design"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Typography",
+    "aliases": [],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Information Architecture",
+    "aliases": [
+      "IA"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Interaction Design",
+    "aliases": [
+      "IxD"
+    ],
+    "categories": [
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Usability Testing",
+    "aliases": [
+      "User Testing"
+    ],
+    "categories": [
+      "DESIGN",
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Data Analysis",
+    "aliases": [
+      "Data Analytics"
+    ],
+    "categories": [
+      "DATA"
+    ]
+  },
+  {
+    "name": "Data Visualization",
+    "aliases": [
+      "Data Visualisation"
+    ],
+    "categories": [
+      "DATA",
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Statistical Analysis",
+    "aliases": [
+      "Statistics"
+    ],
+    "categories": [
+      "DATA",
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Machine Learning",
+    "aliases": [
+      "ML"
+    ],
+    "categories": [
+      "DATA"
+    ]
+  },
+  {
+    "name": "Data Cleaning",
+    "aliases": [
+      "Data Cleansing"
+    ],
+    "categories": [
+      "DATA"
+    ]
+  },
+  {
+    "name": "Data Modeling",
+    "aliases": [
+      "Data Modelling"
+    ],
+    "categories": [
+      "DATA"
+    ]
+  },
+  {
+    "name": "ETL",
+    "aliases": [
+      "Extract Transform Load"
+    ],
+    "categories": [
+      "DATA"
+    ]
+  },
+  {
+    "name": "Business Intelligence",
+    "aliases": [
+      "BI"
+    ],
+    "categories": [
+      "DATA",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Dashboard Design",
+    "aliases": [
+      "Dashboarding"
+    ],
+    "categories": [
+      "DATA",
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Forecasting",
+    "aliases": [
+      "Predictive Forecasting"
+    ],
+    "categories": [
+      "DATA",
+      "FINANCE",
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Financial Analysis",
+    "aliases": [],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Accounting",
+    "aliases": [],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Bookkeeping",
+    "aliases": [
+      "Book Keeping"
+    ],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Budgeting",
+    "aliases": [
+      "Budget Management"
+    ],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Financial Reporting",
+    "aliases": [],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Auditing",
+    "aliases": [
+      "Audit"
+    ],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Tax Preparation",
+    "aliases": [
+      "Tax Accounting"
+    ],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Financial Modeling",
+    "aliases": [
+      "Financial Modelling"
+    ],
+    "categories": [
+      "FINANCE",
+      "DATA"
+    ]
+  },
+  {
+    "name": "Cash Flow Management",
+    "aliases": [
+      "Cashflow Management"
+    ],
+    "categories": [
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Cost Analysis",
+    "aliases": [
+      "Costing"
+    ],
+    "categories": [
+      "FINANCE",
+      "DATA"
+    ]
+  },
+  {
+    "name": "Sales",
+    "aliases": [
+      "Selling"
+    ],
+    "categories": [
+      "SALES"
+    ]
+  },
+  {
+    "name": "Lead Generation",
+    "aliases": [
+      "Lead Gen"
+    ],
+    "categories": [
+      "SALES",
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Business Development",
+    "aliases": [
+      "Biz Dev"
+    ],
+    "categories": [
+      "SALES",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Account Management",
+    "aliases": [
+      "Client Account Management"
+    ],
+    "categories": [
+      "SALES"
+    ]
+  },
+  {
+    "name": "Customer Service",
+    "aliases": [
+      "Customer Support"
+    ],
+    "categories": [
+      "SALES",
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Customer Relationship Management",
+    "aliases": [
+      "CRM"
+    ],
+    "categories": [
+      "SALES",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Sales Strategy",
+    "aliases": [],
+    "categories": [
+      "SALES",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Sales Forecasting",
+    "aliases": [],
+    "categories": [
+      "SALES",
+      "DATA"
+    ]
+  },
+  {
+    "name": "Customer Success",
+    "aliases": [
+      "Client Success"
+    ],
+    "categories": [
+      "SALES"
+    ]
+  },
+  {
+    "name": "Client Relations",
+    "aliases": [
+      "Customer Relations"
+    ],
+    "categories": [
+      "SALES",
+      "SOFT_SKILL"
+    ]
+  },
+  {
+    "name": "Recruitment",
+    "aliases": [
+      "Recruiting"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Interviewing",
+    "aliases": [
+      "Candidate Interviewing"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Onboarding",
+    "aliases": [
+      "Employee Onboarding"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Training and Development",
+    "aliases": [
+      "Employee Development"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Performance Management",
+    "aliases": [
+      "Employee Performance Management"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Employee Engagement",
+    "aliases": [],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Talent Acquisition",
+    "aliases": [
+      "Talent Recruitment"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Workforce Planning",
+    "aliases": [
+      "Manpower Planning"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES",
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Compensation and Benefits",
+    "aliases": [
+      "Comp and Benefits"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES",
+      "FINANCE"
+    ]
+  },
+  {
+    "name": "Employee Relations",
+    "aliases": [
+      "Labor Relations"
+    ],
+    "categories": [
+      "HUMAN_RESOURCES"
+    ]
+  },
+  {
+    "name": "Operations Management",
+    "aliases": [
+      "Operational Management"
+    ],
+    "categories": [
+      "OPERATIONS",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Supply Chain Management",
+    "aliases": [
+      "SCM"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Inventory Management",
+    "aliases": [
+      "Stock Management"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Procurement",
+    "aliases": [
+      "Purchasing"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Quality Assurance",
+    "aliases": [
+      "QA"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Event Management",
+    "aliases": [
+      "Event Planning"
+    ],
+    "categories": [
+      "OPERATIONS",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Logistics Management",
+    "aliases": [
+      "Logistics"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Warehouse Management",
+    "aliases": [
+      "Warehousing"
+    ],
+    "categories": [
+      "OPERATIONS"
+    ]
+  },
+  {
+    "name": "Resource Planning",
+    "aliases": [
+      "Capacity Planning"
+    ],
+    "categories": [
+      "OPERATIONS",
+      "MANAGEMENT"
+    ]
+  },
+  {
+    "name": "Compliance Management",
+    "aliases": [
+      "Regulatory Compliance"
+    ],
+    "categories": [
+      "OPERATIONS",
+      "BUSINESS"
+    ]
+  },
+  {
+    "name": "Content Writing",
+    "aliases": [
+      "Web Content Writing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Technical Writing",
+    "aliases": [
+      "Technical Documentation"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Copywriting",
+    "aliases": [
+      "Marketing Copywriting"
+    ],
+    "categories": [
+      "WRITING_MEDIA",
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Editing",
+    "aliases": [
+      "Copy Editing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Photography",
+    "aliases": [
+      "Photo Production"
+    ],
+    "categories": [
+      "WRITING_MEDIA",
+      "DESIGN"
+    ]
+  },
+  {
+    "name": "Video Editing",
+    "aliases": [
+      "Film Editing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Video Production",
+    "aliases": [
+      "Film Production"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Content Strategy",
+    "aliases": [],
+    "categories": [
+      "WRITING_MEDIA",
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Scriptwriting",
+    "aliases": [
+      "Script Writing"
+    ],
+    "categories": [
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Media Relations",
+    "aliases": [
+      "Press Relations"
+    ],
+    "categories": [
+      "WRITING_MEDIA",
+      "MARKETING"
+    ]
+  },
+  {
+    "name": "Research",
+    "aliases": [
+      "Research Skills"
+    ],
+    "categories": [
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Academic Research",
+    "aliases": [
+      "Scholarly Research"
+    ],
+    "categories": [
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Survey Design",
+    "aliases": [
+      "Questionnaire Design"
+    ],
+    "categories": [
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Data Collection",
+    "aliases": [
+      "Research Data Collection"
+    ],
+    "categories": [
+      "RESEARCH",
+      "DATA"
+    ]
+  },
+  {
+    "name": "Report Writing",
+    "aliases": [
+      "Business Report Writing"
+    ],
+    "categories": [
+      "RESEARCH",
+      "WRITING_MEDIA"
+    ]
+  },
+  {
+    "name": "Literature Review",
+    "aliases": [
+      "Literature Research"
+    ],
+    "categories": [
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Qualitative Research",
+    "aliases": [
+      "Qualitative Analysis"
+    ],
+    "categories": [
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Quantitative Research",
+    "aliases": [
+      "Quantitative Analysis"
+    ],
+    "categories": [
+      "RESEARCH",
+      "DATA"
+    ]
+  },
+  {
+    "name": "Research Methodology",
+    "aliases": [
+      "Research Methods"
+    ],
+    "categories": [
+      "RESEARCH"
+    ]
+  },
+  {
+    "name": "Experimental Design",
+    "aliases": [
+      "Design of Experiments"
+    ],
+    "categories": [
+      "RESEARCH",
+      "DATA"
+    ]
+  }
+]

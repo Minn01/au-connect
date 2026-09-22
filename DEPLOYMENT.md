@@ -51,7 +51,6 @@ key ones:
 
 ```dotenv
 NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL, use https
-NEXT_PUBLIC_APP_URL=https://life.au.edu/connect
 NODE_ENV=production
 JWT_SECRET=                                        # openssl rand -base64 32
 DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
@@ -98,15 +97,18 @@ The recommendation API and MongoDB have no host port at all.
 
 ### 5. Set up nginx
 
-The AU team adds two routes to their existing nginx (example in
-[`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example)):
+The AU team adds routes to their existing nginx. The main app example is in
+[`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example):
 
 ```
+life.au.edu/               ->  127.0.0.1:3000   (Next redirects to /connect)
 life.au.edu/connect        ->  127.0.0.1:3000   (main app)
 life.au.edu/connect-admin  ->  127.0.0.1:3001   (admin app)
 ```
 
-Then reload:
+Forward the exact `/`, `/connect`, and `/connect/...` paths without changing the
+URI. Next redirects `/` to `/connect` on localhost and the production host.
+The admin app uses its own `/connect-admin` route. Then reload nginx:
 
 ```bash
 sudo nginx -t && sudo nginx -s reload
@@ -149,25 +151,18 @@ NEXT_PUBLIC_BASE_URL = https://life.au.edu/connect
 ```
 
 And add the two secrets the build uses: `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN`. (The workflow defaults it to the `/connect` production URL, so
-it works even if you don't set it — but set it explicitly if the URL differs.)
+`DOCKERHUB_TOKEN`. The production workflow stops if the URL is missing or
+does not end in `/connect`.
 
 ## About the /connect path
 
-The app is served under `/connect` **everywhere** — `basePath: "/connect"` is set
-in `next.config.ts`, both locally (`localhost:3000/connect`) and in production
-(`life.au.edu/connect`), so dev mirrors prod. Use Option A in the nginx example.
+The main app is served under `/connect` everywhere: `basePath: "/connect"` is
+set in `next.config.ts` for both localhost and production. Next prefixes page
+navigation; browser API calls use the `/connect/api/connect/v1` paths in
+`lib/constants.ts`. Share links are built from `NEXT_PUBLIC_BASE_URL`.
 
-`NEXT_PUBLIC_BASE_URL` must **end with `/connect`** (local
-`http://localhost:3000/connect`, prod `https://life.au.edu/connect`) — it feeds
-the share links and the OAuth redirect URIs. Register the resulting `/connect`
-callback URLs with each provider (Google / LinkedIn / Microsoft):
-
-```
-<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/google/callback
-<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/linkedin/callback
-<NEXT_PUBLIC_BASE_URL>/api/connect/v1/auth/azure-ad/callback
-```
-
-For a dedicated subdomain (e.g. `connect.au.edu`), remove the `basePath` line
-from `next.config.ts` and set `NEXT_PUBLIC_BASE_URL=https://connect.au.edu`.
+The main thing is to build and run with
+`NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect` (both the GitHub Actions
+variable and the `.env`). That value has to include the `/connect` part, or the
+links, logins, and notification emails won't line up. The server rejects a
+missing or invalid public URL in production instead of sending localhost links.

@@ -34,8 +34,8 @@ import { useRouter } from "next/navigation";
 import {
   JOBS_PAGE_PATH,
   MY_MANAGED_COMMUNITIES_API_PATH,
-  SHARE_POST_PAGE_PATH,
 } from "@/lib/constants";
+import { sharePostUrl } from "@/lib/client/sharePostUrl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostType from "@/types/Post";
 import { useActorStore } from "@/lib/stores/actorStore";
@@ -332,6 +332,8 @@ export default function CreatePostModal({
           status: job.status || "OPEN",
           deadline: job.deadline || "",
           jobDetails: job.jobDetails || "",
+          skills: job.skills || [],
+          skillIds: job.skills?.map((skill) => skill.id) || [],
           jobRequirements: job.jobRequirements || [],
           applyUrl: job.applyUrl || "",
           allowExternalApply: job.allowExternalApply ?? false,
@@ -583,7 +585,7 @@ export default function CreatePostModal({
           // Offer LinkedIn/Facebook sharing once the post is live and has a URL.
           if (wantsShare && createdPost?.id && onPosted) {
             onPosted(
-              `${process.env.NEXT_PUBLIC_BASE_URL ?? window.location.origin}${SHARE_POST_PAGE_PATH(createdPost.id)}`,
+              sharePostUrl(createdPost.id),
             );
           }
         });

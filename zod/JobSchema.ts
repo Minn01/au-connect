@@ -19,7 +19,12 @@ const JobSchema = z
     salaryCurrency: z.string().optional(),
     deadline: z.string().optional(),
     jobDetails: z.string().optional(),
-    jobSkills: z.array(z.string()).optional(),
+    skillIds: z
+      .array(z.string().regex(/^[a-f\d]{24}$/i, "Invalid skill ID"))
+      .refine((ids) => new Set(ids).size === ids.length, {
+        message: "Duplicate skill IDs are not allowed",
+      })
+      .optional(),
     jobRequirements: z.array(z.string()).optional(),
     allowExternalApply: z.boolean(),
     applyUrl: z.string().optional(),

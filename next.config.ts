@@ -2,10 +2,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  // Served under /connect everywhere — locally (localhost:3000/connect) and in
-  // production (life.au.edu/connect) — so dev mirrors prod exactly. Client
-  // fetch() calls and /public assets are prefixed via lib/basePath.ts.
+  // Next prefixes page navigation and managed assets. Browser fetch() uses
+  // the public API paths defined in lib/constants.ts.
   basePath: '/connect',
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/connect',
+        basePath: false,
+        permanent: true,
+      },
+    ];
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

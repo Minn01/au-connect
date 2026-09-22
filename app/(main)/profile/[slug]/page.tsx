@@ -113,6 +113,7 @@ export default async function ProfilePage(props: {
     })),
 
     education: user.education,
+    skills: user.userSkills.map(({ skill }) => skill),
   };
 
   return (
@@ -120,7 +121,6 @@ export default async function ProfilePage(props: {
       <ProfileView
         user={userData}
         isOwner={isOwner}
-        sessionUserId={sessionUserId}
         sessionUser={sessionUser}
       />
     </div>

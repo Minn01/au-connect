@@ -1,3 +1,4 @@
+import { BASE_API_PATH } from "@/lib/constants";
 import { useActorStore } from "@/lib/stores/actorStore";
 
 function messageActorQuery() {
@@ -12,7 +13,7 @@ function messageActorQuery() {
 }
 
 export async function fetchUnreadMessagesCount() {
-  const res = await fetch(`/api/connect/v1/messages/unread-count?${messageActorQuery()}`, {
+  const res = await fetch(`${BASE_API_PATH}/messages/unread-count?${messageActorQuery()}`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to fetch unread messages count");

@@ -71,6 +71,7 @@ model User {
   accountStatus  UserAccountStatus @default(ACTIVE)
   suspendedUntil DateTime?
   warningCount   Int               @default(0)
+  userSkills     UserSkill[]
 }
 
 enum UserAccountStatus {
@@ -662,10 +663,64 @@ model JobApplication {
   @@index([applicantId])
 }
 
+enum SkillCategory {
+  LANGUAGE
+  DATABASE
+  PLATFORM
+  FRAMEWORK
+  TOOL
+  SOFT_SKILL
+  BUSINESS
+  MANAGEMENT
+  MARKETING
+  DESIGN
+  DATA
+  FINANCE
+  SALES
+  HUMAN_RESOURCES
+  OPERATIONS
+  WRITING_MEDIA
+  RESEARCH
+}
+
 model Skill {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String     @unique
-  jobSkills JobSkill[]
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name              String
+  normalizedName    String          @unique
+  aliases           String[]        @default([])
+  normalizedAliases String[]        @default([])
+  categories        SkillCategory[]
+  popularity        Float?
+  frequency         Int?
+  iconKey           String?
+  sources           String[]        @default([])
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  jobSkills  JobSkill[]
+  userSkills UserSkill[]
+
+  @@index([normalizedAliases])
+  @@index([active, popularity])
+}
+
+model UserSkill {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId  String @db.ObjectId
+  skillId String @db.ObjectId
+  order   Int    @default(0)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, skillId])
+  @@index([userId, order])
+  @@index([skillId])
 }
 
 model JobSkill {
@@ -674,10 +729,13 @@ model JobSkill {
   jobPostId String @db.ObjectId
   skillId   String @db.ObjectId
 
-  jobPost JobPost @relation(fields: [jobPostId], references: [id])
-  skill   Skill   @relation(fields: [skillId], references: [id])
+  jobPost JobPost @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@unique([jobPostId, skillId])
+  @@index([jobPostId])
   @@index([skillId])
 }
 

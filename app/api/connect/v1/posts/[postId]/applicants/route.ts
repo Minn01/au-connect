@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { asset } from "@/lib/basePath";
 import { getHeaderUserInfo } from "@/lib/authFunctions"; // your auth util
 import {
   StorageSharedKeyCredential,
@@ -103,6 +104,7 @@ const sharedKeyCredential = new StorageSharedKeyCredential(ACCOUNT, KEY);
 
 export function getProfilePicUrl(profilePic?: string | null) {
   if (!profilePic) return null;
+  if (profilePic.startsWith("/")) return asset(profilePic);
 
   // Already full URL → return as-is
   if (profilePic.startsWith("http://") || profilePic.startsWith("https://")) {

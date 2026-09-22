@@ -10,25 +10,19 @@ import { fetchUser } from "../(main)/profile/utils/fetchfunctions";
 import Post from "../components/Post";
 import { MyApplicationSection } from "../components/MyApplicationSection";
 import { TRENDING_JOB_SKILLS_API_PATH } from "@/lib/constants";
+import { RECOMMENDED_JOBS_API_PATH } from "@/lib/constants";
+import { useRouter } from "next/navigation";
 
-const sampleJobsRecs = [
-  {
-    title: "Senior Front End Engineer",
-    company: "Google",
-    location: "Bangkok, Thailand",
-    type: "Remote",
-    status: "Open",
-    skills: ["React", "CSS", "TypeScript", "Figma"],
-  },
-  {
-    title: "UI/UX Designer",
-    company: "Au Connect",
-    location: "Bangkok, Thailand",
-    type: "Onsite",
-    status: "Open",
-    skills: ["Figma", "Design Systems"],
-  },
-];
+type RecommendedJob = {
+  id: string;
+  postId: string;
+  jobTitle: string;
+  companyName: string | null;
+  location: string | null;
+  locationType: string | null;
+  employmentType: string;
+  explanation: string;
+};
 
 enum JobTabFilters {
   ALL = "All jobs",
@@ -75,6 +69,7 @@ async function fetchTrendingJobSkills() {
 }
 
 export default function JobsPage() {
+  const router = useRouter();
   // job filters
   const [keyword, setKeyword] = useState("");
   const [employmentTypes, setEmploymentTypes] = useState<string[]>([]);
@@ -127,11 +122,6 @@ export default function JobsPage() {
     salaryRange: salaryRangeParam,
   });
 
-  useEffect(() => {
-    console.log("Job posts data updated:", data);
-  }, [data]);
-
-
   const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
@@ -145,6 +135,39 @@ export default function JobsPage() {
     queryKey: ["trending-job-skills"],
     queryFn: fetchTrendingJobSkills,
   });
+  const recommendations = useQuery({
+    queryKey: ["recommended-jobs"],
+    queryFn: async (): Promise<{
+      jobs: RecommendedJob[];
+      hasProfileSkills: boolean;
+      available: boolean;
+    }> => {
+      const response = await fetch(`${RECOMMENDED_JOBS_API_PATH}?limit=6`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("Recommendations unavailable");
+      return response.json();
+    },
+    retry: 1,
+  });
+
+  useEffect(() => {
+    if (recommendations.data?.available === false) {
+      console.warn("Job recommendations are unavailable; hiding the section.");
+    } else if (recommendations.isError) {
+      console.warn("Job recommendations are unavailable; hiding the section.", {
+        error:
+          recommendations.error instanceof Error
+            ? recommendations.error.message
+            : "Unknown recommendation error",
+      });
+    }
+  }, [
+    recommendations.data?.available,
+    recommendations.error,
+    recommendations.isError,
+  ]);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null!);
   const setVirtuosoRef = useFeedStore((s) => s.setVirtuosoRef);
@@ -213,50 +236,68 @@ export default function JobsPage() {
   };
 
   const JobRecommendationCard = () => {
+    const successfullyEmpty =
+      recommendations.isSuccess &&
+      (recommendations.data?.jobs.length ?? 0) === 0;
+
     return (
       <>
-        {/* Recommendations */}
-        <div className="bg-white border border-zinc-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl">
-          <div className="flex items-start sm:items-center justify-between gap-3 mb-5 sm:mb-6">
-            <div>
-              <p className="text-sm text-red-600 mb-1">
-                ✨ Recommended for you
-              </p>
-              <h2 className="text-xl sm:text-2xl font-semibold">Top matches</h2>
+        {!recommendations.isError &&
+          recommendations.data?.available !== false &&
+          !successfullyEmpty && (
+          <>
+            {/* Recommendations */}
+            <div className="bg-white border border-zinc-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl">
+              <div className="flex items-start sm:items-center justify-between gap-3 mb-5 sm:mb-6">
+                <div>
+                  <p className="text-sm text-red-600 mb-1">
+                    ✨ Recommended for you
+                  </p>
+                  <h2 className="text-xl sm:text-2xl font-semibold">Top matches</h2>
+                </div>
+
+                {!recommendations.data?.hasProfileSkills && (
+                  <p className="max-w-52 text-right text-xs text-zinc-500">
+                    Add profile skills to improve recommendations.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 cursor-pointer">
+                {recommendations.isLoading ? (
+                  Array.from({ length: 2 }).map((_, index) => (
+                    <div key={index} className="h-36 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100" />
+                  ))
+                ) : recommendations.data?.jobs.map((job) => (
+                  <button
+                    type="button"
+                    key={job.id}
+                    onClick={() => router.push(`/posts/${job.postId}`)}
+                    className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 sm:p-5 hover:border-red-400/40 transition"
+                  >
+                    <div className="mb-4 text-left">
+                      <p className="text-zinc-500 text-sm">{job.companyName || "Company not listed"}</p>
+                      <h3 className="text-lg sm:text-xl font-semibold leading-tight mt-1">
+                        {job.jobTitle}
+                      </h3>
+                    </div>
+
+                    <div className="space-y-1 text-left text-sm text-zinc-500 mb-4">
+                      <p>{job.location}</p>
+                      <p>{job.locationType?.toLowerCase()} · {job.employmentType.replaceAll("_", " ").toLowerCase()}</p>
+                    </div>
+
+                    <div className="inline-flex px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-sm">
+                      {job.explanation}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <button className="shrink-0 border border-zinc-200 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl hover:bg-zinc-100 transition text-sm sm:text-base">
-              See all
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 cursor-pointer">
-            {sampleJobsRecs.map((job, i) => (
-              <div
-                key={i}
-                className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 sm:p-5 hover:border-red-400/40 transition"
-              >
-                <div className="mb-4">
-                  <p className="text-zinc-500 text-sm">{job.company}</p>
-                  <h3 className="text-lg sm:text-xl font-semibold leading-tight mt-1">
-                    {job.title}
-                  </h3>
-                </div>
-
-                <div className="space-y-1 text-sm text-zinc-500 mb-4">
-                  <p>{job.location}</p>
-                  <p>{job.type}</p>
-                </div>
-
-                <div className="inline-flex px-3 py-1 rounded-full bg-green-50 text-green-500 border border-green-400 text-sm">
-                  95% match
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="h-5" />
+            <div className="h-5" />
+          </>
+        )}
 
         {/* Tabs */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

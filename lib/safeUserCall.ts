@@ -45,6 +45,12 @@ export const safeUserSelect = {
       endYear: true,
     },
   },
+  userSkills: {
+    orderBy: { order: "asc" as const },
+    select: {
+      skill: { select: { id: true, name: true } },
+    },
+  },
 
   posts: {
     select: {

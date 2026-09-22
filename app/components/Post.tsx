@@ -19,8 +19,8 @@ import ShareModal from "../(main)/profile/components/ShareModal";
 import {
   JOB_APPLICANTS_PAGE_PATH,
   POST_DETAIL_PAGE_PATH,
-  SHARE_POST_PAGE_PATH,
 } from "@/lib/constants";
+import { sharePostUrl } from "@/lib/client/sharePostUrl";
 
 import PostPoll from "./PostPoll";
 import LinkEmbedPreview from "./Linkembedpreview";
@@ -344,7 +344,7 @@ export default function Post({
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
         postId={post.id}
-        shareUrl={`${process.env.NEXT_PUBLIC_BASE_URL ?? window.location.origin}${SHARE_POST_PAGE_PATH(post.id)}`}
+        shareUrl={sharePostUrl(post.id)}
       />
 
       <VerificationRequiredModal

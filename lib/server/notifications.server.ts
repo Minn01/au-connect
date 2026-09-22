@@ -4,10 +4,7 @@ import prisma from "../prisma";
 import nodemailer from "nodemailer";
 import { ActorType, NotificationType } from "@/lib/generated/prisma";
 import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
-
-// ─── Config ───────────────────────────────────────────────────────────────────
-const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+import { getAppUrl } from "@/lib/server/appUrl";
 
 // ─── Gmail SMTP transporter (used in both dev + production) ──────────────────
 function getGmailTransporter() {
@@ -97,12 +94,13 @@ async function sendNotificationEmail(
   }
 
   const slug = buildSlug(sender.username, sender.id);
+  const appUrl = getAppUrl();
 
   const { subject, html } = buildEmailContent({
     type,
     senderName: sender.username,
-    profileUrl: `${APP_URL}/profile/${slug}`,
-    notificationsUrl: `${APP_URL}/notifications`,
+    profileUrl: `${appUrl}/profile/${slug}`,
+    notificationsUrl: `${appUrl}/notifications`,
   });
 
   const transporter = getGmailTransporter();

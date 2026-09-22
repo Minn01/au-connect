@@ -25,6 +25,7 @@ import {
   MAIN_PAGE_PATH,
   NOTIFICATION_PAGE_PATH,
   SIGNIN_PAGE_PATH,
+  BASE_API_PATH,
   ONBOARD_PAGE_PATH,
   MESSAGES_PAGE_PATH,
   PROFILE_PAGE_PATH,
@@ -181,7 +182,7 @@ export default function Header() {
     queryKey: ["search-results", query],
     queryFn: async () => {
       const res = await fetch(
-        `/api/connect/v1/search/users?q=${encodeURIComponent(query)}`,
+        `${BASE_API_PATH}/search/users?q=${encodeURIComponent(query)}`,
       );
       if (!res.ok) throw new Error("Search failed");
       return res.json();

@@ -1,13 +1,14 @@
+import { BASE_API_PATH } from "@/lib/constants";
 import prisma from "./prisma";
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
+import { getAppUrl } from "@/lib/server/appUrl";
 
 // ─── Resend (production) ──────────────────────────────────────────────────────
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const EMAIL_FROM = process.env.EMAIL_FROM || "onboarding@resend.dev";
 const IS_DEV = process.env.NODE_ENV === "development";
 
@@ -69,12 +70,14 @@ async function sendNotificationEmail(
     return;
   }
 
+  const appUrl = getAppUrl();
+
   const { subject, html } = buildEmailContent({
     type,
     recipientName: recipient.username || "there",
     senderName: sender.username,
-    profileUrl: `${APP_URL}/profile/${sender.username}-${sender.id}`,
-    notificationsUrl: `${APP_URL}/notifications`,
+    profileUrl: `${appUrl}/profile/${sender.username}-${sender.id}`,
+    notificationsUrl: `${appUrl}/notifications`,
   });
 
   // Development → Gmail SMTP (sends to any address)
@@ -243,9 +246,9 @@ function buildEmailContent({
   };
 }
 
-// ─── Client-side helpers (unchanged) ─────────────────────────────────────────
+// ─── Client-side helpers ─────────────────────────────────────────────────────
 export async function fetchNotifications() {
-  const res = await fetch("/api/connect/v1/notifications", {
+  const res = await fetch(BASE_API_PATH + "/notifications", {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to load notifications");
@@ -253,21 +256,21 @@ export async function fetchNotifications() {
 }
 
 export async function markNotificationRead(id: string) {
-  await fetch(`/api/connect/v1/notifications/${id}`, {
+  await fetch(`${BASE_API_PATH}/notifications/${id}`, {
     method: "PATCH",
     credentials: "include",
   });
 }
 
 export async function fetchUnreadCount() {
-  const res = await fetch("/api/connect/v1/notifications/unread-count", {
+  const res = await fetch(BASE_API_PATH + "/notifications/unread-count", {
     credentials: "include",
   });
   return res.json();
 }
 
 export async function markAllNotificationsRead() {
-  const res = await fetch("/api/connect/v1/notifications/mark-all-read", {
+  const res = await fetch(BASE_API_PATH + "/notifications/mark-all-read", {
     method: "PATCH",
     credentials: "include",
   });

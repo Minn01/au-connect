@@ -13,7 +13,11 @@ import {
 } from "@/lib/env";
 import { POSTS_PER_FETCH, SAS_TOKEN_EXPIRE_DURATION } from "@/lib/constants";
 import type { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
-import { getSkillNamesFromJobSkills } from "@/lib/jobSkillFunctions";
+import type { Prisma } from "@/lib/generated/prisma/client";
+import {
+  getSkillNamesFromJobSkills,
+  getSkillOptionsFromJobSkills,
+} from "@/lib/jobSkillFunctions";
 
 function isValidObjectId(id: string) {
   return /^[a-fA-F0-9]{24}$/.test(id);
@@ -40,6 +44,7 @@ const JOBPOST_SELECT = {
     select: {
       skill: {
         select: {
+          id: true,
           name: true,
         },
       },
@@ -84,7 +89,7 @@ export async function getProfileJobPosts(
     }
 
     // ✅ Base filters
-    const whereAND: any[] = [
+    const whereAND: Prisma.PostWhereInput[] = [
       { moderationStatus: "VISIBLE" },
       { actorType: "USER" },
       { jobPost: { isNot: null } },
@@ -162,6 +167,7 @@ export async function getProfileJobPosts(
                 jobRequirements: getSkillNamesFromJobSkills(
                   post.jobPost.jobSkills,
                 ),
+                skills: getSkillOptionsFromJobSkills(post.jobPost.jobSkills),
                 jobSkills: undefined,
                 remainingPositions:
                   post.jobPost.positionsAvailable -

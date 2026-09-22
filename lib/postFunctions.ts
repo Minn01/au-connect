@@ -19,7 +19,8 @@ import { PostMedia, PostMediaWithUrl } from "@/types/PostMedia";
 import { requireAccountVerification } from "@/lib/accountVerification";
 import {
   getSkillNamesFromJobSkills,
-  normalizeSkillNames,
+  getSkillOptionsFromJobSkills,
+  SkillValidationError,
   syncJobSkills,
 } from "@/lib/jobSkillFunctions";
 import { getManagedCommunity } from "@/lib/communityAuth";
@@ -34,6 +35,11 @@ import {
   reservePostQuota,
   retryPostTransaction,
 } from "./postQuota";
+import {
+  deleteJobEmbedding,
+  refreshJobEmbedding,
+  runJobMutationWithEmbeddingSync,
+} from "@/lib/server/jobRecommendations.server";
 
 export async function createPost(req: NextRequest) {
   try {
@@ -109,8 +115,9 @@ export async function createPost(req: NextRequest) {
       userId,
     );
 
-    const post = await retryPostTransaction(() => prisma.$transaction(async (tx) => {
-      await reservePostQuota(tx, userId);
+    const created = await runJobMutationWithEmbeddingSync(
+      () => retryPostTransaction(() => prisma.$transaction(async (tx) => {
+        await reservePostQuota(tx, userId);
       // 🔹 Build Post payload safely
       const basePost = await tx.post.create({
         data: {
@@ -141,6 +148,7 @@ export async function createPost(req: NextRequest) {
         },
       });
 
+      let jobPostId: string | null = null;
       // 🔹 If job post → create JobPost record
       if (data.postType === "job_post" && job) {
         const createdJobPost = await tx.jobPost.create({
@@ -166,12 +174,17 @@ export async function createPost(req: NextRequest) {
         await syncJobSkills(
           tx,
           createdJobPost.id,
-          normalizeSkillNames(job.jobSkills ?? job.jobRequirements),
+          job.skillIds ?? [],
         );
+        jobPostId = createdJobPost.id;
       }
 
-      return basePost;
-    }));
+        return { post: basePost, jobPostId };
+      })),
+      ({ jobPostId }) => jobPostId,
+      refreshJobEmbedding,
+    );
+    const post = created.post;
 
     if (Array.isArray(post.media)) {
       const sharedKeyCredential = new StorageSharedKeyCredential(
@@ -229,6 +242,9 @@ export async function createPost(req: NextRequest) {
       return NextResponse.json(post, { status: 201 });
     }
   } catch (error) {
+    if (error instanceof SkillValidationError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     if (error instanceof PostLimitError) {
       return NextResponse.json(
         { error: error.message, retryAfterSeconds: error.retryAfterSeconds },
@@ -370,6 +386,7 @@ export async function getPosts(req: NextRequest) {
           ? {
               ...post.jobPost,
               jobRequirements: getSkillNamesFromJobSkills(post.jobPost.jobSkills),
+              skills: getSkillOptionsFromJobSkills(post.jobPost.jobSkills),
               jobSkills: undefined,
               remainingPositions:
                 post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
@@ -588,7 +605,8 @@ export async function editPost(req: NextRequest) {
 
     // Update the post
 
-    const updatedPost = await prisma.$transaction(async (tx) => {
+    const updatedPost = await runJobMutationWithEmbeddingSync(
+      () => prisma.$transaction(async (tx) => {
       await tx.post.update({
         where: { id: postId },
         data: {
@@ -648,11 +666,11 @@ export async function editPost(req: NextRequest) {
           },
         });
 
-        if (job.jobSkills !== undefined || job.jobRequirements !== undefined) {
+        if (job.skillIds !== undefined) {
           await syncJobSkills(
             tx,
             updatedJobPost.id,
-            normalizeSkillNames(job.jobSkills ?? job.jobRequirements),
+            job.skillIds,
           );
         }
       }
@@ -672,7 +690,10 @@ export async function editPost(req: NextRequest) {
           },
         },
       });
-    });
+      }),
+      (result) => result?.jobPost?.id,
+      refreshJobEmbedding,
+    );
 
     if (blobsToDelete.length > 0 || thumbnailsToDelete.length > 0) {
       const sharedKeyCredential = new StorageSharedKeyCredential(
@@ -705,6 +726,9 @@ export async function editPost(req: NextRequest) {
         ? {
             ...updatedPost.jobPost,
             jobRequirements: getSkillNamesFromJobSkills(
+              updatedPost.jobPost.jobSkills,
+            ),
+            skills: getSkillOptionsFromJobSkills(
               updatedPost.jobPost.jobSkills,
             ),
             jobSkills: undefined,
@@ -768,6 +792,9 @@ export async function editPost(req: NextRequest) {
 
     return NextResponse.json(updatedPostWithCompatibleJob, { status: 200 });
   } catch (error) {
+    if (error instanceof SkillValidationError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     if (error instanceof PostLimitError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
@@ -891,7 +918,8 @@ export async function deletePost(req: NextRequest) {
     // DATABASE DELETE TRANSACTION
     // -------------------------
 
-    await prisma.$transaction(async (tx) => {
+    await runJobMutationWithEmbeddingSync(
+      () => prisma.$transaction(async (tx) => {
       // delete job applications
       if (post.jobPost) {
         await tx.jobApplication.deleteMany({
@@ -932,7 +960,10 @@ export async function deletePost(req: NextRequest) {
       await tx.post.delete({
         where: { id: postId },
       });
-    });
+      }),
+      () => post.jobPost?.id,
+      deleteJobEmbedding,
+    );
 
     return NextResponse.json(
       { message: "Post deleted successfully" },
@@ -951,8 +982,14 @@ export async function deletePost(req: NextRequest) {
 function extractMediaTypes(media: unknown): string[] {
   if (!Array.isArray(media)) return [];
   const types = media
-    .map((m: any) => m?.type)
-    .filter((t: any) => typeof t === "string" && t.trim().length > 0)
+    .map((item: unknown) =>
+      typeof item === "object" && item !== null && "type" in item
+        ? item.type
+        : undefined,
+    )
+    .filter((type): type is string =>
+      typeof type === "string" && type.trim().length > 0,
+    )
     .map((t: string) => t.trim().toLowerCase());
 
   // unique
@@ -966,7 +1003,7 @@ function computeHasLinks(links: unknown): boolean {
   if (Array.isArray(links)) return links.length > 0;
 
   // if someday you store an object instead of array
-  if (typeof links === "object") return Object.keys(links as any).length > 0;
+  if (typeof links === "object") return Object.keys(links).length > 0;
 
   return false;
 }

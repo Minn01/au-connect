@@ -123,11 +123,17 @@ async function main() {
     }
 
     for (const name of skillNames) {
-      const skill = await prisma.skill.upsert({
-        where: { name },
-        update: {},
-        create: { name },
-      });
+      const normalizedName = name.normalize("NFKC").toLowerCase();
+      const skill =
+        (await prisma.skill.findFirst({ where: { normalizedName } })) ??
+        (await prisma.skill.create({
+          data: {
+            name,
+            normalizedName,
+            categories: ["SOFT_SKILL"],
+            sources: ["LEGACY_MIGRATION"],
+          },
+        }));
 
       await prisma.jobSkill.upsert({
         where: {

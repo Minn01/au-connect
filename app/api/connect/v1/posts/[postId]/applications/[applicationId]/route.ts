@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { asset } from "@/lib/basePath";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
+import { refreshJobEmbedding } from "@/lib/server/jobRecommendations.server";
 
 import {
   StorageSharedKeyCredential,
@@ -130,8 +132,10 @@ export async function GET(
     if (application.applicant.profilePic) {
       const pic = application.applicant.profilePic;
 
-      // External image → use as-is
-      if (pic.startsWith("http://") || pic.startsWith("https://")) {
+      if (pic.startsWith("/")) {
+        profilePicUrl = asset(pic);
+      } else if (pic.startsWith("http://") || pic.startsWith("https://")) {
+        // External image → use as-is
         profilePicUrl = pic;
       } else {
         // Blob image → generate SAS (generic)
@@ -188,6 +192,7 @@ export async function PATCH(
     }
 
     // Use transaction to ensure consistency
+    let changedJobPostId: string | null = null;
     const result = await prisma.$transaction(async (tx) => {
       // Get existing application
       const existingApplication = await tx.jobApplication.findUnique({
@@ -242,6 +247,7 @@ export async function PATCH(
 
       // Update positionsFilled if needed
       if (increment !== 0) {
+        changedJobPostId = existingApplication.jobPostId;
         const updatedJobPost = await tx.jobPost.update({
           where: { id: existingApplication.jobPostId },
           data: {
@@ -275,6 +281,8 @@ export async function PATCH(
 
       return updatedApplication;
     });
+
+    if (changedJobPostId) await refreshJobEmbedding(changedJobPostId);
 
     return NextResponse.json(result);
   } catch (err) {

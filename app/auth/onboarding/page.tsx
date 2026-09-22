@@ -3,6 +3,7 @@
 import { ACCOUNT_VERIFICATION_PAGE_PATH } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, ChangeEvent } from "react";
+import { asset } from "@/lib/basePath";
 
 export default function OnBoardingPage() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function OnBoardingPage() {
       {/* MOBILE BACKGROUND IMAGE */}
       <div
         className="absolute inset-0 md:hidden bg-cover bg-center"
-        style={{ backgroundImage: "url('/signUp.png')" }}
+        style={{ backgroundImage: `url('${asset("/signUp.png")}')` }}
       >
         <div className="absolute inset-0 bg-black/55" />
       </div>
@@ -51,7 +52,7 @@ export default function OnBoardingPage() {
       {/* DESKTOP LEFT IMAGE */}
       <div
         className="hidden md:flex w-1/2 bg-cover bg-center relative"
-        style={{ backgroundImage: "url('/signUp.png')" }}
+        style={{ backgroundImage: `url('${asset("/signUp.png")}')` }}
       >
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 flex items-end p-10">

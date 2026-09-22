@@ -1,3 +1,5 @@
+import { BASE_API_PATH } from "@/lib/constants";
+
 export async function fetchProfilePosts({
   pageParam,
   userId,
@@ -12,7 +14,7 @@ export async function fetchProfilePosts({
   if (tab) params.set("tab", tab);
 
   const res = await fetch(
-    `/api/connect/v1/profile/${userId}/posts?${params.toString()}`,
+    `${BASE_API_PATH}/profile/${userId}/posts?${params.toString()}`,
     { credentials: "include" }
   );
 
