@@ -38,6 +38,8 @@ import { postReport } from "../utils/reportFunctions";
 import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
 import { ACCOUNT_VERIFICATION_PAGE_PATH, BASE_API_PATH } from "@/lib/constants";
 import { useActorStore } from "@/lib/stores/actorStore";
+import VerificationRequiredModal from "@/app/components/VerificationRequiredModal";
+import { VerificationRequiredError } from "@/lib/verificationError";
 
 type ConnectionUser = {
   id: string;
@@ -111,6 +113,10 @@ export default function ProfileView({
   const canUsePersonalRelationshipActions = !isOwner && isUserActor;
   const canMessageProfile = !isOwner;
   const [userState, setUserState] = useState<User>(user);
+  const profileFirstName = userState.username?.split(" ")[0] || userState.username;
+  const connectionsCardTitle = isOwner
+    ? "Your connections"
+    : `${profileFirstName}'s connections`;
   const [openContactInfo, setOpenContactInfo] = useState(false);
   const [tab, setTab] = useState<
     "all" | "article" | "poll" | "videos" | "images" | "documents" | "links"
@@ -279,15 +285,27 @@ export default function ProfileView({
   const isHiringLoading = jobPostLoading;
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [verificationAction, setVerificationAction] = useState("do this");
   const reportTarget: ReportTargetSnapshot = {
     type: "USER",
     id: user.id,
     username: user.username,
     profilePic: user.profilePic,
-  } 
+  }
 
   const handleReportSubmit = async (payload: ReportSubmitPayload) => {
-    await postReport(payload);
+    try {
+      await postReport(payload);
+    } catch (err) {
+      if (err instanceof VerificationRequiredError) {
+        setReportModalOpen(false);
+        setVerificationAction("report users");
+        setVerificationModalOpen(true);
+        return;
+      }
+      throw err;
+    }
   };
 
   // ✅ UPDATED: On profile load: check connection status (connected / outgoing / incoming)
@@ -422,6 +440,11 @@ export default function ProfileView({
       const json = await res.json();
 
       if (!res.ok) {
+        if (json?.requiresVerification) {
+          setVerificationAction("send connection requests");
+          setVerificationModalOpen(true);
+          return;
+        }
         const msg = json?.error || "Failed to send connection request";
         if (msg.toLowerCase().includes("already")) setConnectSuccess(true);
         throw new Error(msg);
@@ -487,7 +510,16 @@ export default function ProfileView({
         { method: "POST", credentials: "include" },
       );
 
-      if (!res.ok) throw new Error("Failed to accept request");
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (json?.requiresVerification) {
+          setVerificationAction("accept connection requests");
+          setVerificationModalOpen(true);
+          return;
+        }
+        throw new Error(json?.error || "Failed to accept request");
+      }
 
       setIncomingRequestId(null);
       setIsConnected(true);
@@ -805,7 +837,7 @@ export default function ProfileView({
 
                 {/* CONNECTIONS CARD (mobile/tablet) */}
                 <div className="lg:hidden">
-                  <SectionCard title="Your connections">
+                  <SectionCard title={connectionsCardTitle}>
                     {connectionsLoading ? (
                       <p className="text-sm text-slate-500">
                         Loading connections...
@@ -1103,7 +1135,7 @@ export default function ProfileView({
               <div className="hidden lg:block col-span-4 space-y-4 sticky top-20">
                 <div className="bg-white rounded-lg border p-4">
                   <h2 className="font-semibold text-gray-900 mb-3">
-                    Your connections
+                    {connectionsCardTitle}
                   </h2>
 
                   {connectionsLoading ? (
@@ -1221,6 +1253,12 @@ export default function ProfileView({
           target={reportTarget}
           onSubmit={handleReportSubmit}
          />
+
+        <VerificationRequiredModal
+          open={verificationModalOpen}
+          onClose={() => setVerificationModalOpen(false)}
+          action={verificationAction}
+        />
     </>
   );
 }

@@ -141,6 +141,9 @@ export async function getProfileJobPosts(
               select: { status: true },
               take: 1,
             },
+            _count: {
+              select: { applications: true },
+            },
           },
         },
       },
@@ -174,7 +177,9 @@ export async function getProfileJobPosts(
                   post.jobPost.positionsFilled,
                 hasApplied,
                 applicationStatus,
+                applicantCount: post.jobPost._count.applications,
                 applications: undefined,
+                _count: undefined,
               },
             }
           : {}),

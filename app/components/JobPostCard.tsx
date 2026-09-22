@@ -13,6 +13,7 @@ interface JobPostCardProps {
   hasApplied: boolean;
   applicationStatus: "APPLIED" | "SHORTLISTED" | "REJECTED";
   isSaved: boolean;
+  applicantCount?: number;
   postMenuDropDownOpen: boolean;
   setPostMenuDropDownOpen: (state: boolean) => void;
   popupOpen: boolean;
@@ -65,6 +66,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
   hasApplied,
   applicationStatus,
   isSaved,
+  applicantCount,
   postMenuDropDownOpen,
   setPostMenuDropDownOpen,
   popupOpen,
@@ -223,6 +225,14 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
               All filled
             </span>
           )}
+        </div>
+      )}
+
+      {typeof applicantCount === "number" && (
+        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
+          <span>
+            {applicantCount} {applicantCount === 1 ? "applicant" : "applicants"}
+          </span>
         </div>
       )}
 

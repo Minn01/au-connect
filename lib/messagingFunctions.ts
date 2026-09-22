@@ -805,6 +805,9 @@ export async function deleteMessageForEveryone(
     if (!isValidObjectId(conversationId)) return jsonError("Invalid conversationId", 400);
     if (!isValidObjectId(messageId)) return jsonError("Invalid messageId", 400);
 
+    const verificationError = await requireAccountVerification(authUserId);
+    if (verificationError) return verificationError;
+
     const access = await getConversationAccess(req, conversationId, authUserId, true);
     if (access instanceof NextResponse) return access;
 
@@ -895,6 +898,9 @@ export async function clearConversation(req: NextRequest, conversationId: string
     const authUserId = getAuthUserIdFromReq(req);
     if (!conversationId) return jsonError("conversationId required", 400);
     if (!isValidObjectId(conversationId)) return jsonError("Invalid conversationId", 400);
+
+    const verificationError = await requireAccountVerification(authUserId);
+    if (verificationError) return verificationError;
 
     const access = await getConversationAccess(req, conversationId, authUserId);
     if (access instanceof NextResponse) return access;

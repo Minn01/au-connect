@@ -352,6 +352,9 @@ export async function getPosts(req: NextRequest) {
               select: { status: true },
               take: 1,
             },
+            _count: {
+              select: { applications: true },
+            },
           },
         },
       },
@@ -392,7 +395,9 @@ export async function getPosts(req: NextRequest) {
                 post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
               hasApplied,
               applicationStatus,
+              applicantCount: post.jobPost._count.applications,
               applications: undefined,
+              _count: undefined,
             }
           : null,
       };

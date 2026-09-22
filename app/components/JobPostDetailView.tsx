@@ -148,6 +148,18 @@ export default function JobPostDetailView({
                 </div>
               )}
 
+              {typeof applicantCount === "number" && (
+                <div className="space-y-1">
+                  <span className="text-xs uppercase tracking-wide text-neutral-400">
+                    Applicants
+                  </span>
+                  <p className="text-neutral-900 font-medium">
+                    {applicantCount}{" "}
+                    {applicantCount === 1 ? "applicant" : "applicants"}
+                  </p>
+                </div>
+              )}
+
               {salary && (
                 <div className="space-y-1">
                   <span className="text-xs uppercase tracking-wide text-neutral-400">

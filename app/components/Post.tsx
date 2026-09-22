@@ -37,11 +37,13 @@ export default function Post({
   post,
   isLoading,
   skeletonVariant = "default",
+  disablePollVoting = false,
 }: {
   user?: User;
   post?: PostType;
   isLoading: boolean;
   skeletonVariant?: "default" | "job";
+  disablePollVoting?: boolean;
 }) {
   const router = useRouter();
   const selectedActor = useActorStore((state) => state.selectedActor);
@@ -152,6 +154,7 @@ export default function Post({
             hasApplied={post.jobPost?.hasApplied ?? false}
             applicationStatus={post.jobPost?.applicationStatus ?? "APPLIED"}
             isSaved={post.isSaved ?? false}
+            applicantCount={post.jobPost?.applicantCount}
             postMenuDropDownOpen={postMenuDropDownOpen}
             setPostMenuDropDownOpen={(state: boolean) =>
               setPostMenuDropDownOpen(state)
@@ -233,6 +236,7 @@ export default function Post({
             votes={post.pollVotes}
             endsAt={post.pollEndsAt}
             currentUserId={user?.id}
+            votingDisabled={disablePollVoting}
           />
         )}
 

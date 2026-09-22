@@ -62,6 +62,22 @@ export function useApplyJob() {
     onSuccess: (_data, variables) => {
       const { jobPostId, postId } = variables;
 
+      const markApplied = (post: any) =>
+        post.jobPost?.id === jobPostId
+          ? {
+              ...post,
+              jobPost: {
+                ...post.jobPost,
+                hasApplied: true,
+                applicationStatus: "APPLIED",
+                applicantCount:
+                  typeof post.jobPost.applicantCount === "number"
+                    ? post.jobPost.applicantCount + 1
+                    : post.jobPost.applicantCount,
+              },
+            }
+          : post;
+
       // feed cache
       queryClient.setQueryData(["posts"], (oldData: any) => {
         if (!oldData?.pages) return oldData;
@@ -70,41 +86,60 @@ export function useApplyJob() {
           ...oldData,
           pages: oldData.pages.map((page: any) => ({
             ...page,
-            posts: page.posts.map((post: any) =>
-              post.jobPost?.id === jobPostId
-                ? {
-                    ...post,
-                    jobPost: {
-                      ...post.jobPost,
-                      hasApplied: true,
-                      applicationStatus: "APPLIED",
-                    },
-                  }
-                : post,
-            ),
+            posts: page.posts.map(markApplied),
           })),
         };
       });
 
-      // ✅ FIXED KEY HERE
-      queryClient.setQueryData(["post", postId], (oldPost: any) => {
-        if (!oldPost) return oldPost;
+      // jobs page cache
+      queryClient.setQueriesData(
+        { queryKey: ["job-posts"], exact: false },
+        (oldData: any) => {
+          if (!oldData?.pages) return oldData;
 
-        return {
-          ...oldPost,
-          jobPost: {
-            ...oldPost.jobPost,
-            hasApplied: true,
-            applicationStatus: "APPLIED",
-          },
-        };
-      });
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              jobs: page.jobs.map(markApplied),
+            })),
+          };
+        },
+      );
+
+      queryClient.setQueriesData(
+        { queryKey: ["post", postId], exact: false },
+        (oldPost: any) => {
+          if (!oldPost) return oldPost;
+
+          return {
+            ...oldPost,
+            jobPost: {
+              ...oldPost.jobPost,
+              hasApplied: true,
+              applicationStatus: "APPLIED",
+              applicantCount:
+                typeof oldPost.jobPost?.applicantCount === "number"
+                  ? oldPost.jobPost.applicantCount + 1
+                  : oldPost.jobPost?.applicantCount,
+            },
+          };
+        },
+      );
     },
 
     onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["job-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["my-applications"] });
       queryClient.invalidateQueries({
         queryKey: ["post", variables.postId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["applicants", variables.postId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["jobPostDetail", variables.postId],
       });
     },
   });
@@ -295,6 +330,8 @@ export function useReopenJobPost() {
 
 // TODO: move to types file
 // this is for the jobs page section
+export type JobTab = "all" | "saved" | "applied";
+
 type FetchJobPostsParams = {
   pageParam?: string | null;
 
@@ -302,6 +339,7 @@ type FetchJobPostsParams = {
   empType?: string[];
   locType?: string[];
   salaryRange?: string;
+  tab?: JobTab;
 };
 
 type JobPostsPage = {
@@ -315,6 +353,7 @@ export async function fetchJobPosts({
   empType,
   locType,
   salaryRange,
+  tab,
 }: FetchJobPostsParams): Promise<JobPostsPage> {
   const params = new URLSearchParams();
 
@@ -327,6 +366,8 @@ export async function fetchJobPosts({
   if (locType?.length) params.set("locType", locType.join(","));
 
   if (salaryRange) params.set("salaryRange", salaryRange);
+
+  if (tab && tab !== "all") params.set("tab", tab);
 
   const res = await fetch(`${JOB_API_PATH}?${params.toString()}`, {
     method: "GET",
@@ -346,6 +387,7 @@ type UseJobPostsParams = {
   empType?: string[];
   locType?: string[];
   salaryRange?: string;
+  tab?: JobTab;
 };
 
 export function useJobPosts({
@@ -353,6 +395,7 @@ export function useJobPosts({
   empType,
   locType,
   salaryRange,
+  tab,
 }: UseJobPostsParams) {
   return useInfiniteQuery<
     JobPostsPage,
@@ -361,7 +404,7 @@ export function useJobPosts({
     (string | string[] | undefined)[],
     string | null
   >({
-    queryKey: ["job-posts", keyword, empType, locType, salaryRange],
+    queryKey: ["job-posts", keyword, empType, locType, salaryRange, tab],
     placeholderData: (previousData) => previousData,
 
     queryFn: ({ pageParam }) =>
@@ -371,6 +414,7 @@ export function useJobPosts({
         empType,
         locType,
         salaryRange,
+        tab,
       }),
 
     initialPageParam: null,

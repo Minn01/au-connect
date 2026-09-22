@@ -113,7 +113,17 @@ export default function PostDetailsModal({
     links: postInfo.links
   }
   const handleReportSubmit = async (payload: ReportSubmitPayload) => {
-    await postReport(payload);
+    try {
+      await postReport(payload);
+    } catch (err) {
+      if (err instanceof VerificationRequiredError) {
+        setReportModalOpen(false);
+        setVerificationAction("report posts");
+        setVerificationModalOpen(true);
+        return;
+      }
+      throw err;
+    }
   };
 
   const handleJobApply = (
@@ -161,6 +171,7 @@ export default function PostDetailsModal({
   const showPostMenu = postOwner || canReportPost;
   const [deletePopupOpen, setDeletePopupOpen] = useState(false);
   const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [verificationAction, setVerificationAction] = useState("comment on posts");
 
   const deletePost = useDeletePost();
   const handleDelete = (postId: string) => {
@@ -321,6 +332,7 @@ export default function PostDetailsModal({
     },
     onError: (err) => {
       if (err instanceof VerificationRequiredError) {
+        setVerificationAction("comment on posts");
         setVerificationModalOpen(true);
       }
     },
@@ -390,6 +402,7 @@ export default function PostDetailsModal({
                   hasApplied={post.jobPost?.hasApplied}
                   applicationStatus={post.jobPost?.applicationStatus}
                   isSaved={post.isSaved}
+                  applicantCount={post.jobPost?.applicantCount}
                   onApply={() =>
                     handleJobApply(
                       postInfo.jobPost?.allowExternalApply ?? false,
@@ -511,6 +524,7 @@ export default function PostDetailsModal({
                     hasApplied={post.jobPost?.hasApplied}
                     applicationStatus={post.jobPost?.applicationStatus}
                     isSaved={post.isSaved}
+                    applicantCount={post.jobPost?.applicantCount}
                     onApply={() =>
                       handleJobApply(
                         postInfo.jobPost?.allowExternalApply ?? false,
@@ -625,7 +639,7 @@ export default function PostDetailsModal({
         <VerificationRequiredModal
           open={verificationModalOpen}
           onClose={() => setVerificationModalOpen(false)}
-          action="comment on posts"
+          action={verificationAction}
         />
       </div>
     </div>

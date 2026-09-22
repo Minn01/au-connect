@@ -146,11 +146,14 @@ export async function getPostWithMedia(postId: string, currentUserId: string) {
           ...post.jobPost,
           jobRequirements: getSkillNamesFromJobSkills(post.jobPost.jobSkills),
           jobSkills: undefined,
-          positionsFilled: post.jobPost._count.applications,
+          positionsFilled: post.jobPost.positionsFilled,
           remainingPositions:
-            post.jobPost.positionsAvailable - post.jobPost._count.applications,
+            post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
           hasApplied: post.jobPost.applications.length > 0,
           applicationStatus: post.jobPost.applications[0]?.status ?? null,
+          applicantCount: post.jobPost._count.applications,
+          applications: undefined,
+          _count: undefined,
         }
       : null,
   };

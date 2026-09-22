@@ -10,6 +10,7 @@ import {
   CONNECTION_RECOMMENDATIONS_API_PATH,
   CONNECTION_REQUEST_API_PATH,
 } from "@/lib/constants";
+import VerificationRequiredModal from "@/app/components/VerificationRequiredModal";
 
 type IncomingRequest = {
   id: string;
@@ -84,6 +85,8 @@ export default function ConnectPage() {
   const [recommendationStatuses, setRecommendationStatuses] = useState<
     Record<string, RecommendationStatus>
   >({});
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [verificationAction, setVerificationAction] = useState("do this");
 
   const router = useRouter();
 
@@ -220,6 +223,11 @@ export default function ConnectPage() {
       const json = await res.json();
 
       if (!res.ok) {
+        if (json?.requiresVerification) {
+          setVerificationAction("send connection requests");
+          setVerificationModalOpen(true);
+          return;
+        }
         throw new Error(json?.error || "Failed to send connection request");
       }
 
@@ -270,7 +278,14 @@ export default function ConnectPage() {
       );
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to accept request");
+      if (!res.ok) {
+        if (json?.requiresVerification) {
+          setVerificationAction("accept connection requests");
+          setVerificationModalOpen(true);
+          return;
+        }
+        throw new Error(json?.error || "Failed to accept request");
+      }
 
       //  pop out from connects page
 
@@ -514,6 +529,12 @@ export default function ConnectPage() {
           </section>
         )}
       </div>
+
+      <VerificationRequiredModal
+        open={verificationModalOpen}
+        onClose={() => setVerificationModalOpen(false)}
+        action={verificationAction}
+      />
     </div>
   );
 }

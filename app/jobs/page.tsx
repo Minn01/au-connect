@@ -30,6 +30,12 @@ enum JobTabFilters {
   APPLIED = "Applied",
 }
 
+const JOB_TAB_FILTER_TO_PARAM: Record<JobTabFilters, "all" | "saved" | "applied"> = {
+  [JobTabFilters.ALL]: "all",
+  [JobTabFilters.SAVED]: "saved",
+  [JobTabFilters.APPLIED]: "applied",
+};
+
 const EMPLOYMENT_FILTERS = [
   { value: "FULL_TIME", label: "Full-time" },
   { value: "PART_TIME", label: "Part-time" },
@@ -120,6 +126,7 @@ export default function JobsPage() {
     empType: employmentTypes.length ? employmentTypes : undefined,
     locType: locationTypes.length ? locationTypes : undefined,
     salaryRange: salaryRangeParam,
+    tab: JOB_TAB_FILTER_TO_PARAM[jobTabFilter],
   });
 
   const { data: user } = useQuery({
@@ -300,28 +307,20 @@ export default function JobsPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto hide-scrollbar pb-1 sm:pb-0">
-            {Object.values(JobTabFilters).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setJobTabFilter(filter)}
-                className={`shrink-0 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border transition ${
-                  jobTabFilter === filter
-                    ? "bg-red-100 border-red-500 text-red-500"
-                    : "bg-white border-zinc-200 text-gray-600"
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          <button
-            className="self-start sm:self-auto px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border transition bg-white border-zinc-200 text-gray-600"
-          >
-            Most recent
-          </button>
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto hide-scrollbar pb-1 sm:pb-0">
+          {Object.values(JobTabFilters).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setJobTabFilter(filter)}
+              className={`shrink-0 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border transition ${
+                jobTabFilter === filter
+                  ? "bg-red-100 border-red-500 text-red-500"
+                  : "bg-white border-zinc-200 text-gray-600"
+              }`}
+            >
+              {filter}
+            </button>
+          ))}
         </div>
 
         {/* the little updating loading circle*/}

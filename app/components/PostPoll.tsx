@@ -11,6 +11,8 @@ interface PostPollProps {
   votes?: Record<string, string[]>; // { "0": ["userId1"], "1": ["userId2"] }
   endsAt?: Date;
   currentUserId?: string;
+  /** When true, voting is closed for this view (e.g. read-only community page feed). */
+  votingDisabled?: boolean;
 }
 
 export default function PostPoll({
@@ -19,6 +21,7 @@ export default function PostPoll({
   votes = {},
   endsAt,
   currentUserId,
+  votingDisabled = false,
 }: PostPollProps) {
   if (!currentUserId) return null;
 
@@ -43,7 +46,7 @@ export default function PostPoll({
   const userHasVoted = !!userVotedOption || hasVoted;
 
   const handleVote = (optionIndex: number) => {
-    if (pollEnded || userHasVoted) return;
+    if (pollEnded || userHasVoted || votingDisabled) return;
 
     setSelectedOption(optionIndex);
     setHasVoted(true);
@@ -86,20 +89,20 @@ export default function PostPoll({
           const voteCount = getVoteCount(index);
           const isSelected =
             selectedOption === index || userVotedOption === index.toString();
-          const showResults = userHasVoted || pollEnded;
+          const showResults = userHasVoted || pollEnded || votingDisabled;
 
           return (
             <button
               key={index}
               onClick={() => handleVote(index)}
-              disabled={userHasVoted || pollEnded}
+              disabled={userHasVoted || pollEnded || votingDisabled}
               className={`w-full text-left relative overflow-hidden rounded-xl border-2 transition-all ${
                 showResults
                   ? isSelected
                     ? "border-blue-500 bg-blue-50"
                     : "border-neutral-200 bg-white"
                   : "border-neutral-300 hover:border-blue-400 hover:bg-blue-50 "
-              } ${(userHasVoted || pollEnded) && "cursor-default"}`}
+              } ${(userHasVoted || pollEnded || votingDisabled) && "cursor-default"}`}
             >
               {/* Progress bar background */}
               {showResults && (
@@ -163,13 +166,19 @@ export default function PostPoll({
         <span>
           {totalVotes} {totalVotes === 1 ? "vote" : "votes"}
         </span>
-        {endsAt && (
+        {endsAt && !votingDisabled && (
           <div className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
             <span>{getTimeRemaining()}</span>
           </div>
         )}
       </div>
+
+      {votingDisabled && !userHasVoted && (
+        <p className="mt-2 text-xs text-gray-500">
+          Voting is closed on the community page. Open the post to vote.
+        </p>
+      )}
     </div>
   );
 }

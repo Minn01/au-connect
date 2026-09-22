@@ -695,6 +695,7 @@ export default function CommunityProfilePage({
                   user={user}
                   post={post}
                   isLoading={false}
+                  disablePollVoting
                 />
               ))}
               {hasNextPage && (

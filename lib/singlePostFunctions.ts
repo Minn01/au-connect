@@ -208,6 +208,9 @@ export async function getSinglePost(
 
           hasApplied: post.jobPost.applications.length > 0,
           applicationStatus: post.jobPost.applications[0]?.status ?? null,
+          applicantCount: post.jobPost._count.applications,
+          applications: undefined,
+          _count: undefined,
         }
       : null;
 

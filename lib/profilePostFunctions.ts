@@ -155,6 +155,10 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
               select: { status: true },
               take: 1,
             },
+
+            _count: {
+              select: { applications: true },
+            },
           },
         },
       },
@@ -186,7 +190,9 @@ export async function getProfilePosts(req: NextRequest, profileUserId: string) {
                 post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
               hasApplied,
               applicationStatus,
+              applicantCount: post.jobPost._count.applications,
               applications: undefined, // prevent leaking extra array to client
+              _count: undefined,
             },
           }
           : {}),

@@ -23,6 +23,7 @@ type JobDraft = {
   applicationStatus?: "APPLIED" | "SHORTLISTED" | "REJECTED" | null;
   positionsFilled?: number;
   remainingPositions?: number;
+  applicantCount?: number;
 };
 
 export default JobDraft;

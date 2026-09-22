@@ -950,7 +950,11 @@ export function useMessaging() {
       credentials: "include",
     });
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      if (json?.requiresVerification) setVerificationModalOpen(true);
+      return;
+    }
 
     // Remove locally
     setMessagesByConv((prev) => {
@@ -974,7 +978,11 @@ export function useMessaging() {
       credentials: "include",
     });
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      if (json?.requiresVerification) setVerificationModalOpen(true);
+      return;
+    }
 
     safeWritePending(convId, []);
 

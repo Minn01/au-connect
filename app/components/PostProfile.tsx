@@ -14,6 +14,8 @@ import ReportModal from "./ReportModal";
 import type { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
 import type { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
 import { useActorStore } from "@/lib/stores/actorStore";
+import VerificationRequiredModal from "./VerificationRequiredModal";
+import { VerificationRequiredError } from "@/lib/verificationError";
 
 const DEFAULT_PROFILE_PIC = "/default_profile.jpg";
 
@@ -53,6 +55,7 @@ export default function PostProfile({
   );
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
   const reportTarget: ReportTargetSnapshot = {
     type: "POST",
     id: post.id,
@@ -111,7 +114,16 @@ export default function PostProfile({
   };
 
   const handleReportSubmit = async (payload: ReportSubmitPayload) => {
-    await postReport(payload);
+    try {
+      await postReport(payload);
+    } catch (err) {
+      if (err instanceof VerificationRequiredError) {
+        setReportModalOpen(false);
+        setVerificationModalOpen(true);
+        return;
+      }
+      throw err;
+    }
   };
 
   return (
@@ -206,6 +218,12 @@ export default function PostProfile({
         }}
         target={reportTarget}
         onSubmit={handleReportSubmit}
+      />
+
+      <VerificationRequiredModal
+        open={verificationModalOpen}
+        onClose={() => setVerificationModalOpen(false)}
+        action="report posts"
       />
     </div>
   );

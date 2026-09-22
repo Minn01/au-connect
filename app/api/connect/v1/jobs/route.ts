@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     const empType = req.nextUrl.searchParams.get("empType");
     const locType = req.nextUrl.searchParams.get("locType");
     const salaryRange = req.nextUrl.searchParams.get("salaryRange");
+    const tab = req.nextUrl.searchParams.get("tab");
 
     // Base conditions inside the jobPost relation
     const jobPostConditions: Prisma.JobPostWhereInput = {};
@@ -82,6 +83,12 @@ export async function GET(req: NextRequest) {
       jobPostConditions.AND = jobPostAndConditions;
     }
 
+    if (tab === "applied") {
+      jobPostConditions.applications = {
+        some: { applicantId: userId },
+      };
+    }
+
     // Building the final dynamic query
     const where: Prisma.PostWhereInput = {
       moderationStatus: "VISIBLE",
@@ -92,6 +99,11 @@ export async function GET(req: NextRequest) {
             ? jobPostConditions
             : undefined,
       },
+      ...(tab === "saved" && {
+        interactions: {
+          some: { actorType: "USER", userId, type: "SAVED" },
+        },
+      }),
     };
 
     // Fetch from database
@@ -178,11 +190,14 @@ export async function GET(req: NextRequest) {
                 post.jobPost.positionsAvailable - post.jobPost.positionsFilled,
               hasApplied: post.jobPost.applications.length > 0,
               applicationStatus: post.jobPost.applications[0]?.status ?? null,
+              applicantCount: post.jobPost._count.applications,
               jobRequirements: getSkillNamesFromJobSkills(
                 post.jobPost.jobSkills,
               ),
               skills: getSkillOptionsFromJobSkills(post.jobPost.jobSkills),
               jobSkills: undefined,
+              applications: undefined,
+              _count: undefined,
             }
           : null,
       };

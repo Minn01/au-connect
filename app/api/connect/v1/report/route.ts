@@ -2,6 +2,7 @@ import { getHeaderUserInfo } from "@/lib/authFunctions";
 import prisma from "@/lib/prisma";
 import { CreateReportSchema } from "@/zod/ReportSchema";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAccountVerification } from "@/lib/accountVerification";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+
+    const verificationError = await requireAccountVerification(userId);
+    if (verificationError) return verificationError;
 
     const body = await req.json();
     // zod schema safe parse validation

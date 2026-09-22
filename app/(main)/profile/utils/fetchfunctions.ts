@@ -822,6 +822,7 @@ export function useToggleSave() {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
       await queryClient.cancelQueries({ queryKey: ["profilePosts"] });
       await queryClient.cancelQueries({ queryKey: ["profileJobPosts"] });
+      await queryClient.cancelQueries({ queryKey: ["job-posts"] });
       await queryClient.cancelQueries({ queryKey: ["post", postId] });
       await queryClient.cancelQueries({ queryKey: ["posts", postId] });
 
@@ -832,6 +833,9 @@ export function useToggleSave() {
       });
       const previousProfileJobPosts = queryClient.getQueriesData({
         queryKey: ["profileJobPosts"],
+      });
+      const previousJobPosts = queryClient.getQueriesData({
+        queryKey: ["job-posts"],
       });
       const previousPost = queryClient.getQueryData(["post", postId]);
       const previousPostAlt = queryClient.getQueryData(["posts", postId]);
@@ -857,6 +861,27 @@ export function useToggleSave() {
         };
       };
 
+      const applyOptimisticSaveToJobs = (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            jobs: page.jobs.map((post: any) =>
+              post.id === postId
+                ? {
+                    ...post,
+                    isSaved: !post.isSaved,
+                    savedCount: post.isSaved
+                      ? post.savedCount - 1
+                      : post.savedCount + 1,
+                  }
+                : post,
+            ),
+          })),
+        };
+      };
+
       // Optimistically update feed cache
       queryClient.setQueryData(["posts"], applyOptimisticSave);
       queryClient.setQueriesData(
@@ -866,6 +891,10 @@ export function useToggleSave() {
       queryClient.setQueriesData(
         { queryKey: ["profileJobPosts"], exact: false },
         applyOptimisticSave,
+      );
+      queryClient.setQueriesData(
+        { queryKey: ["job-posts"], exact: false },
+        applyOptimisticSaveToJobs,
       );
 
       // Optimistically update single post cache
@@ -894,6 +923,7 @@ export function useToggleSave() {
         previousPosts,
         previousProfilePosts,
         previousProfileJobPosts,
+        previousJobPosts,
         previousPost,
         previousPostAlt,
       };
@@ -914,6 +944,11 @@ export function useToggleSave() {
           queryClient.setQueryData(key, data);
         });
       }
+      if (context?.previousJobPosts) {
+        context.previousJobPosts.forEach(([key, data]: [any, any]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
       if (context?.previousPost) {
         queryClient.setQueryData(["post", postId], context.previousPost);
       }
@@ -929,6 +964,9 @@ export function useToggleSave() {
       queryClient.invalidateQueries({ queryKey: ["community-profile-posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
       queryClient.invalidateQueries({ queryKey: ["profileJobPosts"] });
+      queryClient.invalidateQueries({ queryKey: ["job-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["posts", postId] });
     },
   });
 }

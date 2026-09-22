@@ -82,7 +82,11 @@ export default function ReportModal({
       onClose();
     } catch (err) {
       console.error("Report submit error:", err);
-      setError("Could not submit the report. Please try again.");
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : "Could not submit the report. Please try again.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
