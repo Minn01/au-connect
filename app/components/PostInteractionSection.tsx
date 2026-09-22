@@ -19,25 +19,25 @@ export default function PostInteractionSection({
   return (
     <>
       {/* Likes, comments and share counts */}
-      <div className="px-4 py-2">
-        <div className="flex flex-row justify-end">
-          <span className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2">
+      <div className="px-3 py-2 sm:px-4">
+        <div className="flex min-w-0 flex-wrap justify-end gap-x-3 gap-y-1">
+          <span className="text-xs text-gray-500 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2 sm:text-sm">
             {post.likeCount} likes
           </span>
           <span
             onClick={onCommentClicked}
-            className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2"
+            className="text-xs text-gray-500 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2 sm:text-sm"
           >
             {commentCount}
           </span>
-          <span className="text-sm text-gray-500 mr-3 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2">
+          <span className="text-xs text-gray-500 cursor-pointer hover:text-blue-500 hover:underline hover:underline-offset-2 sm:text-sm">
             {post.shareCount || 0} shares
           </span>
         </div>
       </div>
-      <div className="flex items-center justify-evenly py-4 border-t border-gray-200">
+      <div className="grid grid-cols-3 items-center border-t border-gray-200 py-3 text-sm sm:flex sm:justify-evenly sm:py-4 sm:text-base">
         <button
-          className={`flex items-center gap-2  disabled:opacity-50 ${
+          className={`flex min-w-0 items-center justify-center gap-1.5 disabled:opacity-50 sm:gap-2 ${
             post.isLiked ? "text-red-600" : "text-gray-600 hover:text-red-600"
           }`}
           disabled={likePending}
@@ -50,14 +50,14 @@ export default function PostInteractionSection({
         </button>
         <button
           onClick={onCommentClicked}
-          className="flex items-center gap-2 text-gray-600 hover:text-red-600 "
+          className="flex min-w-0 items-center justify-center gap-1.5 text-gray-600 hover:text-red-600 sm:gap-2"
         >
           <MessageCircle className="w-5 h-5" />
           <span>Comment</span>
         </button>
         <button
           onClick={onShareClicked}
-          className="flex items-center gap-2 text-gray-600 hover:text-red-600 "
+          className="flex min-w-0 items-center justify-center gap-1.5 text-gray-600 hover:text-red-600 sm:gap-2"
         >
           <Send className="w-5 h-5" />
           <span>Share</span>

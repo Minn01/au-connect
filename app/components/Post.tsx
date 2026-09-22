@@ -105,7 +105,7 @@ export default function Post({
     }
 
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse sm:p-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
           <div className="flex-1">
@@ -144,7 +144,7 @@ export default function Post({
   if (post.postType === "job_post" && post.jobPost) {
     content = (
       <>
-        <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="min-w-0 max-w-full bg-white border border-gray-200 rounded-lg">
           <JobPostCard
             post={post}
             job={post.jobPost}
@@ -197,7 +197,7 @@ export default function Post({
     );
   } else {
     content = (
-      <div className="bg-white border border-gray-200 rounded-lg">
+      <div className="min-w-0 max-w-full bg-white border border-gray-200 rounded-lg">
         <PostProfile
           post={post}
           currentUserId={user?.id}
@@ -216,8 +216,8 @@ export default function Post({
         />
 
         {post.title && (
-          <div className="px-5 mt-2 mb-3">
-            <h2 className="text-xl font-semibold text-gray-900">
+          <div className="px-4 mt-2 mb-3 sm:px-5">
+            <h2 className="break-words text-lg font-semibold text-gray-900 sm:text-xl">
               {post.title}
             </h2>
           </div>
