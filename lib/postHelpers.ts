@@ -176,12 +176,16 @@ export function buildBlobReadSasUrl(blobName: string): string {
   return `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER_NAME}/${blobName}?${sasToken}`;
 }
 
-/** blobName of the first previewable image for a post's media, or null. */
+/** blobName of an actual image or video thumbnail, never a video blob. */
 export function firstImageBlobName(media: unknown): string | null {
   if (!Array.isArray(media) || media.length === 0) return null;
-  const first = media[0] as PostMedia;
-  // Videos carry an image poster in thumbnailBlobName; images use blobName.
-  return first.thumbnailBlobName ?? first.blobName ?? null;
+  const items = media as PostMedia[];
+  const image = items.find((item) => item?.type === "image" && item.blobName);
+  if (image) return image.blobName;
+  const videoWithThumbnail = items.find(
+    (item) => item?.type === "video" && item.thumbnailBlobName,
+  );
+  return videoWithThumbnail?.thumbnailBlobName ?? null;
 }
 
 /*

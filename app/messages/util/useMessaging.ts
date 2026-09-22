@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import type { InboxRow } from "@/types/InboxRow";
 import type { ChatMessage } from "@/types/ChatMessage";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MESSAGES_INBOX_API_PATH } from "@/lib/constants";
+import { BASE_API_PATH, MESSAGES_INBOX_API_PATH } from "@/lib/constants";
 import { useActorStore } from "@/lib/stores/actorStore";
 
 const LS_LAST_CONV = "auconnect:lastConversationId";
@@ -250,7 +250,7 @@ export function useMessaging() {
 
     lastReadPostAtRef.current[conversationId] = now;
 
-    await fetch(messageApi(`/api/connect/v1/messages/${conversationId}/read`), {
+    await fetch(messageApi(`${BASE_API_PATH}/messages/${conversationId}/read`), {
       method: "POST",
       credentials: "include",
     }).catch(() => {});
@@ -346,8 +346,8 @@ export function useMessaging() {
   const ensureConversation = async (peerType: "USER" | "COMMUNITY", peerId: string) => {
     const endpoint =
       peerType === "COMMUNITY"
-        ? `/api/connect/v1/messages/conversation/with-community/${peerId}`
-        : `/api/connect/v1/messages/conversation/with/${peerId}`;
+        ? `${BASE_API_PATH}/messages/conversation/with-community/${peerId}`
+        : `${BASE_API_PATH}/messages/conversation/with/${peerId}`;
     const separator = endpoint.includes("?") ? "&" : "?";
     const res = await fetch(`${endpoint}${separator}${activeActorQuery}`, {
       method: "POST",
@@ -375,7 +375,7 @@ export function useMessaging() {
   const fetchMessagesReplace = async (conversationId: string) => {
     if (isDraftConvId(conversationId)) return;
 
-    const res = await fetch(messageApi(`/api/connect/v1/messages/${conversationId}`), {
+    const res = await fetch(messageApi(`${BASE_API_PATH}/messages/${conversationId}`), {
       credentials: "include",
     });
     const json = await res.json().catch(() => ({}));
@@ -398,7 +398,7 @@ export function useMessaging() {
     if (isDraftConvId(conversationId)) return [];
 
     const qs = cursorISO ? `?cursor=${encodeURIComponent(cursorISO)}` : "";
-    const res = await fetch(messageApi(`/api/connect/v1/messages/${conversationId}${qs}`), {
+    const res = await fetch(messageApi(`${BASE_API_PATH}/messages/${conversationId}${qs}`), {
       credentials: "include",
     });
     const json = await res.json().catch(() => ({}));
@@ -422,7 +422,7 @@ export function useMessaging() {
     if (isDraftConvId(conversationId)) return [];
 
     const res = await fetch(
-      messageApi(`/api/connect/v1/messages/${conversationId}?before=${encodeURIComponent(beforeISO)}`),
+      messageApi(`${BASE_API_PATH}/messages/${conversationId}?before=${encodeURIComponent(beforeISO)}`),
       { credentials: "include" }
     );
     const json = await res.json().catch(() => ({}));
@@ -559,7 +559,7 @@ export function useMessaging() {
     // No conversation yet → fetch real user info
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/connect/v1/users/${targetId}`, {
+        const res = await fetch(`${BASE_API_PATH}/users/${targetId}`, {
           credentials: "include",
         });
 
@@ -797,7 +797,7 @@ export function useMessaging() {
     }
 
     // send to server (real conversation)
-    const res = await fetch(messageApi(`/api/connect/v1/messages/${realConvId}`), {
+    const res = await fetch(messageApi(`${BASE_API_PATH}/messages/${realConvId}`), {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -875,7 +875,7 @@ export function useMessaging() {
 
     markMessageStatus(convId, messageId, "sending");
 
-    const res = await fetch(messageApi(`/api/connect/v1/messages/${convId}`), {
+    const res = await fetch(messageApi(`${BASE_API_PATH}/messages/${convId}`), {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -933,7 +933,7 @@ export function useMessaging() {
     const convId = selectedConvRef.current;
     if (!convId) return;
 
-    const res = await fetch(messageApi(`/api/connect/v1/messages/${convId}/message/${messageId}`), {
+    const res = await fetch(messageApi(`${BASE_API_PATH}/messages/${convId}/message/${messageId}`), {
       method: "DELETE",
       credentials: "include",
     });
@@ -957,7 +957,7 @@ export function useMessaging() {
     const convId = selectedConvRef.current;
     if (!convId) return;
 
-    const res = await fetch(messageApi(`/api/connect/v1/messages/${convId}/clear`), {
+    const res = await fetch(messageApi(`${BASE_API_PATH}/messages/${convId}/clear`), {
       method: "DELETE",
       credentials: "include",
     });

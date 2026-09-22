@@ -67,15 +67,16 @@ export async function GET(
 
   const blobName = firstImageBlobName(post.media);
 
-  // Post has a photo/video → stream its bytes through this stable URL so the
+  // Post has a photo or video thumbnail → stream it through this stable URL so the
   // cached social card never breaks when the underlying SAS token expires.
   if (blobName) {
     try {
       const upstream = await fetch(buildBlobReadSasUrl(blobName));
-      if (upstream.ok && upstream.body) {
+      const contentType = upstream.headers.get("content-type");
+      if (upstream.ok && upstream.body && contentType?.startsWith("image/")) {
         return new Response(upstream.body, {
           headers: {
-            "content-type": upstream.headers.get("content-type") ?? "image/jpeg",
+            "content-type": contentType,
             "cache-control": "public, max-age=3600, s-maxage=3600",
           },
         });

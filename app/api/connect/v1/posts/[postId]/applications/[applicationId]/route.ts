@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { asset } from "@/lib/basePath";
 import { getHeaderUserInfo } from "@/lib/authFunctions";
 import { refreshJobEmbedding } from "@/lib/server/jobRecommendations.server";
 
@@ -131,8 +132,10 @@ export async function GET(
     if (application.applicant.profilePic) {
       const pic = application.applicant.profilePic;
 
-      // External image → use as-is
-      if (pic.startsWith("http://") || pic.startsWith("https://")) {
+      if (pic.startsWith("/")) {
+        profilePicUrl = asset(pic);
+      } else if (pic.startsWith("http://") || pic.startsWith("https://")) {
+        // External image → use as-is
         profilePicUrl = pic;
       } else {
         // Blob image → generate SAS (generic)

@@ -6,6 +6,7 @@ import { useResolvedMediaUrl } from "@/app/(main)/profile/utils/useResolvedMedia
 import { useRouter } from "next/navigation";
 import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
 import {
+  BASE_API_PATH,
   CONNECTION_RECOMMENDATIONS_API_PATH,
   CONNECTION_REQUEST_API_PATH,
 } from "@/lib/constants";
@@ -96,7 +97,7 @@ export default function ConnectPage() {
 
         const res = await fetch(
           // TODO: all api paths should be in the constants file
-          "/api/connect/v1/connect/requests?type=incoming",
+          BASE_API_PATH + "/connect/requests?type=incoming",
           { credentials: "include" },
         );
 
@@ -242,7 +243,7 @@ export default function ConnectPage() {
 
       const res = await fetch(
           // TODO: all api paths should be in the constants file
-        `/api/connect/v1/connect/request/${requestId}/decline`,
+        `${BASE_API_PATH}/connect/request/${requestId}/decline`,
         { method: "POST", credentials: "include" },
       );
 
@@ -264,7 +265,7 @@ export default function ConnectPage() {
 
       const res = await fetch(
           // TODO: all api paths should be in the constants file
-        `/api/connect/v1/connect/request/${requestId}/accept`,
+        `${BASE_API_PATH}/connect/request/${requestId}/accept`,
         { method: "POST", credentials: "include" },
       );
 

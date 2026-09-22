@@ -1,5 +1,7 @@
 "use client";
 
+import { BASE_API_PATH } from "@/lib/constants";
+
 import { useQuery } from "@tanstack/react-query";
 import { asset } from "@/lib/basePath";
 
@@ -39,7 +41,7 @@ export function useResolvedMediaUrl(
     queryFn: async () => {
       try {
         const res = await fetch(
-          `/api/connect/v1/fetch-media?blobName=${encodeURIComponent(raw)}`
+          `${BASE_API_PATH}/fetch-media?blobName=${encodeURIComponent(raw)}`
         );
         const json = await res.json();
         if (!res.ok) {

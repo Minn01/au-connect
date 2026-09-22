@@ -1,3 +1,4 @@
+import { BASE_API_PATH } from "@/lib/constants";
 import { useActorStore } from "@/lib/stores/actorStore";
 
 function notificationActorQuery() {
@@ -12,7 +13,7 @@ function notificationActorQuery() {
 }
 
 export async function fetchNotifications() {
-  const res = await fetch(`/api/connect/v1/notifications?${notificationActorQuery()}`, {
+  const res = await fetch(`${BASE_API_PATH}/notifications?${notificationActorQuery()}`, {
     credentials: "include",
   });
 
@@ -21,7 +22,7 @@ export async function fetchNotifications() {
 }
 
 export async function markNotificationRead(id: string) {
-  const res = await fetch(`/api/connect/v1/notifications/${id}`, {
+  const res = await fetch(`${BASE_API_PATH}/notifications/${id}`, {
     method: "PATCH",
     credentials: "include",
   });
@@ -33,7 +34,7 @@ export async function markNotificationRead(id: string) {
 
 export async function fetchUnreadCount() {
   const res = await fetch(
-    `/api/connect/v1/notifications/unread-count?${notificationActorQuery()}`,
+    `${BASE_API_PATH}/notifications/unread-count?${notificationActorQuery()}`,
     { credentials: "include" }
   );
 
@@ -46,7 +47,7 @@ export async function fetchUnreadCount() {
 
 export async function markAllNotificationsRead() {
   const res = await fetch(
-    `/api/connect/v1/notifications/mark-all-read?${notificationActorQuery()}`,
+    `${BASE_API_PATH}/notifications/mark-all-read?${notificationActorQuery()}`,
     {
       method: "PATCH",
       credentials: "include",

@@ -2,11 +2,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  // Served under the /connect sub-path of life.au.edu. Next prefixes pages,
-  // assets, <Link>, <Image> and the router automatically; client fetch() calls
-  // are prefixed by installApiBasePath() in lib/client/apiBasePath.ts (keep the
-  // BASE_PATH there in sync with this value).
+  // Next prefixes page navigation and managed assets. Browser fetch() uses
+  // the public API paths defined in lib/constants.ts.
   basePath: '/connect',
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/connect',
+        basePath: false,
+        permanent: true,
+      },
+    ];
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

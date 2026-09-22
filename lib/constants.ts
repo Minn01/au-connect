@@ -3,7 +3,7 @@
  * contains routes, paths and other constants
  */
 
-export const BASE_API_PATH = "/api/connect/v1";
+export const BASE_API_PATH = "/connect/api/connect/v1";
 
 export const MAIN_PAGE_PATH = "/";
 export const POST_DETAIL_PAGE_PATH = (
@@ -55,9 +55,9 @@ export const NOTIFICATION_PAGE_PATH = "/notifications";
 export const HEADER_HIDDEN_PAGES = [SIGNIN_PAGE_PATH, ONBOARD_PAGE_PATH];
 
 // paths to to push to for OAuth sign-in
-export const GOOGLE_AUTH_DIRECT_PATH = BASE_API_PATH + "/auth/google";
-export const LINKEDIN_AUTH_DIRECT_PATH = BASE_API_PATH + "/auth/linkedin";
-export const MICROSOFT_AUTH_DIRECT_PATH = BASE_API_PATH + "/auth/azure-ad";
+export const GOOGLE_AUTH_DIRECT_PATH = "/api/connect/v1/auth/google";
+export const LINKEDIN_AUTH_DIRECT_PATH = "/api/connect/v1/auth/linkedin";
+export const MICROSOFT_AUTH_DIRECT_PATH = "/api/connect/v1/auth/azure-ad";
 
 // api routes
 export const LOGOUT_API_PATH = BASE_API_PATH + "/auth/logout";

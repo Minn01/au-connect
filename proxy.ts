@@ -4,7 +4,6 @@ import type { NextProxy, NextRequest } from "next/server";
 
 import {
   ACCOUNT_RESTRICTED_PAGE_PATH,
-  BASE_API_PATH,
   CONNECT_PAGE_PATH,
   JOBS_PAGE_PATH,
   JWT_COOKIE,
@@ -28,7 +27,8 @@ const protectedRoutes = [
   NOTIFICATION_PAGE_PATH,
 ];
 
-const PUBLIC_API_ROUTES = [BASE_API_PATH + "/auth"];
+const API_PATH = "/api/connect/v1";
+const PUBLIC_API_ROUTES = [API_PATH + "/auth"];
 
 // Public, no-auth pages so Facebook/LinkedIn crawlers can read OG tags.
 const PUBLIC_PAGE_ROUTES = ["/share"];
@@ -70,9 +70,9 @@ export const proxy: NextProxy = async (req: NextRequest) => {
   );
 
   if (!sessionToken) {
-    if (isProtectedRoute || pathname.startsWith(BASE_API_PATH)) {
+    if (isProtectedRoute || pathname.startsWith(API_PATH)) {
       // API calls → 401
-      if (pathname.startsWith(BASE_API_PATH)) {
+      if (pathname.startsWith(API_PATH)) {
         return NextResponse.json(
           { error: "Unauthorized access to application api" },
           { status: 401 },
@@ -101,7 +101,7 @@ async function verifySession(
     const restriction = await getAccountRestriction(decoded.userId);
 
     if (restriction) {
-      if (pathname.startsWith(BASE_API_PATH)) {
+      if (pathname.startsWith(API_PATH)) {
         const response = NextResponse.json(
           {
             error: restriction.status === "BANNED"
@@ -145,6 +145,8 @@ async function verifySession(
 // Security depends on injected auth headers
 export const config = {
   matcher: [
+    // With basePath, the generic matcher misses the exact /connect entry URL.
+    "/",
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)).*)",
   ],
 };

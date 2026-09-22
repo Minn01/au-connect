@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, Search, MapPin } from "lucide-react";
 import { JOB_APPLICATION_DETAIL_PAGE_PATH } from "@/lib/constants";
+import { asset } from "@/lib/basePath";
 
 const STATUS_STYLES = {
   APPLIED: "bg-blue-50 text-blue-700 border-blue-200",
@@ -199,7 +200,7 @@ export default function ApplicantsPageClient({ postId }: { postId: string }) {
                         <img
                           src={
                             application.applicant.profilePic ||
-                            "/default-avatar.png"
+                            asset("/default-avatar.png")
                           }
                           alt={application.applicant.username}
                           className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-gray-200 transition"

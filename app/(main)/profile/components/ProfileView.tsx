@@ -36,7 +36,7 @@ import ReportModal from "@/app/components/ReportModal";
 import { ReportTargetSnapshot } from "@/types/ReportTargetSnapshot";
 import { postReport } from "../utils/reportFunctions";
 import { ReportSubmitPayload } from "@/types/ReportSubmitPayload";
-import { ACCOUNT_VERIFICATION_PAGE_PATH } from "@/lib/constants";
+import { ACCOUNT_VERIFICATION_PAGE_PATH, BASE_API_PATH } from "@/lib/constants";
 import { useActorStore } from "@/lib/stores/actorStore";
 
 type ConnectionUser = {
@@ -300,7 +300,7 @@ export default function ProfileView({
       try {
         // 1) connected?
         const connectionsRes = await fetch(
-          "/api/connect/v1/connect/status?otherUserId=" + user.id,
+          BASE_API_PATH + "/connect/status?otherUserId=" + user.id,
           { credentials: "include" },
         );
 
@@ -318,7 +318,7 @@ export default function ProfileView({
 
         // 2) outgoing request?
         const outgoingRes = await fetch(
-          "/api/connect/v1/connect/requests?type=outgoing",
+          BASE_API_PATH + "/connect/requests?type=outgoing",
           { credentials: "include" },
         );
         if (outgoingRes.ok) {
@@ -340,7 +340,7 @@ export default function ProfileView({
 
         // 3) incoming request?
         const incomingRes = await fetch(
-          "/api/connect/v1/connect/requests?type=incoming",
+          BASE_API_PATH + "/connect/requests?type=incoming",
           { credentials: "include" },
         );
         if (incomingRes.ok) {
@@ -384,7 +384,7 @@ export default function ProfileView({
       setConnectionsLoading(true);
 
       const res = await fetch(
-        `/api/connect/v1/connect/connections?userId=${user.id}`,
+        `${BASE_API_PATH}/connect/connections?userId=${user.id}`,
         { credentials: "include" },
       );
 
@@ -413,7 +413,7 @@ export default function ProfileView({
       setConnectError(null);
       setConnectLoading(true);
 
-      const res = await fetch("/api/connect/v1/connect/request", {
+      const res = await fetch(BASE_API_PATH + "/connect/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ toUserId: user.id }),
@@ -451,7 +451,7 @@ export default function ProfileView({
       setConnectLoading(true);
 
       const res = await fetch(
-        `/api/connect/v1/connect/request/${requestId}/cancel`,
+        `${BASE_API_PATH}/connect/request/${requestId}/cancel`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -483,7 +483,7 @@ export default function ProfileView({
       setConnectLoading(true);
 
       const res = await fetch(
-        `/api/connect/v1/connect/request/${incomingRequestId}/accept`,
+        `${BASE_API_PATH}/connect/request/${incomingRequestId}/accept`,
         { method: "POST", credentials: "include" },
       );
 
@@ -508,7 +508,7 @@ export default function ProfileView({
       setConnectLoading(true);
 
       const res = await fetch(
-        `/api/connect/v1/connect/request/${incomingRequestId}/decline`,
+        `${BASE_API_PATH}/connect/request/${incomingRequestId}/decline`,
         { method: "POST", credentials: "include" },
       );
 
@@ -529,7 +529,7 @@ export default function ProfileView({
       setConnectError(null);
       setConnectLoading(true);
 
-      const res = await fetch(`/api/connect/v1/connect/${user.id}`, {
+      const res = await fetch(`${BASE_API_PATH}/connect/${user.id}`, {
         method: "DELETE",
         credentials: "include",
       });

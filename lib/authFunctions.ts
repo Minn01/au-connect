@@ -35,6 +35,7 @@ import {
 
 import { BlobServiceClient } from "@azure/storage-blob";
 import { getAccountRestriction } from "@/lib/accountStatus";
+import { getAppUrl } from "@/lib/server/appUrl";
 
 // TODO: check for errors from providers in each function
 // TODO: google and linkedin are missing error handline for fetching token
@@ -345,7 +346,7 @@ export async function azurezAdAuthSignIn(req: NextRequest) {
   } catch (error) {
     console.error("Microsoft OAuth callback error:", error);
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/register?error=${encodeURIComponent(
+      `${getAppUrl()}${SIGNIN_PAGE_PATH}?error=${encodeURIComponent(
         error instanceof Error ? error.message : "Authentication failed"
       )}`
     );
@@ -362,12 +363,7 @@ export function createOauthStateCookie(res: NextResponse, state: string) {
 }
 
 export function isSecureCookie() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "";
-
-  return baseUrl.startsWith("https://");
+  return getAppUrl().startsWith("https://");
 }
 
 function verifyOauthState(url: URL, req: NextRequest) {

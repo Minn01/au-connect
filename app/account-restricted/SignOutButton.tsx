@@ -2,7 +2,7 @@
 
 import { LOGOUT_API_PATH, SIGNIN_PAGE_PATH } from "@/lib/constants";
 import { clearClientSessionStorage } from "@/lib/client/logoutCleanup";
-import { BASE_PATH } from "@/lib/client/apiBasePath";
+import { BASE_PATH } from "@/lib/basePath";
 import { useState } from "react";
 
 export default function SignOutButton() {

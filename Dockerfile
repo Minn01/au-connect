@@ -21,8 +21,8 @@ COPY . .
 
 # NEXT_PUBLIC_* values are inlined into the browser bundle at build time, so the
 # public URL must be supplied HERE (via --build-arg), not just at runtime.
-# Defaults to localhost for local builds; CI passes the real production URL.
-ARG NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+# The production build must supply the public URL explicitly.
+ARG NEXT_PUBLIC_BASE_URL
 
 # Now generate and build with real-ish env (placeholders, only needed at build time)
 RUN DATABASE_URL="mongodb://placeholder" pnpm prisma generate

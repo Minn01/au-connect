@@ -40,7 +40,6 @@ Open `.env` and fill in the values. The main ones:
 
 ```dotenv
 NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect   # the public URL, use https
-NEXT_PUBLIC_APP_URL=https://life.au.edu/connect
 NODE_ENV=production
 JWT_SECRET=                                        # openssl rand -base64 32
 DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
@@ -89,7 +88,9 @@ team's nginx sits in front of it.
 There's an example config at
 [`deploy/nginx/au-connect.conf.example`](deploy/nginx/au-connect.conf.example)
 that proxies `life.au.edu/connect` to `127.0.0.1:3000`. Copy it into the
-server's nginx config and reload:
+server's nginx config and reload. The exact `/`, `/connect`, and `/connect/...`
+locations must be forwarded without changing the URI. Next redirects `/` to
+`/connect` on both localhost and the production host:
 
 ```bash
 sudo nginx -t && sudo nginx -s reload
@@ -132,20 +133,18 @@ NEXT_PUBLIC_BASE_URL = https://life.au.edu/connect
 ```
 
 And add the two secrets the build uses: `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN`. If you skip the variable, the image gets built pointing at
-localhost, and the links, logins, and social-share previews break in production.
+`DOCKERHUB_TOKEN`. The production workflow stops if the URL is missing or
+does not end in `/connect`.
 
 ## About the /connect path
 
 The app is set up to live under `life.au.edu/connect`. `basePath: "/connect"` is
-set in `next.config.ts`, and the share links are built from
-`NEXT_PUBLIC_BASE_URL`. Use Option A in the nginx example.
+set in `next.config.ts`. Next prefixes page navigation; browser API calls use
+the `/connect/api/connect/v1` paths in `lib/constants.ts`. Share links are
+built from `NEXT_PUBLIC_BASE_URL`.
 
 The main thing is to build and run with
 `NEXT_PUBLIC_BASE_URL=https://life.au.edu/connect` (both the GitHub Actions
 variable and the `.env`). That value has to include the `/connect` part, or the
-links and logins won't line up.
-
-If the AU team gives you a separate subdomain instead (like `connect.au.edu`),
-remove the `basePath` line from `next.config.ts`, use Option B in the nginx
-example, and set `NEXT_PUBLIC_BASE_URL=https://connect.au.edu`.
+links, logins, and notification emails won't line up. The server rejects a
+missing or invalid public URL in production instead of sending localhost links.

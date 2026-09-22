@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import PostPollView from "./PostPollView";
+import { withoutBasePath } from "@/lib/basePath";
 
 export default function MediaCarousel({
   postType,
@@ -67,7 +68,7 @@ export default function MediaCarousel({
 
     const params = new URLSearchParams(window.location.search);
     params.set("media", newIndex.toString());
-    router.replace(`${window.location.pathname}?${params.toString()}`, {
+    router.replace(`${withoutBasePath(window.location.pathname)}?${params.toString()}`, {
       scroll: false,
     });
   };
@@ -79,7 +80,7 @@ export default function MediaCarousel({
 
     const params = new URLSearchParams(window.location.search);
     params.set("media", newIndex.toString());
-    router.replace(`${window.location.pathname}?${params.toString()}`, {
+    router.replace(`${withoutBasePath(window.location.pathname)}?${params.toString()}`, {
       scroll: false,
     });
   };
@@ -95,7 +96,7 @@ export default function MediaCarousel({
 
         const params = new URLSearchParams(window.location.search);
         params.set("media", newIndex.toString());
-        router.replace(`${window.location.pathname}?${params.toString()}`, {
+        router.replace(`${withoutBasePath(window.location.pathname)}?${params.toString()}`, {
           scroll: false,
         });
       }
@@ -106,7 +107,7 @@ export default function MediaCarousel({
 
         const params = new URLSearchParams(window.location.search);
         params.set("media", newIndex.toString());
-        router.replace(`${window.location.pathname}?${params.toString()}`, {
+        router.replace(`${withoutBasePath(window.location.pathname)}?${params.toString()}`, {
           scroll: false,
         });
       }
