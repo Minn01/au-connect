@@ -2,7 +2,7 @@ import "server-only";
 
 import prisma from "@/lib/prisma";
 
-const RECOMMENDATION_TIMEOUT_MS = 3_000;
+const RECOMMENDATION_TIMEOUT_MS = 30_000;
 
 export type ConnectionRecommendation = {
   user: {

@@ -1,6 +1,6 @@
 import "server-only";
 
-const TIMEOUT_MS = 3_000;
+const TIMEOUT_MS = 30_000;
 const INTERNAL_HEADER = "x-internal-service-key";
 
 export type RecommendationFailure =
