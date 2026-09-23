@@ -142,6 +142,10 @@ export default function JobsPage() {
     queryKey: ["trending-job-skills"],
     queryFn: fetchTrendingJobSkills,
   });
+  // Keep the query behavior intact while its UI section is temporarily hidden.
+  void trendingSkills;
+  void trendingSkillsLoading;
+  void trendingSkillsError;
   const recommendations = useQuery({
     queryKey: ["recommended-jobs"],
     queryFn: async (): Promise<{
@@ -533,7 +537,7 @@ export default function JobsPage() {
                 </div>
               </div>
 
-              <div>
+              {/* <div>
                 <h3 className="font-medium mb-3 text-zinc-700">Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -558,7 +562,7 @@ export default function JobsPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {hasSelectedFilters && (
                 <button
@@ -609,7 +613,7 @@ export default function JobsPage() {
         <aside className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:col-span-12 xl:col-span-3 xl:block xl:space-y-6">
           <MyApplicationSection />
 
-          <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
+          {/* <div className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xl">
             <h2 className="font-semibold text-lg mb-6">Trending skills</h2>
 
             <div className="space-y-5">
@@ -653,7 +657,7 @@ export default function JobsPage() {
                 </p>
               )}
             </div>
-          </div>
+          </div> */}
         </aside>
       </div>
     </div>
