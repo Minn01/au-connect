@@ -43,7 +43,7 @@ Docker images.
 Each app gets its own env file (all gitignored — never commit real secrets):
 
 ```bash
-cp .env.template .env                                # main app
+cp .env.example .env                                # main app
 cp .env.admin.example .env.admin                     # admin app
 cp .env.recommendation.example .env.recommendation   # recommendation api
 ```
@@ -69,7 +69,7 @@ For the main app's `.env`, the key values are:
 NODE_ENV=production
 
 APP_PUBLIC_URL=https://life.au.edu/connect
-DATABASE_URL=mongodb://mongo:27017/au_connect?directConnection=true
+DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
 
 JWT_SECRET=
 MESSAGE_ENCRYPTION_KEY=
@@ -108,7 +108,7 @@ in `.env.recommendation`.
 For `.env.admin`:
 
 ```dotenv
-DATABASE_URL=mongodb://mongo:27017/au_connect?directConnection=true
+DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
 
 ADMIN_PUBLIC_URL=https://life.au.edu/connect-admin
 MAIN_APP_PATH=https://life.au.edu/connect
@@ -133,7 +133,9 @@ For `.env.recommendation`:
 
 ```dotenv
 MONGODB_URL=mongodb://mongo:27017/?directConnection=true
-MONGODB_DB=au_connect
+# Must equal the database name in the main app's DATABASE_URL (au-connect).
+# A mismatch (e.g. au_connect) connects fine but sees an empty database.
+MONGODB_DB=au-connect
 
 INTERNAL_API_KEY=
 
@@ -193,7 +195,7 @@ mongo-init               Exited (0)
 The production database name is:
 
 ```text
-au_connect
+au-connect
 ```
 
 ### 5. First deployment: initialize the fresh database
@@ -214,7 +216,7 @@ docker run --rm \
   -v "$PWD":/app \
   -v au-connect-deploy-node-modules:/app/node_modules \
   -w /app \
-  -e DATABASE_URL='mongodb://mongo:27017/au_connect?directConnection=true' \
+  -e DATABASE_URL='mongodb://mongo:27017/au-connect?directConnection=true' \
   node:22-bookworm \
   bash -lc '
     corepack enable &&
@@ -241,7 +243,7 @@ docker cp bootstrap/admin.json au-connect-mongo:/tmp/admin.json
 
 docker exec au-connect-mongo \
   mongoimport \
-  --db au_connect \
+  --db au-connect \
   --collection Admin \
   --file /tmp/admin.json \
   --jsonArray \
@@ -266,7 +268,7 @@ docker cp bootstrap/skills.json au-connect-mongo:/tmp/skills.json
 
 docker exec au-connect-mongo \
   mongoimport \
-  --db au_connect \
+  --db au-connect \
   --collection Skill \
   --file /tmp/skills.json \
   --jsonArray \
@@ -279,7 +281,7 @@ Verify the initial data:
 ```bash
 docker exec au-connect-mongo \
   mongosh --quiet --eval '
-    const d = db.getSiblingDB("au_connect");
+    const d = db.getSiblingDB("au-connect");
     print("Admins:", d.Admin.countDocuments());
     print("Skills:", d.Skill.countDocuments());
   '
@@ -527,7 +529,7 @@ Example backup:
 ```bash
 docker exec au-connect-mongo \
   mongodump \
-  --db au_connect \
+  --db au-connect \
   --archive=/tmp/au-connect-backup.archive \
   --gzip
 

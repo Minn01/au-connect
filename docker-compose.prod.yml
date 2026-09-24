@@ -62,7 +62,9 @@ services:
     image: mongo:7
     container_name: au-connect-mongo
     restart: unless-stopped
-    command: ["--replSet", "rs0", "--bind_ip_all"]
+    # Cache cap: default WiredTiger grabs ~50% of (RAM - 1 GB), inappropriate
+    # next to other services on a shared VM. 0.5 GB is ample for this workload.
+    command: ["--replSet", "rs0", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.5"]
     # No host port published: the DB is reachable only inside au-network.
     volumes:
       - ac-mongo-data:/data/db
