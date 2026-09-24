@@ -1,25 +1,16 @@
-# Production stack for the AU Connect system on the life.au.edu server.
-#
-#   cp .env.template .env                                # main app
-#   cp .env.admin.example .env.admin                     # admin app
-#   cp .env.recommendation.example .env.recommendation   # recommendation api
-#   make prod-up
-#
-# Runs the three app images (pulled from Docker Hub) + MongoDB on one private
-# network. The reverse proxy (nginx) and redeploys are handled by the AU team.
-#
-# nginx routes the AU team add to their existing config:
-#   life.au.edu/connect        -> 127.0.0.1:3000   (main)
-#   life.au.edu/connect-admin  -> 127.0.0.1:3001   (admin)
-# The recommendation api and MongoDB have no host port — internal only.
+# Shared local production simulation for the AU Connect system.
+# The application services run prebuilt images on the shared au-network.
 services:
   au-connect:
-    image: ${AU_CONNECT_IMAGE:-tommyzizii/au-connect:latest}
+    image: ${AU_CONNECT_IMAGE:-au-connect:local-prod}
     container_name: au-connect-app
     platform: linux/amd64
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      DATABASE_URL: mongodb://mongo:27017/au-connect?directConnection=true
+      RECOMMENDATION_SERVICE_URL: http://recommendation:8000
     depends_on:
       mongo:
         condition: service_started
@@ -31,7 +22,7 @@ services:
       - au-network
 
   admin:
-    image: ${ADMIN_IMAGE:-tommyzizii/au-connect-admin:latest}
+    image: ${ADMIN_IMAGE:-au-connect-admin:local-prod}
     container_name: au-connect-admin
     platform: linux/amd64
     restart: unless-stopped
@@ -47,16 +38,17 @@ services:
       - au-network
 
   recommendation:
-    image: ${RECO_IMAGE:-tommyzizii/au-connect-recommendation:latest}
+    image: ${RECO_IMAGE:-au-connect-recommendation:local-prod}
     container_name: au-connect-reco
     platform: linux/amd64
     restart: unless-stopped
     env_file:
       - .env.recommendation
     depends_on:
-      # Only needed if the service reads MongoDB directly. Harmless otherwise.
       mongo:
-        condition: service_started
+        condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
     # INTERNAL ONLY — no host port. The main app reaches it on the private
     # network at  http://recommendation:8000  (see RECOMMENDATION_SERVICE_URL).
     expose:
@@ -91,15 +83,18 @@ services:
     restart: "no"
     entrypoint: |
       bash -c '
-        echo "Waiting for Mongo...";
-        sleep 5;
-        mongosh --host mongo:27017 --eval "
-          rs.initiate({ _id: \"rs0\", members: [{ _id: 0, host: \"mongo:27017\" }] })
-        " || echo "Replica set already initialized";
+        if mongosh --host mongo:27017 --quiet --eval "quit(rs.status().ok ? 0 : 1)"; then
+          echo "Replica set already initialized";
+        else
+          mongosh --host mongo:27017 --eval "
+            rs.initiate({ _id: \"rs0\", members: [{ _id: 0, host: \"mongo:27017\" }] })
+          ";
+        fi
       '
 
 networks:
   au-network:
+    name: au-network
 
 volumes:
   ac-mongo-data:
