@@ -8,6 +8,7 @@ import type { Announcement } from "@/types/Announcement";
 
 function formatAnnouncementDate(startDate: string, endDate: string | null) {
   const formatter = new Intl.DateTimeFormat("en", {
+    timeZone: "Asia/Bangkok",
     month: "short",
     day: "numeric",
   });
