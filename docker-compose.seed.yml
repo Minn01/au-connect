@@ -1,0 +1,15 @@
+# Temporary overlay: publish Mongo on localhost so host-side scripts
+# (pnpm db:seed / prisma) can reach it. Works with any compose file that
+# defines a `mongo` service - add --env-file .compose.env if your flow uses it.
+#
+#   docker compose -f docker-compose.prod.yml -f docker-compose.seed.yml up -d mongo
+#   DATABASE_URL="mongodb://localhost:27018/au-connect?directConnection=true" pnpm db:seed
+#   docker compose -f docker-compose.prod.yml up -d mongo   # reseal (no overlay = no port)
+#
+# For remote hosts, run the seed through an SSH tunnel instead of exposing
+# the port publicly:
+#   ssh -N -L 27018:127.0.0.1:27018 <user>@<host>
+services:
+  mongo:
+    ports:
+      - "127.0.0.1:27018:27017"

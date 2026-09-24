@@ -43,7 +43,7 @@ Docker images.
 Each app gets its own env file (all gitignored — never commit real secrets):
 
 ```bash
-cp .env.template .env                                # main app
+cp .env.example .env                                # main app
 cp .env.admin.example .env.admin                     # admin app
 cp .env.recommendation.example .env.recommendation   # recommendation api
 ```
@@ -69,7 +69,7 @@ For the main app's `.env`, the key values are:
 NODE_ENV=production
 
 APP_PUBLIC_URL=https://life.au.edu/connect
-DATABASE_URL=mongodb://mongo:27017/au_connect?directConnection=true
+DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
 
 JWT_SECRET=
 MESSAGE_ENCRYPTION_KEY=
@@ -94,7 +94,8 @@ GMAIL_APP_PASSWORD=
 ```
 
 `APP_PUBLIC_URL` is runtime configuration. It must include the `/connect`
-suffix.
+suffix. In production it must also be an absolute **https** URL: the app
+rejects http and every OAuth start route returns a 500.
 
 `MESSAGE_ENCRYPTION_KEY` must be a stable secret. It can be generated with:
 
@@ -108,7 +109,7 @@ in `.env.recommendation`.
 For `.env.admin`:
 
 ```dotenv
-DATABASE_URL=mongodb://mongo:27017/au_connect?directConnection=true
+DATABASE_URL=mongodb://mongo:27017/au-connect?directConnection=true
 
 ADMIN_PUBLIC_URL=https://life.au.edu/connect-admin
 MAIN_APP_PATH=https://life.au.edu/connect
@@ -133,7 +134,9 @@ For `.env.recommendation`:
 
 ```dotenv
 MONGODB_URL=mongodb://mongo:27017/?directConnection=true
-MONGODB_DB=au_connect
+# Must equal the database name in the main app's DATABASE_URL (au-connect).
+# A mismatch (e.g. au_connect) connects fine but sees an empty database.
+MONGODB_DB=au-connect
 
 INTERNAL_API_KEY=
 
@@ -193,8 +196,12 @@ mongo-init               Exited (0)
 The production database name is:
 
 ```text
-au_connect
+au-connect
 ```
+
+MongoDB runs with a WiredTiger cache cap (`--wiredTigerCacheSizeGB 0.5`, set
+in `docker-compose.prod.yml`) because the default cache grabs roughly half of
+(total RAM - 1 GB), which is too much on a VM shared with other services.
 
 ### 5. First deployment: initialize the fresh database
 
@@ -214,7 +221,7 @@ docker run --rm \
   -v "$PWD":/app \
   -v au-connect-deploy-node-modules:/app/node_modules \
   -w /app \
-  -e DATABASE_URL='mongodb://mongo:27017/au_connect?directConnection=true' \
+  -e DATABASE_URL='mongodb://mongo:27017/au-connect?directConnection=true' \
   node:22-bookworm \
   bash -lc '
     corepack enable &&
@@ -241,7 +248,7 @@ docker cp bootstrap/admin.json au-connect-mongo:/tmp/admin.json
 
 docker exec au-connect-mongo \
   mongoimport \
-  --db au_connect \
+  --db au-connect \
   --collection Admin \
   --file /tmp/admin.json \
   --jsonArray \
@@ -251,6 +258,24 @@ docker exec au-connect-mongo \
 
 After the first administrator can sign in, additional administrators can be
 managed from the admin app.
+
+Alternatively, the first administrator can be inserted directly. This is how
+the initial SUPER_ADMIN was created on life.au.edu:
+
+```bash
+docker exec -it au-connect-mongo mongosh --quiet --eval 'db.getSiblingDB("au-connect").Admin.insertOne({
+  email: "<admin-email>",
+  name: "<admin-name>",
+  role: "SUPER_ADMIN",
+  status: "ACTIVE",
+  activatedAt: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date()
+})'
+```
+
+`status` must be `ACTIVE`; the schema default `PENDING` does not pass the
+login check.
 
 #### Skill catalogue
 
@@ -266,7 +291,7 @@ docker cp bootstrap/skills.json au-connect-mongo:/tmp/skills.json
 
 docker exec au-connect-mongo \
   mongoimport \
-  --db au_connect \
+  --db au-connect \
   --collection Skill \
   --file /tmp/skills.json \
   --jsonArray \
@@ -279,7 +304,7 @@ Verify the initial data:
 ```bash
 docker exec au-connect-mongo \
   mongosh --quiet --eval '
-    const d = db.getSiblingDB("au_connect");
+    const d = db.getSiblingDB("au-connect");
     print("Admins:", d.Admin.countDocuments());
     print("Skills:", d.Skill.countDocuments());
   '
@@ -422,6 +447,33 @@ intentionally being deleted.
 
 ---
 
+## Demo/test data seeding
+
+Demo data can be seeded with `pnpm db:seed` from a checkout of this repo
+(`migration_scripts/seed-local-test-data.ts`). Mongo is temporarily
+published on loopback for the seeding, then resealed. This is how the demo
+data on life.au.edu was seeded:
+
+```bash
+docker compose \
+  --env-file .compose.env \
+  -f docker-compose.prod.yml \
+  -f docker-compose.seed.yml \
+  up -d mongo
+
+DATABASE_URL="mongodb://localhost:27018/au-connect?directConnection=true" pnpm db:seed
+
+docker compose \
+  --env-file .compose.env \
+  -f docker-compose.prod.yml \
+  up -d mongo
+```
+
+The seed links everything to the first real OAuth account, so at least one
+login must happen before seeding. All seeded accounts use the email domain
+`@seed.aunetwork.test`, so the demo data is identifiable and removable at any
+time by deleting those users.
+
 ## How updates get deployed
 
 Each of the three repos builds and pushes its **own** image; the server just
@@ -527,7 +579,7 @@ Example backup:
 ```bash
 docker exec au-connect-mongo \
   mongodump \
-  --db au_connect \
+  --db au-connect \
   --archive=/tmp/au-connect-backup.archive \
   --gzip
 
