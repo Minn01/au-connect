@@ -7,6 +7,7 @@
     "build": "prisma generate && next build",
     "db:backfill-user-defaults": "tsx migration_scripts/backfill-user-defaults.ts",
     "db:backfill-post-moderation": "tsx migration_scripts/backfill-post-moderation-status.ts",
+    "db:seed": "tsx migration_scripts/seed-local-test-data.ts",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
