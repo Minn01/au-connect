@@ -31,6 +31,8 @@ services:
     depends_on:
       mongo:
         condition: service_started
+      mongo-init:
+        condition: service_completed_successfully
     ports:
       # Different host port than main; both listen on :3000 inside the container.
       - "127.0.0.1:3001:3000"
