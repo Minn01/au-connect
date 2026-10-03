@@ -67,8 +67,8 @@ AZURE_STORAGE_ACCOUNT_KEY=
 AZURE_STORAGE_CONNECTION_STRING=
 AZURE_STORAGE_CONTAINER_NAME=
 
-RESEND_API_KEY=                                    # from resend.com/api-keys
-EMAIL_FROM=                                        # address on a domain verified in Resend
+GMAIL_USER=
+GMAIL_APP_PASSWORD=
 ```
 
 For the OAuth logins to work, register these redirect URIs with each provider
