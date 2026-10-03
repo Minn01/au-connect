@@ -1,28 +1,17 @@
 "use server";
 
 import prisma from "../prisma";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { ActorType, NotificationType } from "@/lib/generated/prisma";
 import { buildSlug } from "@/app/(main)/profile/utils/buildSlug";
 import { getAppUrl } from "@/lib/server/appUrl";
 
-// ─── Gmail SMTP transporter (used in both dev + production) ──────────────────
-function getGmailTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
+// ─── Resend client (used in both dev + production) ───────────────────────────
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
-  if (!user || !pass) {
-    console.error("❌ GMAIL_USER or GMAIL_APP_PASSWORD not set.");
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: { user, pass },
-  });
-}
+const EMAIL_FROM = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
 // ─── Public: create notification + fire email ─────────────────────────────────
 export async function createNotification({
@@ -103,20 +92,25 @@ async function sendNotificationEmail(
     notificationsUrl: `${appUrl}/notifications`,
   });
 
-  const transporter = getGmailTransporter();
-  if (!transporter) return;
+  if (!resend) {
+    console.error("❌ RESEND_API_KEY not set — cannot send email.");
+    return;
+  }
 
   try {
-    const result = await transporter.sendMail({
-      from: `"AU Connect" <${process.env.GMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: `AU Connect <${EMAIL_FROM}>`,
       to: recipient.email,
       subject,
       html,
     });
 
-    console.log(
-      `✅ Email sent via Gmail → ${recipient.email} | messageId: ${result.messageId}`
-    );
+    if (error) {
+      console.error("❌ Email sending failed:", error);
+      return;
+    }
+
+    console.log(`✅ Email sent via Resend → ${recipient.email} | id: ${data?.id}`);
   } catch (error) {
     console.error("❌ Email sending failed:", error);
   }
